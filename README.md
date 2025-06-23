@@ -1,87 +1,108 @@
-# Welcome to React Router!
+# Gerenciador de Finanças Familiares
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Sistema integrado com API Pluggy para sincronização automática de dados bancários, transações e investimentos com base de dados SQLite local.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## **Arquitetura**
 
-## Features
+- **API**: Integração com Pluggy API para dados bancários
+- **Banco de dados**: SQLite local com Prisma ORM
+- **Frontend**: React Router com SSR
+- **Backend**: Server loaders e actions para processamento de dados
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## **1. Integração com API Pluggy**
 
-## Getting Started
+### 1.1 Configuração e Autenticação
 
-### Installation
+- Cadastrar-se no Meu Pluggy, para ter acesso ao Pluggy como instituição financeira integrada ao open finance
+- Acessar Pluggy Demo App
+- Configurar cliente Pluggy com credenciais do `.env`
+- Implementar autenticação OAuth com tokens de acesso
+- Tokens Pluggy duram 2 horas e serão usados apenas para sincronização de dados
 
-Install the dependencies:
+### 1.2 Sincronização de Dados
 
-```bash
-npm install
-```
+- **Contas**: Buscar e sincronizar contas correntes, poupança e cartões de crédito
+- **Transações**: Importar histórico completo de transações com metadados
+- **Investimentos**: Sincronizar posições e movimentações de investimentos
+- Implementar estratégia de sincronização incremental baseada em `updatedAt`
+- Garantir idempotência por ID único da Pluggy
+- Sincronização deve ser manual, por meio de ação do usuário
 
-### Development
+### 1.3 Tratamento de Erros
 
-Start the development server with HMR:
+- Retry automático para falhas temporárias
+- Log estruturado de erros de sincronização
+- Fallback para dados locais em caso de indisponibilidade da API
 
-```bash
-npm run dev
-```
+## **2. Modelagem de Dados (Prisma)**
 
-Your application will be available at `http://localhost:5173`.
+### 2.1 Schema Principal
 
-## Building for Production
+- **Account**: Baseado no schema Pluggy Account (type, subtype, balance, bankData, creditData)
+- **Transaction**: Baseado no schema Pluggy Transaction (amount, date, category, merchant, paymentData)
+- **Investment**: Baseado no schema Pluggy Investment (type, subtype, value, transactions, taxes)
 
-Create a production build:
+### 2.2 Relacionamentos
 
-```bash
-npm run build
-```
+- Transações vinculadas a contas
+- Investimentos com histórico de transações
+- Metadados de sincronização (lastSyncAt, pluggyId)
 
-## Deployment
+### 2.3 Índices e Performance
 
-### Docker Deployment
+- Índices compostos para queries por data e conta
+- Índices para pesquisa por categoria e merchant
+- Otimização para queries de agregação
 
-To build and run using Docker:
+## **3. Processamento de Dados**
 
-```bash
-docker build -t my-app .
+### 3.1 Categorização Automática
 
-# Run the container
-docker run -p 3000:3000 my-app
-```
+- Engine de categorização baseada em merchant e descrição
+- Aprendizado de padrões históricos de categorização
+- Interface para correção manual de categorias
 
-The containerized application can be deployed to any platform that supports Docker, including:
+### 3.2 Projeções Financeiras
 
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
+- Projeção de saldos mensais baseada em histórico
+- Identificação de despesas recorrentes por análise temporal
+- Projeção de parcelas futuras de cartões de crédito
+- Cálculo de rendimentos de investimentos
 
-### DIY Deployment
+### 3.3 Análise de Padrões
 
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
+- Detecção de gastos atípicos
+- Análise de tendências por categoria
+- Identificação de oportunidades de economia
 
-Make sure to deploy the output of `npm run build`
+## **4. Interface de Usuário**
 
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
+### 4.1 Dashboard Principal
 
-## Styling
+- Visão geral de saldos e movimentações
+- Gráficos de evolução patrimonial
+- Alertas de gastos e metas
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+### 4.2 Gestão de Transações
 
----
+- Lista filtrada e pesquisável de transações
+- Edição de categorias e tags
+- Conciliação manual quando necessário
 
-Built with ❤️ using React Router.
+### 4.3 Análise de Investimentos
+
+- Portfólio consolidado com rentabilidade
+- Evolução temporal dos investimentos
+
+### 4.4 Relatórios e Projeções
+
+- Relatórios mensais automatizados
+- Projeções de fluxo de caixa
+- Análise de metas financeiras
+
+## **Prioridades de Desenvolvimento**
+
+1. **Fase 1**: Schema Prisma e sincronização básica (contas, transações, investimentos)
+2. **Fase 2**: Interface de visualização e categorização
+3. **Fase 3**: Projeções e análises avançadas
+4. **Fase 4**: Automações e relatórios

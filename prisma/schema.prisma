@@ -1,0 +1,340 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma-app/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountType {
+  BANK
+  CREDIT
+}
+
+enum AccountSubtype {
+  CHECKING_ACCOUNT
+  CREDIT_CARD
+}
+
+enum InvestmentType {
+  COE
+  EQUITY
+  ETF
+  FIXED_INCOME
+  MUTUAL_FUND
+  SECURITY
+  OTHER
+}
+
+enum InvestmentSubtype {
+  STRUCTURED_NOTE
+  STOCK
+  ETF
+  REAL_ESTATE_FUND
+  BDR
+  DERIVATIVES
+  OPTION
+  TREASURY
+  LCI
+  LCA
+  LF
+  CDB
+  CRI
+  CRA
+  CORPORATE_DEBT
+  LC
+  DEBENTURES
+  INVESTMENT_FUND
+  MULTIMARKET_FUND
+  FIXED_INCOME_FUND
+  STOCK_FUND
+  ETF_FUND
+  OFFSHORE_FUND
+  FIP_FUND
+  EXCHANGE_FUND
+  RETIREMENT
+  OTHER
+}
+
+enum InvestmentStatus {
+  ACTIVE
+  PENDING
+  TOTAL_WITHDRAWAL
+}
+
+enum InvestmentTransactionType {
+  BUY
+  SELL
+  TAX
+  TRANSFER
+  INTEREST
+  AMORTIZATION
+}
+
+enum MovementType {
+  CREDIT
+  DEBIT
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum TransactionStatus {
+  POSTED
+  PENDING
+}
+
+model Account {
+  id            String          @id @default(uuid())
+  itemId        String
+  number        String?
+  type          AccountType
+  subtype       AccountSubtype?
+  name          String
+  balance       Decimal
+  currencyCode  String          @default("BRL")
+  marketingName String?
+  taxNumber     String?
+  owner         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  transactions  Transaction[]
+  bankData      BankData?
+  creditData    CreditData?
+
+  @@unique([itemId, number])
+}
+
+model BankData {
+  id                           String   @id @default(uuid())
+  accountId                    String   @unique
+  transferNumber               String?
+  closingBalance               Decimal?
+  automaticallyInvestedBalance Decimal?
+  overdraftContractedLimit     Decimal?
+  overdraftUsedLimit           Decimal?
+  unarrangedOverdraftAmount    Decimal?
+  account                      Account  @relation(fields: [accountId], references: [id])
+}
+
+model CreditData {
+  id                        String                     @id @default(uuid())
+  accountId                 String                     @unique
+  level                     String?
+  brand                     String?
+  balanceCloseDate          DateTime?
+  balanceDueDate            DateTime?
+  availableCreditLimit      Decimal?
+  balanceForeignCurrency    Decimal?
+  minimumPayment            Decimal?
+  creditLimit               Decimal?
+  isLimitFlexible           Boolean?
+  holderType                String?
+  status                    String?
+  additionalCards           String?
+  account                   Account                    @relation(fields: [accountId], references: [id])
+  disaggregatedCreditLimits DisaggregatedCreditLimit[]
+}
+
+model DisaggregatedCreditLimit {
+  id                          String     @id @default(uuid())
+  creditDataId                String
+  lineName                    String?
+  usedAmount                  Decimal?
+  limitAmount                 Decimal?
+  availableAmount             Decimal?
+  isLimitFlexible             Boolean?
+  consolidationType           String?
+  creditLineLimitType         String?
+  identificationNumber        String?
+  lineNameAdditionalInfo      String?
+  usedAmountCurrencyCode      String?
+  limitAmountCurrencyCode     String?
+  availableAmountCurrencyCode String?
+  creditData                  CreditData @relation(fields: [creditDataId], references: [id])
+}
+
+model Transaction {
+  id                      String              @id @default(uuid())
+  accountId               String
+  description             String
+  descriptionRaw          String?
+  currencyCode            String              @default("BRL")
+  amount                  Decimal
+  amountInAccountCurrency Decimal?
+  date                    DateTime
+  category                String?
+  categoryId              String?
+  balance                 Decimal?
+  providerCode            String?
+  status                  TransactionStatus?
+  type                    TransactionType?
+  operationType           String?
+  providerId              String?
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  account                 Account             @relation(fields: [accountId], references: [id])
+  paymentData             PaymentData?
+  creditCardMetadata      CreditCardMetadata?
+  acquirerData            AcquirerData?
+  merchant                Merchant?
+}
+
+model PaymentData {
+  id                  String              @id @default(uuid())
+  transactionId       String              @unique
+  paymentMethod       String?
+  reason              String?
+  receiverReferenceId String?
+  referenceNumber     String?
+  boletoMetadata      String?
+  transaction         Transaction         @relation(fields: [transactionId], references: [id])
+  payer               PaymentParticipant? @relation("PayerRelation")
+  receiver            PaymentParticipant? @relation("ReceiverRelation")
+}
+
+model PaymentParticipant {
+  id                    String       @id @default(uuid())
+  accountNumber         String?
+  branchNumber          String?
+  documentType          String?
+  documentValue         String?
+  name                  String?
+  routingNumber         String?
+  routingNumberISPB     String?
+  payerPaymentData      PaymentData? @relation("PayerRelation", fields: [payerPaymentDataId], references: [id])
+  payerPaymentDataId    String?      @unique
+  receiverPaymentData   PaymentData? @relation("ReceiverRelation", fields: [receiverPaymentDataId], references: [id])
+  receiverPaymentDataId String?      @unique
+}
+
+model CreditCardMetadata {
+  id            String      @id @default(uuid())
+  transactionId String      @unique
+  data          String?
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+}
+
+model AcquirerData {
+  id            String      @id @default(uuid())
+  transactionId String      @unique
+  data          String?
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+}
+
+model Merchant {
+  id            String      @id @default(uuid())
+  transactionId String      @unique
+  cnae          String?
+  cnpj          String?
+  name          String?
+  category      String?
+  businessName  String?
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+}
+
+model Investment {
+  id                     String                  @id @default(uuid())
+  itemId                 String
+  type                   InvestmentType
+  subtype                InvestmentSubtype?
+  number                 String?
+  balance                Decimal
+  name                   String
+  lastMonthRate          Float?
+  lastTwelveMonthsRate   Float?
+  annualRate             Float?
+  currencyCode           String                  @default("BRL")
+  code                   String?
+  isin                   String?
+  value                  Float?
+  quantity               Float?
+  amount                 Float?
+  taxes                  Float?
+  taxes2                 Float?
+  date                   DateTime
+  owner                  String?
+  amountProfit           Float?
+  amountWithdrawal       Float?
+  amountOriginal         Float?
+  dueDate                DateTime?
+  issuer                 String?
+  issuerCNPJ             String?
+  issueDate              DateTime?
+  rate                   Float?
+  rateType               String?
+  fixedAnnualRate        Float?
+  status                 InvestmentStatus?
+  institution            String?
+  metadata               String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  investmentTransactions InvestmentTransaction[]
+
+  @@unique([itemId, id])
+}
+
+model InvestmentTransaction {
+  id              String                    @id @default(uuid())
+  investmentId    String
+  type            InvestmentTransactionType
+  movementType    MovementType?
+  quantity        Float?
+  value           Float?
+  amount          Float?
+  netAmount       Float?
+  description     String?
+  agreedRate      Float?
+  date            DateTime
+  tradeDate       DateTime?
+  brokerageNumber String?
+  expenses        String?
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  investment      Investment                @relation(fields: [investmentId], references: [id])
+}
+
+model Category {
+  id                    String     @id
+  description           String
+  descriptionTranslated String
+  parentId              String?
+  parentDescription     String?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  parent                Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children              Category[] @relation("CategoryHierarchy")
+}
+
+// Database views for spending and income projections
+model CategorySpendingMovingAverage {
+  category                String
+  monthYear               String   @map("month_year")
+  monthDate               DateTime @map("month_date")
+  totalSpending           Decimal  @map("total_spending")
+  movingAvg6Months        Decimal? @map("moving_avg_6_months")
+  monthsInWindow          Int      @map("months_in_window")
+  projected6MonthSpending Decimal? @map("projected_6_month_spending")
+  projectedAnnualSpending Decimal? @map("projected_annual_spending")
+
+  @@id([category, monthYear])
+  @@map("category_spending_moving_average")
+}
+
+model CategoryIncomeMovingAverage {
+  category              String
+  monthYear             String   @map("month_year")
+  monthDate             DateTime @map("month_date")
+  totalIncome           Decimal  @map("total_income")
+  movingAvg6Months      Decimal? @map("moving_avg_6_months")
+  monthsInWindow        Int      @map("months_in_window")
+  projected6MonthIncome Decimal? @map("projected_6_month_income")
+  projectedAnnualIncome Decimal? @map("projected_annual_income")
+
+  @@id([category, monthYear])
+  @@map("category_income_moving_average")
+}
