@@ -124,14 +124,14 @@ model BankData {
 model CreditData {
   id                        String                     @id @default(uuid())
   accountId                 String                     @unique
-  level                     String?
-  brand                     String?
+  level                     String
+  brand                     String
   balanceCloseDate          DateTime?
-  balanceDueDate            DateTime?
-  availableCreditLimit      Decimal?
+  balanceDueDate            DateTime
+  availableCreditLimit      Decimal
   balanceForeignCurrency    Decimal?
   minimumPayment            Decimal?
-  creditLimit               Decimal?
+  creditLimit               Decimal
   isLimitFlexible           Boolean?
   holderType                String?
   status                    String?
@@ -171,8 +171,8 @@ model Transaction {
   categoryId              String?
   balance                 Decimal?
   providerCode            String?
-  status                  TransactionStatus?
-  type                    TransactionType?
+  status                  TransactionStatus
+  type                    TransactionType
   operationType           String?
   providerId              String?
   createdAt               DateTime            @default(now())
@@ -312,29 +312,17 @@ model Category {
 
 // Database views for spending and income projections
 model CategorySpendingMovingAverage {
-  category                String
-  monthYear               String   @map("month_year")
-  monthDate               DateTime @map("month_date")
-  totalSpending           Decimal  @map("total_spending")
-  movingAvg6Months        Decimal? @map("moving_avg_6_months")
-  monthsInWindow          Int      @map("months_in_window")
-  projected6MonthSpending Decimal? @map("projected_6_month_spending")
-  projectedAnnualSpending Decimal? @map("projected_annual_spending")
+  category         String
+  movingAvg6Months Decimal? @map("moving_avg_6_months")
 
-  @@id([category, monthYear])
+  @@id([category])
   @@map("category_spending_moving_average")
 }
 
 model CategoryIncomeMovingAverage {
-  category              String
-  monthYear             String   @map("month_year")
-  monthDate             DateTime @map("month_date")
-  totalIncome           Decimal  @map("total_income")
-  movingAvg6Months      Decimal? @map("moving_avg_6_months")
-  monthsInWindow        Int      @map("months_in_window")
-  projected6MonthIncome Decimal? @map("projected_6_month_income")
-  projectedAnnualIncome Decimal? @map("projected_annual_income")
+  category         String
+  movingAvg6Months Decimal? @map("moving_avg_6_months")
 
-  @@id([category, monthYear])
+  @@id([category])
   @@map("category_income_moving_average")
 }

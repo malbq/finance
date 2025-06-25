@@ -14,7 +14,7 @@ export function Layout({ children }: LayoutProps) {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/sync', {
+      const response = await fetch('/api/sync', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

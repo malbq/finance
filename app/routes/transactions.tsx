@@ -1,13 +1,12 @@
-import { PrismaClient } from '@prisma-app/client'
 import { useMemo, useState } from 'react'
 import { useLoaderData, type ActionFunctionArgs } from 'react-router'
+import { prisma } from '~/lib/db.server'
+import { GetTransactionsData } from '~/use-cases/transactions/GetTransactionsData'
+import { UpdateTransactionCategory } from '~/use-cases/transactions/UpdateTransactionCategory'
 import { formatCurrency } from '~/utils/formatCurrency'
 import { AccountCard } from '../components/AccountCard'
-import { AccountTransactionsTable } from '../components/AccountTransactionsTable'
-import { CreditCardTransactionsTable } from '../components/CreditCardTransactionsTable'
 import { EmptyState } from '../components/EmptyState'
-
-const prisma = new PrismaClient()
+import { TransactionTable } from '../components/transactions/TransactionTable'
 
 export async function action({ request }: ActionFunctionArgs) {
   if (request.method !== 'POST') {
@@ -29,28 +28,20 @@ export async function action({ request }: ActionFunctionArgs) {
       )
     }
 
-    // Find the category to get the translated name
-    const category = await prisma.category.findUnique({
-      where: { id: categoryId },
-    })
+    const updateTransactionCategory = new UpdateTransactionCategory(prisma)
+    const result = await updateTransactionCategory.execute(
+      transactionId,
+      categoryId
+    )
 
-    if (!category) {
+    if (result.success) {
+      return Response.json({ success: true })
+    } else {
       return Response.json(
-        { success: false, error: 'Category not found' },
-        { status: 404 }
+        { success: false, error: result.error },
+        { status: 500 }
       )
     }
-
-    await prisma.transaction.update({
-      where: { id: transactionId },
-      data: {
-        categoryId: categoryId,
-        category: category.descriptionTranslated,
-        updatedAt: new Date(),
-      },
-    })
-
-    return Response.json({ success: true })
   } catch (error) {
     console.error('Error updating transaction category:', error)
     return Response.json(
@@ -60,173 +51,11 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
-export async function loader({ request }: { request: Request }) {
+const getTransactionsData = new GetTransactionsData(prisma)
+
+export async function loader() {
   try {
-    // Load accounts with minimal data first
-    const accounts = await prisma.account.findMany({
-      include: {
-        bankData: {
-          select: {
-            closingBalance: true,
-          },
-        },
-        creditData: {
-          select: {
-            availableCreditLimit: true,
-            creditLimit: true,
-          },
-        },
-        _count: {
-          select: {
-            transactions: true,
-          },
-        },
-      },
-      orderBy: {
-        type: 'asc',
-      },
-    })
-
-    // Load categories once
-    const categories = await prisma.category.findMany({
-      select: {
-        id: true,
-        descriptionTranslated: true,
-      },
-    })
-
-    // Load all transactions for each account
-    const accountsWithTransactions = await Promise.all(
-      accounts.map(async (account) => {
-        const transactions = await prisma.transaction.findMany({
-          where: {
-            accountId: account.id,
-          },
-          include: {
-            paymentData: {
-              select: {
-                paymentMethod: true,
-                payer: {
-                  select: {
-                    name: true,
-                    documentValue: true,
-                  },
-                },
-                receiver: {
-                  select: {
-                    name: true,
-                    documentValue: true,
-                  },
-                },
-              },
-            },
-            creditCardMetadata: {
-              select: {
-                data: true,
-              },
-            },
-            merchant: {
-              select: {
-                name: true,
-              },
-            },
-          },
-          orderBy: {
-            date: 'desc',
-          },
-        })
-
-        return {
-          ...account,
-          transactions,
-        }
-      })
-    )
-
-    // Minimal processing on server - move expensive operations to client
-    const categoryMap = new Map(
-      categories.map((cat) => [cat.id, cat.descriptionTranslated])
-    )
-
-    function getBalanceValue(balance: unknown): number {
-      if (balance === null || balance === undefined) return 0
-      const value =
-        typeof balance === 'object' && balance !== null && 'toNumber' in balance
-          ? (balance as { toNumber(): number }).toNumber()
-          : parseFloat(String(balance))
-      return isNaN(value) ? 0 : value
-    }
-
-    // Simplified serialization - only essential server-side processing
-    const serializedAccounts = accountsWithTransactions.map((account) => ({
-      ...account,
-      balance: getBalanceValue(account.balance),
-      transactions: account.transactions.map((transaction) => {
-        // Parse credit card metadata only when needed
-        let creditCardMeta = null
-        if (transaction.creditCardMetadata?.data) {
-          try {
-            creditCardMeta = JSON.parse(transaction.creditCardMetadata.data)
-          } catch {
-            // Ignore parsing errors
-          }
-        }
-
-        return {
-          ...transaction,
-          amount: getBalanceValue(transaction.amount),
-          amountInAccountCurrency: transaction.amountInAccountCurrency
-            ? getBalanceValue(transaction.amountInAccountCurrency)
-            : null,
-          balance: transaction.balance
-            ? getBalanceValue(transaction.balance)
-            : null,
-          // Keep original date for client-side formatting
-          futurePayment: transaction.date > new Date(),
-          category:
-            transaction.categoryId && categoryMap.has(transaction.categoryId)
-              ? categoryMap.get(transaction.categoryId)!
-              : transaction.category,
-          categoryId: transaction.categoryId,
-          paymentData: transaction.paymentData,
-          merchant: transaction.merchant,
-          // Extract credit card data without heavy processing
-          installmentNumber: creditCardMeta?.installmentNumber,
-          totalInstallments: creditCardMeta?.totalInstallments,
-          totalAmount: creditCardMeta?.totalAmount,
-          originalPurchaseDate: creditCardMeta?.purchaseDate,
-          payeeMCC: creditCardMeta?.payeeMCC,
-          cardNumber: creditCardMeta?.cardNumber,
-        }
-      }),
-      bankData: account.bankData
-        ? {
-            closingBalance: account.bankData.closingBalance
-              ? getBalanceValue(account.bankData.closingBalance)
-              : null,
-          }
-        : null,
-      creditData: account.creditData
-        ? {
-            availableCreditLimit: account.creditData.availableCreditLimit
-              ? getBalanceValue(account.creditData.availableCreditLimit)
-              : null,
-            creditLimit: account.creditData.creditLimit
-              ? getBalanceValue(account.creditData.creditLimit)
-              : null,
-          }
-        : null,
-    }))
-
-    const availableCategories = categories.map((cat) => ({
-      id: cat.id,
-      name: cat.descriptionTranslated,
-    }))
-
-    return {
-      accounts: serializedAccounts,
-      categories: availableCategories,
-    }
+    return await getTransactionsData.execute()
   } catch (error) {
     console.error('Error loading transactions:', error)
     return {
@@ -240,7 +69,6 @@ export default function Transactions() {
   const { accounts = [], categories = [] } = useLoaderData<typeof loader>()
   const [activeTab, setActiveTab] = useState<string>(accounts[0]?.id || '')
 
-  // Format account data on client side for display
   const formattedAccounts = useMemo(() => {
     return accounts.map((account: any) => ({
       ...account,
@@ -324,15 +152,11 @@ export default function Transactions() {
                   No transactions available for this account
                 </p>
               </div>
-            ) : activeAccount.type === 'CREDIT' ? (
-              <CreditCardTransactionsTable
-                transactions={activeAccount.transactions}
-                categories={categories}
-              />
             ) : (
-              <AccountTransactionsTable
+              <TransactionTable
                 transactions={activeAccount.transactions}
                 categories={categories}
+                accountType={activeAccount.type}
               />
             )}
           </div>

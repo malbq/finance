@@ -9,6 +9,7 @@ import {
   YAxis,
 } from 'recharts'
 import { formatCurrency } from '~/utils/formatCurrency'
+import { ChartTooltip } from './chart/ChartTooltip'
 
 interface BalanceEvolutionData {
   month: string
@@ -27,26 +28,6 @@ interface BalanceEvolutionChartProps {
   totalBalance: string
   bankBalance: number
   investmentBalance: number
-}
-
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-zinc-800 border border-zinc-600 rounded-lg p-3 shadow-lg">
-        <p className="text-white font-medium mb-2">{`${label}`}</p>
-        {payload.map((entry: any, index: number) => (
-          <p
-            key={index}
-            className="text-sm"
-            style={{ color: entry.color }}
-          >
-            {`${entry.name}: ${formatCurrency(entry.value)}`}
-          </p>
-        ))}
-      </div>
-    )
-  }
-  return null
 }
 
 export const BalanceEvolutionChart = ({
@@ -131,7 +112,7 @@ export const BalanceEvolutionChart = ({
               fontSize={12}
               tickFormatter={formatCurrency}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<ChartTooltip />} />
             <Legend />
             <Bar
               dataKey="balance"

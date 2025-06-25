@@ -1,4 +1,4 @@
-import type { Account } from '../types/transactions'
+import type { Account } from '~/domain/accounts/entities/Account'
 
 interface AccountCardProps {
   account: Account
@@ -7,13 +7,20 @@ interface AccountCardProps {
 }
 
 export function AccountCard({ account, isActive, onClick }: AccountCardProps) {
+  const utilizationRate =
+    account.type === 'CREDIT'
+      ? (account.creditData?.creditLimit ?? 1) > 0
+        ? (account.balance / (account.creditData?.creditLimit ?? 1)) * 100
+        : 0
+      : 0
+
   return (
     <button
       onClick={onClick}
       className={`bg-zinc-800 rounded-lg p-4 border text-left transition-all hover:bg-slate-800 ${
         isActive
           ? 'border-blue-500 ring-2 ring-blue-500 ring-opacity-50'
-          : 'border-zinc-600 hover:border-zinc-500'
+          : 'border-zinc-600 hover:border-slate-500'
       }`}
     >
       <div className="flex justify-between items-start mb-2">
@@ -54,24 +61,11 @@ export function AccountCard({ account, isActive, onClick }: AccountCardProps) {
               </span>
             </span>
           </div>
-          <div className="h-0.5 flex rounded-full overflow-hidden">
+          <div className="h-0.5 flex rounded-full overflow-hidden bg-green-500/50">
             <div
               className="h-full bg-red-500/50"
               style={{
-                width: `${
-                  (account.balance / (account.creditData?.creditLimit ?? 1)) *
-                  100
-                }%`,
-              }}
-            ></div>
-            <div
-              className="h-full bg-green-500/50"
-              style={{
-                width: `${
-                  ((account.creditData?.availableCreditLimit ?? 1) /
-                    (account.creditData?.creditLimit ?? 1)) *
-                  100
-                }%`,
+                width: `${utilizationRate}%`,
               }}
             ></div>
           </div>

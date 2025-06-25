@@ -10,6 +10,7 @@ import {
   YAxis,
 } from 'recharts'
 import { formatCurrency } from '~/utils/formatCurrency'
+import { ChartTooltip } from './chart/ChartTooltip'
 
 interface SpendingChartData {
   month: string
@@ -34,28 +35,6 @@ const colors = [
   'hsl(300, 70%, 50%)',
   'hsl(330, 70%, 50%)',
 ]
-
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-zinc-800 border border-zinc-600 rounded-lg p-3 shadow-lg">
-        <p className="text-white font-medium mb-2">{`${label}`}</p>
-        {payload
-          .sort((a: any, b: any) => b.value - a.value)
-          .map((entry: any, index: number) => (
-            <p
-              key={index}
-              className="text-sm"
-              style={{ color: entry.color }}
-            >
-              {`${entry.dataKey}: ${formatCurrency(entry.value)}`}
-            </p>
-          ))}
-      </div>
-    )
-  }
-  return null
-}
 
 export const SpendingChart = ({ data }: SpendingChartProps) => {
   if (!data || data.length === 0) {
@@ -114,7 +93,7 @@ export const SpendingChart = ({ data }: SpendingChartProps) => {
               fontSize={12}
               tickFormatter={formatCurrency}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<ChartTooltip sortByValue />} />
             <Legend />
             {categories.map((category, index) => (
               <Area
