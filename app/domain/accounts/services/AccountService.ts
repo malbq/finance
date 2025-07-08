@@ -45,12 +45,12 @@ export class AccountService {
         brand: accountData.creditData.brand,
         balanceDueDate: accountData.creditData.balanceDueDate,
         creditLimit: accountData.creditData.creditLimit.toNumber(),
-        formattedCreditLimit: formatCurrency(
+        creditLimitFormatted: formatCurrency(
           accountData.creditData.creditLimit.toNumber()
         ),
         availableCreditLimit:
           accountData.creditData.availableCreditLimit.toNumber(),
-        formattedAvailableCreditLimit: formatCurrency(
+        availableCreditLimitFormatted: formatCurrency(
           accountData.creditData.availableCreditLimit.toNumber()
         ),
       }

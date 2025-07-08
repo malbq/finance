@@ -1,108 +1,133 @@
 # Gerenciador de Finanças Familiares
 
-Sistema integrado com API Pluggy para sincronização automática de dados bancários, transações e investimentos com base de dados SQLite local.
+Um painel financeiro pessoal que conecta suas contas bancárias, cartões de crédito e investimentos em uma única visão. Organize seus gastos por categoria, acompanhe a evolução do seu patrimônio e projete sua situação financeira futura baseada no seu histórico de receitas e despesas. Ideal para quem quer ter controle total sobre suas finanças sem precisar inserir dados manualmente.
 
 ## **Arquitetura**
 
 - **API**: Integração com Pluggy API para dados bancários
 - **Banco de dados**: SQLite local com Prisma ORM
-- **Frontend**: React Router com SSR
+- **Frontend**: React Router v7 com SSR
 - **Backend**: Server loaders e actions para processamento de dados
+- **Runtime**: Bun para desenvolvimento e execução
 
-## **1. Integração com API Pluggy**
+## **Funcionalidades Implementadas**
 
-### 1.1 Configuração e Autenticação
+### 1. Dashboard Principal
 
-- Cadastrar-se no Meu Pluggy, para ter acesso ao Pluggy como instituição financeira integrada ao open finance
-- Acessar Pluggy Demo App
-- Configurar cliente Pluggy com credenciais do `.env`
-- Implementar autenticação OAuth com tokens de acesso
-- Tokens Pluggy duram 2 horas e serão usados apenas para sincronização de dados
+- **Visão geral financeira**: Saldo total dividido entre contas bancárias e investimentos
+- **Evolução patrimonial**: Gráfico de projeção de saldo baseado em médias móveis de 6 meses
+- **Análise de gastos**: Gráfico e tabela de gastos por categoria
+- **Métricas calculadas**: Renda mensal média, gastos mensais médios e economia esperada
 
-### 1.2 Sincronização de Dados
+### 2. Gestão de Transações
 
-- **Contas**: Buscar e sincronizar contas correntes, poupança e cartões de crédito
-- **Transações**: Importar histórico completo de transações com metadados
-- **Investimentos**: Sincronizar posições e movimentações de investimentos
-- Implementar estratégia de sincronização incremental baseada em `updatedAt`
-- Garantir idempotência por ID único da Pluggy
-- Sincronização deve ser manual, por meio de ação do usuário
+- **Visualização por conta**: Cards de contas com saldos e informações específicas
+- **Tabela de transações**: Listagem completa com filtros por conta
+- **Edição de categorias**: Interface para reclassificar transações manualmente
+- **Suporte a cartões de crédito**: Tratamento diferenciado para transações de crédito
 
-### 1.3 Tratamento de Erros
+### 3. Projeção de Fluxo de Caixa
 
-- Retry automático para falhas temporárias
-- Log estruturado de erros de sincronização
-- Fallback para dados locais em caso de indisponibilidade da API
+- **Cashflow fixo**: Visualização de gastos fixos mensais (atualmente hardcoded para Julho 2025)
+- **Gráfico interativo**: Entradas, saídas e evolução do saldo
+- **Detalhamento diário**: Tooltip com transações específicas por data
 
-## **2. Modelagem de Dados (Prisma)**
+### 4. Sincronização com Pluggy
 
-### 2.1 Schema Principal
+- **Sync manual**: Endpoint `/api/sync` para sincronização completa
+- **Contas bancárias**: Importa contas correntes, poupança e cartões
+- **Transações**: Sincroniza histórico completo de movimentações
+- **Investimentos**: Importa posições e transações de investimento
+- **Tratamento de erros**: Logs estruturados e respostas de erro detalhadas
 
-- **Account**: Baseado no schema Pluggy Account (type, subtype, balance, bankData, creditData)
-- **Transaction**: Baseado no schema Pluggy Transaction (amount, date, category, merchant, paymentData)
-- **Investment**: Baseado no schema Pluggy Investment (type, subtype, value, transactions, taxes)
+## **Integração com API Pluggy**
 
-### 2.2 Relacionamentos
+### Autenticação
 
-- Transações vinculadas a contas
-- Investimentos com histórico de transações
-- Metadados de sincronização (lastSyncAt, pluggyId)
+- Autenticação via API key configurada no `.env`
+- Cliente Pluggy centralizado para todas as operações
 
-### 2.3 Índices e Performance
+### Sincronização de Dados
 
-- Índices compostos para queries por data e conta
-- Índices para pesquisa por categoria e merchant
-- Otimização para queries de agregação
+- **Contas**: Busca e sincroniza todos os tipos de conta
+- **Transações**: Importa histórico com categorização automática básica
+- **Investimentos**: Sincroniza posições atuais e movimentações
+- **Idempotência**: Baseada em ID único da Pluggy para evitar duplicatas
+- **Sincronização completa**: Cada operação refaz toda a sincronização
 
-## **3. Processamento de Dados**
+### Tratamento de Erros
 
-### 3.1 Categorização Automática
+- Logs detalhados para debugging
+- Respostas estruturadas de erro
+- Graceful degradation em caso de falhas
 
-- Engine de categorização baseada em merchant e descrição
-- Aprendizado de padrões históricos de categorização
-- Interface para correção manual de categorias
+## **Modelagem de Dados (Prisma)**
 
-### 3.2 Projeções Financeiras
+### Schema Principal
 
-- Projeção de saldos mensais baseada em histórico
-- Identificação de despesas recorrentes por análise temporal
-- Projeção de parcelas futuras de cartões de crédito
-- Cálculo de rendimentos de investimentos
+- **Account**: Contas bancárias e cartões (type, subtype, balance, bankData, creditData)
+- **Transaction**: Transações com categorização (amount, date, category, merchant)
+- **Investment**: Investimentos com saldo atual (type, subtype, balance)
+- **Category**: Sistema de categorias para classificação
 
-### 3.3 Análise de Padrões
+### Relacionamentos
 
-- Detecção de gastos atípicos
-- Análise de tendências por categoria
-- Identificação de oportunidades de economia
+- Transações vinculadas a contas específicas
+- Investimentos independentes
+- Categorias reutilizáveis entre transações
 
-## **4. Interface de Usuário**
+### Views e Agregações
 
-### 4.1 Dashboard Principal
+- **category_spending_moving_average**: Médias móveis de gastos por categoria
+- **category_income_moving_average**: Médias móveis de receitas por categoria
 
-- Visão geral de saldos e movimentações
-- Gráficos de evolução patrimonial
-- Alertas de gastos e metas
+## **Análise e Projeções**
 
-### 4.2 Gestão de Transações
+### Projeções Financeiras
 
-- Lista filtrada e pesquisável de transações
-- Edição de categorias e tags
-- Conciliação manual quando necessário
+- **Evolução patrimonial**: Baseada em médias móveis de 6 meses de receitas e gastos
+- **Projeção de 24 meses**: Estimativa de saldo futuro
+- **Categorização de gastos**: Análise mensal por categoria
 
-### 4.3 Análise de Investimentos
+### Métricas Calculadas
 
-- Portfólio consolidado com rentabilidade
-- Evolução temporal dos investimentos
+- Renda mensal média (baseada em médias móveis)
+- Gastos mensais médios por categoria
+- Economia mensal esperada (receita - gastos)
 
-### 4.4 Relatórios e Projeções
+## **Interface de Usuário**
 
-- Relatórios mensais automatizados
-- Projeções de fluxo de caixa
-- Análise de metas financeiras
+### Dashboard
 
-## **Prioridades de Desenvolvimento**
+- Cards de resumo financeiro
+- Gráfico de evolução patrimonial
+- Análise de gastos por categoria (gráfico + tabela)
 
-1. **Fase 1**: Schema Prisma e sincronização básica (contas, transações, investimentos)
-2. **Fase 2**: Interface de visualização e categorização
-3. **Fase 3**: Projeções e análises avançadas
-4. **Fase 4**: Automações e relatórios
+### Transações
+
+- Seleção de conta via cards visuais
+- Tabela responsiva de transações
+- Edição inline de categorias
+
+### Projeções
+
+- Gráfico de cashflow com dados fixos
+- Visualização de entradas/saídas/saldo
+
+## **Funcionalidades Não Implementadas**
+
+- **Gestão de investimentos**: Interface está como placeholder
+- **Categorização automática inteligente**: Apenas categorização manual
+- **Detecção de padrões**: Não há análise automática de gastos atípicos
+- **Relatórios automatizados**: Não há geração de relatórios
+- **Metas financeiras**: Sistema de metas não implementado
+- **Sincronização incremental**: Apenas sincronização completa
+- **Refresh automático de tokens**: Gestão manual de autenticação
+
+## **Como Usar**
+
+1. **Configurar credenciais**: Adicionar API key do Pluggy no `.env`
+2. **Executar sincronização**: POST para `/api/sync` para importar dados
+3. **Navegar no dashboard**: Visualizar resumo financeiro
+4. **Gerenciar transações**: Editar categorias conforme necessário
+5. **Analisar cashflow**: Verificar projeções de fluxo de caixa

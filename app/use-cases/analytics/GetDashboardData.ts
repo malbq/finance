@@ -111,7 +111,25 @@ export class GetDashboardData {
         OR: [
           {
             categoryId: {
-              notIn: ['03000000', '04000000', '05100000', '12', '03060000'],
+              notIn: [
+                '01000000',
+                '01010000',
+                '01020000',
+                '01030000',
+                '01040000',
+                '01050000',
+                '03000000',
+                '03010000',
+                '03020000',
+                '03030000',
+                '03040000',
+                '03050000',
+                '03060000',
+                '03070000',
+                '04000000',
+                '05100000',
+                '12',
+              ],
             },
           },
           {
@@ -163,27 +181,18 @@ export class GetDashboardData {
       0
     )
 
-    const latestSpendingProjections = (await this.prisma.$queryRawUnsafe(`
-      SELECT category, moving_avg_6_months
-      FROM category_spending_moving_average 
-      WHERE moving_avg_6_months IS NOT NULL
-    `)) as Array<{ category: string; moving_avg_6_months: number }>
+    const movingAverageProjections = (await this.prisma.$queryRawUnsafe(`
+      SELECT category, value
+      FROM moving_average_projections 
+      WHERE value IS NOT NULL
+    `)) as Array<{ category: string; value: number }>
 
-    const latestIncomeProjections = (await this.prisma.$queryRawUnsafe(`
-      SELECT category, moving_avg_6_months
-      FROM category_income_moving_average 
-      WHERE moving_avg_6_months IS NOT NULL
-    `)) as Array<{ category: string; moving_avg_6_months: number }>
-
-    const totalMonthlySpending = latestSpendingProjections.reduce(
-      (sum, projection) => sum + (projection.moving_avg_6_months || 0),
+    const totalMonthlySpending =
+      movingAverageProjections.find((p) => p.category === 'Spending')?.value ||
       0
-    )
 
-    const totalMonthlyIncome = latestIncomeProjections.reduce(
-      (sum, projection) => sum + (projection.moving_avg_6_months || 0),
-      0
-    )
+    const totalMonthlyIncome =
+      movingAverageProjections.find((p) => p.category === 'Income')?.value || 0
 
     const monthlyProjectedSavings = totalMonthlyIncome - totalMonthlySpending
 

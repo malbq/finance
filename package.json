@@ -8,28 +8,29 @@
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "prisma:generate": "bunx prisma generate && bun run generate:categories",
-    "generate:categories": "bun scripts/generate-categories.ts"
+    "generate:categories": "bun scripts/generate-categories.ts",
+    "db:views": "sqlite3 db/finance.db < prisma/migrations/01_results_moving_average_view.sql"
   },
   "dependencies": {
-    "@prisma/client": "^6.11.0",
-    "@react-router/node": "^7.5.3",
-    "@react-router/serve": "^7.5.3",
-    "isbot": "^5",
-    "prisma": "^6.11.0",
+    "@prisma/client": "^6.11.1",
+    "@react-router/node": "^7.6.3",
+    "@react-router/serve": "^7.6.3",
+    "isbot": "^5.1.28",
+    "prisma": "^6.11.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router": "^7.5.3",
-    "recharts": "^2.15.3"
+    "react-router": "^7.6.3",
+    "recharts": "^2.15.4"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.5.3",
-    "@tailwindcss/vite": "^4.1.4",
-    "@types/node": "^20",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "tailwindcss": "^4.1.4",
+    "@react-router/dev": "^7.6.3",
+    "@tailwindcss/vite": "^4.1.11",
+    "@types/node": "^20.19.4",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "tailwindcss": "^4.1.11",
     "typescript": "^5.8.3",
-    "vite": "^6.3.3",
+    "vite": "^6.3.5",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }

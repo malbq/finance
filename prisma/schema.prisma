@@ -311,18 +311,9 @@ model Category {
 }
 
 // Database views for spending and income projections
-model CategorySpendingMovingAverage {
-  category         String
-  movingAvg6Months Decimal? @map("moving_avg_6_months")
+model MovingAverageProjections {
+  category String   @id
+  value    Decimal?
 
-  @@id([category])
-  @@map("category_spending_moving_average")
-}
-
-model CategoryIncomeMovingAverage {
-  category         String
-  movingAvg6Months Decimal? @map("moving_avg_6_months")
-
-  @@id([category])
-  @@map("category_income_moving_average")
+  @@map("moving_average_projections")
 }
