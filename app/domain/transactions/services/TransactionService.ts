@@ -2,6 +2,7 @@ import { PrismaClient, type Prisma } from '@prisma-app/client'
 import { formatCurrency } from '~/utils/formatCurrency'
 import { formatDate } from '~/utils/formatDate'
 import { formatTime } from '~/utils/formatTime'
+import type { CategoryId, CategoryName } from '../entities/Categories'
 import type { Transaction } from '../entities/Transaction'
 
 const TODAY = new Date()
@@ -22,6 +23,11 @@ export class TransactionService {
         creditCardMetadata: true,
         acquirerData: true,
         merchant: true,
+        account: {
+          select: {
+            type: true,
+          },
+        },
       },
       orderBy: {
         date: 'desc',
@@ -50,6 +56,11 @@ export class TransactionService {
         creditCardMetadata: true
         acquirerData: true
         merchant: true
+        account: {
+          select: {
+            type: true
+          }
+        }
       }
     }>
   ): Transaction => {
@@ -57,19 +68,27 @@ export class TransactionService {
       ? JSON.parse(transactionData.creditCardMetadata.data)
       : undefined
 
+    const normalizedAmount =
+      transactionData.account.type === 'BANK'
+        ? transactionData.amount.toNumber()
+        : transactionData.amount.toNumber() * -1
     const transaction: Transaction = {
       id: transactionData.id,
       accountId: transactionData.accountId,
       description: transactionData.description,
       currencyCode: transactionData.currencyCode,
-      amount: transactionData.amount.toNumber(),
-      amountFormatted: formatCurrency(transactionData.amount.toNumber()),
+      amount: normalizedAmount,
+      amountFormatted: formatCurrency(normalizedAmount),
       date: transactionData.date,
       dateFormatted: formatDate(transactionData.date),
       timeFormatted: formatTime(transactionData.date),
       futurePayment: transactionData.date > TODAY,
-      category: transactionData.category ?? undefined,
-      categoryId: transactionData.categoryId ?? undefined,
+      category: (transactionData.category ?? undefined) as
+        | CategoryName
+        | undefined,
+      categoryId: (transactionData.categoryId ?? undefined) as
+        | CategoryId
+        | undefined,
       balance: transactionData.balance
         ? Number(transactionData.balance)
         : undefined,

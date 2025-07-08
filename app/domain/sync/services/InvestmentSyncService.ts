@@ -104,7 +104,7 @@ export class InvestmentSyncService {
 
     for (const transaction of response.results) {
       try {
-        await this.syncSingleInvestmentTransaction(transaction)
+        await this.syncSingleInvestmentTransaction(transaction, investment.id)
       } catch (error) {
         console.error(
           `Failed to sync investment transaction ${transaction.id}:`,
@@ -116,10 +116,13 @@ export class InvestmentSyncService {
   }
 
   private async syncSingleInvestmentTransaction(
-    transaction: PluggyInvestmentTransaction
+    transaction: PluggyInvestmentTransaction,
+    investmentId: string
   ): Promise<void> {
     const transactionData =
       PluggyDataMapper.mapInvestmentTransactionToDatabase(transaction)
+
+    transactionData.investmentId = investmentId
 
     await this.prisma.investmentTransaction.upsert({
       where: { id: transaction.id },

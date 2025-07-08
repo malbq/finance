@@ -1,9 +1,7 @@
 import { PrismaClient } from '@prisma-app/client'
 import type { Account } from '~/domain/accounts/entities/Account'
 import { AccountService } from '~/domain/accounts/services/AccountService'
-import type { Category } from '~/domain/transactions/entities/Categories'
 import type { Transaction } from '~/domain/transactions/entities/Transaction'
-import { CategoryService } from '../../domain/transactions/services/CategoryService'
 import { TransactionService } from '../../domain/transactions/services/TransactionService'
 
 export type AccountWithTransactions = Account & {
@@ -12,26 +10,20 @@ export type AccountWithTransactions = Account & {
 
 export interface TransactionsData {
   accounts: Array<AccountWithTransactions>
-  categories: Array<Category>
 }
 
 export class GetTransactionsData {
   private transactionService: TransactionService
-  private categoryService: CategoryService
   private accountService: AccountService
 
   constructor(prisma: PrismaClient) {
     this.transactionService = new TransactionService(prisma)
-    this.categoryService = new CategoryService(prisma)
     this.accountService = new AccountService(prisma)
   }
 
   async execute(): Promise<TransactionsData> {
     try {
-      const [accounts, categories] = await Promise.all([
-        this.accountService.findAll(),
-        this.categoryService.findAll(),
-      ])
+      const accounts = await this.accountService.findAll()
 
       const accountsWithTransactions = await Promise.all(
         accounts.map<Promise<AccountWithTransactions>>(async (account) => {
@@ -59,7 +51,6 @@ export class GetTransactionsData {
 
       return {
         accounts: accountsWithTransactions,
-        categories,
       }
     } catch (error) {
       console.error('Error loading transactions data:', error)
@@ -71,7 +62,6 @@ export class GetTransactionsData {
       }
       return {
         accounts: [],
-        categories: [],
       }
     }
   }

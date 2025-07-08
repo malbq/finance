@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import type { AccountType } from '~/domain/accounts/entities/Account'
+import { CATEGORY_MAP } from '~/domain/transactions/entities/Categories'
 import type { Transaction } from '~/domain/transactions/entities/Transaction'
 
 export interface TransactionFilters {
@@ -67,7 +68,10 @@ export const useTransactionFilters = (
 
       const categoryMatch =
         !categoryFilter ||
-        (transaction.category || '').toLowerCase().includes(categoryFilter)
+        (transaction.categoryId &&
+          CATEGORY_MAP[transaction.categoryId]
+            .toLowerCase()
+            .includes(categoryFilter))
 
       return dateMatch && descriptionMatch && detailsMatch && categoryMatch
     })

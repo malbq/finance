@@ -1,3 +1,5 @@
+import type { CategoryId, CategoryName } from './Categories'
+
 export type TransactionType = 'CREDIT' | 'DEBIT'
 
 export type TransactionStatus = 'POSTED' | 'PENDING'
@@ -54,8 +56,8 @@ export interface Transaction {
   dateFormatted: string
   timeFormatted: string
   futurePayment: boolean
-  category?: string
-  categoryId?: string
+  category?: CategoryName
+  categoryId?: CategoryId
   balance?: number
   status?: TransactionStatus
   type?: TransactionType

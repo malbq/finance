@@ -7,14 +7,15 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "prisma:generate": "bunx prisma generate"
+    "prisma:generate": "bunx prisma generate && bun run generate:categories",
+    "generate:categories": "bun scripts/generate-categories.ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.9.0",
+    "@prisma/client": "^6.11.0",
     "@react-router/node": "^7.5.3",
     "@react-router/serve": "^7.5.3",
     "isbot": "^5",
-    "prisma": "^6.9.0",
+    "prisma": "^6.11.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router": "^7.5.3",

@@ -6,37 +6,19 @@ export async function action({ request }: { request: Request }) {
     const syncOrchestrator = new SyncOrchestrator(prisma)
 
     try {
-      const formData = await request.formData()
-      const syncType = formData.get('type') as string
+      console.info('Starting full sync operation')
 
-      console.info(`Starting sync operation: ${syncType || 'full'}`)
-
-      let result
-      switch (syncType) {
-        case 'accounts':
-          result = await syncOrchestrator.executeAccounts()
-          break
-        case 'transactions':
-          result = await syncOrchestrator.executeTransactions()
-          break
-        case 'investments':
-          result = await syncOrchestrator.executeInvestments()
-          break
-        default:
-          result = await syncOrchestrator.executeFull()
-      }
+      const result = await syncOrchestrator.executeFull()
 
       if (result.success) {
-        console.info(
-          `Sync operation completed successfully: ${syncType || 'full'}`
-        )
+        console.info('Sync operation completed successfully')
         return Response.json({
           success: true,
           message: result.message,
           details: result.details,
         })
       } else {
-        console.error(`Sync operation failed: ${syncType || 'full'}`, {
+        console.error('Sync operation failed', {
           message: result.message,
           details: result.details,
           errors: result.errors,

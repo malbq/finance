@@ -29,16 +29,16 @@ export class TransactionSyncService {
       pageSize: '500',
     }
 
-    const latestTransaction = await this.prisma.transaction.findFirst({
-      where: { accountId: account.id },
-      orderBy: { date: 'desc' },
-    })
+    // const latestTransaction = await this.prisma.transaction.findFirst({
+    //   where: { accountId: account.id },
+    //   orderBy: { date: 'desc' },
+    // })
 
-    if (latestTransaction) {
-      params.from = latestTransaction.date.toISOString().split('T')[0]
-    }
+    // if (latestTransaction) {
+    //   params.from = latestTransaction.date.toISOString().split('T')[0]
+    // }
 
-    params.from = '2025-06-14'
+    params.from = '2025-06-20'
 
     const response = await PluggyClient.fetchData<PluggyTransaction>(
       this.apiKey,
@@ -60,25 +60,24 @@ export class TransactionSyncService {
     transaction: PluggyTransaction
   ): Promise<void> {
     await this.prisma.$transaction(async (tx: PrismaClient) => {
+      const existingTransaction = await tx.transaction.findUnique({
+        where: { id: transaction.id },
+      })
+
+      if (existingTransaction) {
+        return
+      }
+
       const transactionData =
         PluggyDataMapper.mapTransactionToDatabase(transaction)
 
-      await tx.transaction.upsert({
-        where: { id: transaction.id },
-        update: {
-          ...transactionData,
-          updatedAt: new Date(),
-        },
-        create: transactionData,
+      await tx.transaction.create({
+        data: transactionData,
       })
 
       if (transaction.creditCardMetadata) {
-        await tx.creditCardMetadata.upsert({
-          where: { transactionId: transaction.id },
-          update: {
-            data: JSON.stringify(transaction.creditCardMetadata),
-          },
-          create: {
+        await tx.creditCardMetadata.create({
+          data: {
             transactionId: transaction.id,
             data: JSON.stringify(transaction.creditCardMetadata),
           },
@@ -86,17 +85,8 @@ export class TransactionSyncService {
       }
 
       if (transaction.paymentData) {
-        const paymentData = await tx.paymentData.upsert({
-          where: { transactionId: transaction.id },
-          update: {
-            paymentMethod: transaction.paymentData.paymentMethod || null,
-            reason: transaction.paymentData.reason || null,
-            receiverReferenceId:
-              transaction.paymentData.receiverReferenceId || null,
-            referenceNumber: transaction.paymentData.referenceNumber || null,
-            boletoMetadata: transaction.paymentData.boletoMetadata || null,
-          },
-          create: {
+        const paymentData = await tx.paymentData.create({
+          data: {
             transactionId: transaction.id,
             paymentMethod: transaction.paymentData.paymentMethod || null,
             reason: transaction.paymentData.reason || null,
@@ -108,23 +98,8 @@ export class TransactionSyncService {
         })
 
         if (transaction.paymentData.payer) {
-          await tx.paymentParticipant.upsert({
-            where: { payerPaymentDataId: paymentData.id },
-            update: {
-              accountNumber:
-                transaction.paymentData.payer.accountNumber || null,
-              branchNumber: transaction.paymentData.payer.branchNumber || null,
-              documentType:
-                transaction.paymentData.payer.documentNumber?.type || null,
-              documentValue:
-                transaction.paymentData.payer.documentNumber?.value || null,
-              name: transaction.paymentData.payer.name || null,
-              routingNumber:
-                transaction.paymentData.payer.routingNumber || null,
-              routingNumberISPB:
-                transaction.paymentData.payer.routingNumberISPB || null,
-            },
-            create: {
+          await tx.paymentParticipant.create({
+            data: {
               accountNumber:
                 transaction.paymentData.payer.accountNumber || null,
               branchNumber: transaction.paymentData.payer.branchNumber || null,
@@ -143,24 +118,8 @@ export class TransactionSyncService {
         }
 
         if (transaction.paymentData.receiver) {
-          await tx.paymentParticipant.upsert({
-            where: { receiverPaymentDataId: paymentData.id },
-            update: {
-              accountNumber:
-                transaction.paymentData.receiver.accountNumber || null,
-              branchNumber:
-                transaction.paymentData.receiver.branchNumber || null,
-              documentType:
-                transaction.paymentData.receiver.documentNumber?.type || null,
-              documentValue:
-                transaction.paymentData.receiver.documentNumber?.value || null,
-              name: transaction.paymentData.receiver.name || null,
-              routingNumber:
-                transaction.paymentData.receiver.routingNumber || null,
-              routingNumberISPB:
-                transaction.paymentData.receiver.routingNumberISPB || null,
-            },
-            create: {
+          await tx.paymentParticipant.create({
+            data: {
               accountNumber:
                 transaction.paymentData.receiver.accountNumber || null,
               branchNumber:
@@ -181,12 +140,8 @@ export class TransactionSyncService {
       }
 
       if (transaction.acquirerData) {
-        await tx.acquirerData.upsert({
-          where: { transactionId: transaction.id },
-          update: {
-            data: transaction.acquirerData.data || null,
-          },
-          create: {
+        await tx.acquirerData.create({
+          data: {
             transactionId: transaction.id,
             data: transaction.acquirerData.data || null,
           },
@@ -194,16 +149,8 @@ export class TransactionSyncService {
       }
 
       if (transaction.merchant) {
-        await tx.merchant.upsert({
-          where: { transactionId: transaction.id },
-          update: {
-            cnae: transaction.merchant.cnae || null,
-            cnpj: transaction.merchant.cnpj || null,
-            name: transaction.merchant.name || null,
-            category: transaction.merchant.category || null,
-            businessName: transaction.merchant.businessName || null,
-          },
-          create: {
+        await tx.merchant.create({
+          data: {
             transactionId: transaction.id,
             cnae: transaction.merchant.cnae || null,
             cnpj: transaction.merchant.cnpj || null,

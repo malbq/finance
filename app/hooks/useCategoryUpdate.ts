@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useFetcher } from 'react-router'
+import {
+  CATEGORY_MAP,
+  type CategoryId,
+} from '~/domain/transactions/entities/Categories'
 import type { Transaction } from '~/domain/transactions/entities/Transaction'
-import type { Category } from '../domain/transactions/entities/Categories'
 
 interface CategoryDropdownState {
   isOpen: boolean
@@ -9,7 +12,7 @@ interface CategoryDropdownState {
   position: { top: number; left: number }
 }
 
-export const useCategoryUpdate = (categories: Category[]) => {
+export const useCategoryUpdate = () => {
   const [categoryDropdown, setCategoryDropdown] =
     useState<CategoryDropdownState>({
       isOpen: false,
@@ -20,18 +23,13 @@ export const useCategoryUpdate = (categories: Category[]) => {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const fetcher = useFetcher()
 
-  const categoryMap = useMemo(
-    () => new Map(categories.map((cat) => [cat.id, cat.descriptionTranslated])),
-    [categories]
-  )
-
   const updatingTransactionData = useMemo(() => {
     if (fetcher.state === 'idle' || !fetcher.formData) {
       return null
     }
     return {
       transactionId: fetcher.formData.get('transactionId') as string,
-      categoryId: fetcher.formData.get('categoryId') as string,
+      categoryId: fetcher.formData.get('categoryId') as CategoryId,
     }
   }, [fetcher.state, fetcher.formData])
 
@@ -63,18 +61,13 @@ export const useCategoryUpdate = (categories: Category[]) => {
     (event: React.MouseEvent, transactionId: string) => {
       event.preventDefault()
       const rect = event.currentTarget.getBoundingClientRect()
-      const containerRect = event.currentTarget
-        .closest('.overflow-x-auto')
-        ?.getBoundingClientRect()
-
-      if (!containerRect) return
 
       setCategoryDropdown({
         isOpen: true,
         transactionId,
         position: {
-          top: rect.bottom - containerRect.top,
-          left: rect.left - containerRect.left,
+          top: rect.bottom,
+          left: rect.left,
         },
       })
     },
@@ -89,19 +82,20 @@ export const useCategoryUpdate = (categories: Category[]) => {
       ) {
         return {
           categoryId: updatingTransactionData.categoryId,
-          categoryName:
-            categoryMap.get(updatingTransactionData.categoryId) || '-',
+          categoryName: updatingTransactionData.categoryId
+            ? CATEGORY_MAP[updatingTransactionData.categoryId]
+            : '-',
         }
       }
 
       return {
         categoryId: transaction.categoryId,
         categoryName: transaction.categoryId
-          ? categoryMap.get(transaction.categoryId) || '-'
+          ? CATEGORY_MAP[transaction.categoryId] || '-'
           : '-',
       }
     },
-    [updatingTransactionData, categoryMap]
+    [updatingTransactionData]
   )
 
   return {
