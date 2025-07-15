@@ -5,7 +5,7 @@
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
-    "start": "react-router-serve ./build/server/index.js",
+    "start": "vite preview",
     "typecheck": "react-router typegen && tsc",
     "prisma:generate": "bunx prisma generate && bun run generate:categories",
     "generate:categories": "bun scripts/generate-categories.ts",
@@ -28,6 +28,7 @@
     "@types/node": "^20.19.4",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "express": "^5.1.0",
     "tailwindcss": "^4.1.11",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
