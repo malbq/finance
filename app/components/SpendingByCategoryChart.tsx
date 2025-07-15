@@ -22,18 +22,15 @@ interface SpendingChartProps {
 }
 
 const colors = [
-  'hsl(0, 70%, 50%)',
-  'hsl(30, 70%, 50%)',
-  'hsl(60, 70%, 50%)',
-  'hsl(90, 70%, 50%)',
-  'hsl(120, 70%, 50%)',
-  'hsl(150, 70%, 50%)',
-  'hsl(180, 70%, 50%)',
-  'hsl(210, 70%, 50%)',
-  'hsl(240, 70%, 50%)',
-  'hsl(270, 70%, 50%)',
-  'hsl(300, 70%, 50%)',
-  'hsl(330, 70%, 50%)',
+  'hsl(25, 90%, 50%)',
+  'hsl(50, 100%, 50%)',
+  'hsl(150, 90%, 40%)',
+  'hsl(180, 90%, 60%)',
+  'hsl(210, 80%, 60%)',
+  'hsl(240, 100%, 70%)',
+  'hsl(270, 100%, 65%)',
+  'hsl(300, 90%, 60%)',
+  'hsl(345, 100%, 70%)',
 ]
 
 export const SpendingByCategoryChart = ({ data }: SpendingChartProps) => {
@@ -89,7 +86,7 @@ export const SpendingByCategoryChart = ({ data }: SpendingChartProps) => {
               type='monotone'
               dataKey='salary'
               name='Entradas'
-              stroke='#22C55E'
+              stroke='#0c0'
               strokeWidth={3}
               dot={{ fill: '#22C55E', strokeWidth: 2, r: 4 }}
             />
@@ -97,7 +94,7 @@ export const SpendingByCategoryChart = ({ data }: SpendingChartProps) => {
               type='monotone'
               dataKey='total'
               name='Saídas'
-              stroke='#ff4444'
+              stroke='#f33'
               strokeWidth={3}
               dot={{ fill: '#ff4444', strokeWidth: 2, r: 4 }}
             />

@@ -49,15 +49,15 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className='min-h-screen h-screen grid grid-rows-[auto_1fr]'>
-      <header className='bg-neutral-900 px-4 flex justify-between items-center py-1'>
+      <header className='bg-neutral-900 px-4 flex justify-between items-center'>
         <nav className='flex space-x-1'>
           {links.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
               className={({ isActive }) =>
-                `px-6 py-2 rounded-sm text-sm font-medium transition-colors ${
-                  isActive ? 'bg-neutral-800' : 'hover:bg-neutral-800'
+                `px-6 py-2 text-sm font-medium transition-colors ${
+                  isActive ? 'bg-neutral-800' : 'hover:bg-neutral-800/50'
                 }`
               }
             >
