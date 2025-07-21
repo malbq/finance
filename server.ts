@@ -25,7 +25,7 @@ Bun.serve({
       })
     },
   },
-  fetch: (request) => createRequestHandler(build, 'production')(request),
+  fetch: (request) => createRequestHandler(build, 'development')(request),
 })
 
 console.log('Server started on port 7777')
