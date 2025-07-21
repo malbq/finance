@@ -65,15 +65,9 @@ export class InvestmentSyncService {
 
     await this.prisma.investment.upsert({
       where: {
-        itemId_id: {
-          itemId: investment.itemId,
-          id: investment.id,
-        },
+        id: investment.id,
       },
-      update: {
-        ...investmentData,
-        updatedAt: new Date(),
-      },
+      update: investmentData,
       create: investmentData,
     })
   }
@@ -126,10 +120,7 @@ export class InvestmentSyncService {
 
     await this.prisma.investmentTransaction.upsert({
       where: { id: transaction.id },
-      update: {
-        ...transactionData,
-        updatedAt: new Date(),
-      },
+      update: transactionData,
       create: transactionData,
     })
   }

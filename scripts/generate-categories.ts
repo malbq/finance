@@ -35,8 +35,6 @@ export interface Category {
   descriptionTranslated: string
   parentId?: string
   parentDescription?: string
-  createdAt: Date
-  updatedAt: Date
 }
 
 export type CategoryId = ${categoryIds || "'unknown'"}

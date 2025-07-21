@@ -10,6 +10,8 @@ export interface PluggyAccount {
   marketingName?: string
   taxNumber?: string
   owner?: string
+  createdAt: string
+  updatedAt: string
   bankData?: {
     transferNumber?: string
     closingBalance?: number
@@ -30,7 +32,6 @@ export interface PluggyAccount {
     isLimitFlexible?: boolean
     holderType?: string
     status?: string
-    additionalCards?: string
   }
 }
 
@@ -51,6 +52,8 @@ export interface PluggyTransaction {
   type?: 'CREDIT' | 'DEBIT'
   operationType?: string
   providerId?: string
+  createdAt: string
+  updatedAt: string
   paymentData?: {
     payer?: {
       name?: string
@@ -135,6 +138,8 @@ export interface PluggyInvestment {
   status?: 'ACTIVE' | 'PENDING' | 'TOTAL_WITHDRAWAL'
   institution?: string
   metadata?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface PluggyInvestmentTransaction {
@@ -314,7 +319,7 @@ export const PluggyDataMapper = {
     return {
       id: account.id,
       itemId: account.itemId,
-      number: account.number || account.id,
+      number: account.number || null,
       type: account.type,
       subtype: account.subtype || null,
       name: account.name,
@@ -323,6 +328,8 @@ export const PluggyDataMapper = {
       marketingName: account.marketingName || null,
       taxNumber: account.taxNumber || null,
       owner: account.owner || null,
+      createdAt: new Date(account.createdAt),
+      updatedAt: new Date(account.updatedAt),
     }
   },
 
@@ -363,7 +370,6 @@ export const PluggyDataMapper = {
       isLimitFlexible: creditData.isLimitFlexible || null,
       holderType: creditData.holderType || null,
       status: creditData.status || null,
-      additionalCards: creditData.additionalCards || null,
     }
   },
 
@@ -385,6 +391,8 @@ export const PluggyDataMapper = {
       type: transaction.type || null,
       operationType: transaction.operationType || null,
       providerId: transaction.providerId || null,
+      createdAt: new Date(transaction.createdAt),
+      updatedAt: new Date(transaction.updatedAt),
     }
   },
 
@@ -423,6 +431,8 @@ export const PluggyDataMapper = {
       status: this.mapInvestmentStatus(investment.status),
       institution: investment.institution || null,
       metadata: investment.metadata || null,
+      createdAt: new Date(investment.createdAt),
+      updatedAt: new Date(investment.updatedAt),
     }
   },
 

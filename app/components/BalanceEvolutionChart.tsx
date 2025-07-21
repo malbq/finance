@@ -30,40 +30,42 @@ export const BalanceEvolutionChart = ({
 }: BalanceEvolutionChartProps) => {
   return (
     <div className='bg-zinc-800 rounded-lg p-4 grid grid-cols-[auto_auto_1fr] grid-rows-4 gap-x-8'>
-      <h2 className='col-span-2 text-xl font-semibold'>Projeção de Saldo</h2>
+      <span className='col-span-2 text-lg font-semibold'>
+        Projeção de Saldo
+      </span>
       <div className='row-span-3'>
-        <div className='text-sm text-zinc-400'>Saldo</div>
-        <div className='text-md font-semibold text-blue-400'>
+        <div className='text-xs text-zinc-400'>Saldo</div>
+        <div className='text-sm font-semibold text-blue-400'>
           {totalBalance}
         </div>
-        <div className='text-sm font-semibold'>
+        <div className='text-xs font-semibold'>
           {formatCurrency(bankBalance)}{' '}
-          <span className='text-xs text-neutral-500'>CC</span>
+          <span className='text-[10px] text-neutral-500'>CC</span>
         </div>
-        <div className='text-sm font-semibold'>
+        <div className='text-xs font-semibold'>
           {formatCurrency(investmentBalance)}{' '}
-          <span className='text-xs text-neutral-500'>INV</span>
+          <span className='text-[10px] text-neutral-500'>INV</span>
         </div>
       </div>
 
       <div>
-        <div className='text-sm text-zinc-400'>Receita (MM6)</div>
-        <div className='text-md font-semibold'>
+        <div className='text-xs text-zinc-400'>Receita (MM6)</div>
+        <div className='text-sm font-semibold'>
           {formatCurrency(movingAverages.totalMonthlyIncome)}
         </div>
       </div>
 
       <div>
-        <div className='text-sm text-zinc-400'>Despesa (MM6)</div>
-        <div className='text-md font-semibold text-red-400'>
+        <div className='text-xs text-zinc-400'>Despesa (MM6)</div>
+        <div className='text-sm font-semibold text-red-400'>
           {formatCurrency(movingAverages.totalMonthlySpending)}
         </div>
       </div>
 
       <div>
-        <div className='text-sm text-zinc-400'>Economia</div>
+        <div className='text-xs text-zinc-400'>Economia</div>
         <div
-          className={`text-md font-semibold ${
+          className={`text-sm font-semibold ${
             movingAverages.expectedSavings >= 0
               ? 'text-green-400'
               : 'text-red-400'
@@ -95,7 +97,7 @@ export const BalanceEvolutionChart = ({
                 dataKey='balance'
                 position='top'
                 fontSize={12}
-                formatter={formatKilo}
+                formatter={(value) => formatKilo(value as number)}
                 fill='#ccc'
               />
             </Bar>

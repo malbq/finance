@@ -17,16 +17,16 @@ export function AccountCard({ account, isActive, onClick }: AccountCardProps) {
   return (
     <button
       onClick={onClick}
-      className={`relative overflow-hidden bg-zinc-800 rounded-lg px-3 py-1 space-y-2 border text-left transition-all hover:bg-slate-800 ${
+      className={`relative overflow-hidden bg-zinc-800 rounded-lg px-2 py-1 border text-left transition-all hover:bg-slate-800 ${
         isActive
-          ? 'border-blue-500 ring-2 ring-blue-500 ring-opacity-50'
+          ? 'border-blue-500 ring-1 ring-blue-500 ring-opacity-50'
           : 'border-zinc-600 hover:border-slate-500'
       }`}
     >
       <div className='flex justify-between items-start'>
-        <h3 className='font-medium truncate'>{account.name}</h3>
+        <span className='truncate text-sm mb-2'>{account.name}</span>
         <span
-          className={`px-2 py-1 text-xs rounded-full ${
+          className={`px-1.5 py-0.5 text-xs rounded-full ${
             account.type === 'BANK'
               ? 'bg-blue-900 text-blue-300'
               : 'bg-purple-800 text-purple-200'
@@ -37,17 +37,17 @@ export function AccountCard({ account, isActive, onClick }: AccountCardProps) {
       </div>
 
       {account.type === 'BANK' ? (
-        <div className='flex justify-between text-sm'>
+        <div className='flex justify-between text-xs'>
           <span className='text-zinc-400'>Saldo</span>
           <span className='text-green-400'>{account.balanceFormatted}</span>
         </div>
       ) : (
         <>
-          <div className='flex justify-between text-sm'>
+          <div className='flex justify-between text-xs'>
             <div>
               <span className='text-red-400'>{account.balanceFormatted}</span>
-              {' / '}
-              <span className='text-zinc-300'>
+              {'/'}
+              <span className='text-zinc-300 text-[10px]'>
                 {account.creditData?.creditLimitFormatted}
               </span>
             </div>

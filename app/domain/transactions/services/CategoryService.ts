@@ -28,8 +28,6 @@ export class CategoryService {
     descriptionTranslated: string
     parentId: string | null
     parentDescription: string | null
-    createdAt: Date
-    updatedAt: Date
   }): Category => {
     return {
       id: category.id,
@@ -37,8 +35,6 @@ export class CategoryService {
       descriptionTranslated: category.descriptionTranslated,
       parentId: category.parentId ?? undefined,
       parentDescription: category.parentDescription ?? undefined,
-      createdAt: category.createdAt,
-      updatedAt: category.updatedAt,
     }
   }
 }

@@ -181,18 +181,18 @@ export class GetDashboardData {
       0
     )
 
-    const movingAverageProjections = (await this.prisma.$queryRawUnsafe(`
-      SELECT category, value
-      FROM moving_average_projections 
-      WHERE value IS NOT NULL
-    `)) as Array<{ category: string; value: number }>
+    const movingAverageProjections =
+      await this.prisma.movingAverageProjections.findMany()
 
     const totalMonthlySpending =
-      movingAverageProjections.find((p) => p.category === 'Spending')?.value ||
-      0
+      movingAverageProjections
+        .find((p) => p.category === 'Spending')
+        ?.value?.toNumber() || 0
 
     const totalMonthlyIncome =
-      movingAverageProjections.find((p) => p.category === 'Income')?.value || 0
+      movingAverageProjections
+        .find((p) => p.category === 'Income')
+        ?.value?.toNumber() || 0
 
     const monthlyProjectedSavings = totalMonthlyIncome - totalMonthlySpending
 

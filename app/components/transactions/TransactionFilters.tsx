@@ -15,7 +15,7 @@ export const TransactionFilters = ({
   return (
     <thead>
       <tr className='border-b border-zinc-600'>
-        <th className='w-[1px] px-4 py-2 text-start text-xs font-medium text-zinc-400'>
+        <th className='w-[1px] px-2 py-1 text-start text-xs font-medium text-zinc-400'>
           <div>DATA</div>
           <input
             type='text'
@@ -27,18 +27,18 @@ export const TransactionFilters = ({
         </th>
 
         {accountType === 'CREDIT' && (
-          <th className='w-[1px] px-4 py-2 text-start text-xs font-medium text-zinc-400'>
+          <th className='w-[1px] px-2 py-1 text-start text-xs font-medium text-zinc-400'>
             PARCELA
           </th>
         )}
 
         {accountType === 'CREDIT' && (
-          <th className='w-[1px] px-4 py-2 text-start text-xs font-medium text-zinc-400'>
+          <th className='w-[1px] px-2 py-1 text-start text-xs font-medium text-zinc-400'>
             COMPRA ORIGINAL
           </th>
         )}
 
-        <th className='px-4 py-2 text-start text-xs font-medium text-zinc-400'>
+        <th className='px-2 py-1 text-start text-xs font-medium text-zinc-400'>
           DESCRIÇÃO
           <input
             type='text'
@@ -49,7 +49,7 @@ export const TransactionFilters = ({
           />
         </th>
 
-        <th className='px-4 py-2 text-start text-xs font-medium text-zinc-400'>
+        <th className='px-2 py-1 text-start text-xs font-medium text-zinc-400'>
           DETALHES
           <input
             type='text'
@@ -60,7 +60,7 @@ export const TransactionFilters = ({
           />
         </th>
 
-        <th className='px-4 py-2 text-start text-xs font-medium text-zinc-400'>
+        <th className='px-2 py-1 text-start text-xs font-medium text-zinc-400'>
           CATEGORIA
           <input
             type='text'
@@ -71,7 +71,7 @@ export const TransactionFilters = ({
           />
         </th>
 
-        <th className='w-[1px] px-4 py-2 text-xs font-medium text-zinc-400'>
+        <th className='w-[1px] px-2 py-1 text-xs font-medium text-zinc-400'>
           VALOR
         </th>
       </tr>

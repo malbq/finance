@@ -39,7 +39,7 @@ export const TransactionTable = ({
           accountType={accountType}
         />
 
-        <tbody>
+        <tbody className='overflow-y-auto h-[600px]'>
           {filteredTransactions.map((transaction) => {
             const TransactionRowComponent =
               accountType === 'CREDIT'

@@ -45,26 +45,26 @@ export const SpendingByCategoryTable = ({ data }: SpendingByCategoryProps) => {
         <table className='w-full border-collapse'>
           <thead>
             <tr className='border-b border-zinc-700'>
-              <th className='text-left p-3 text-sm font-medium text-zinc-300'>
+              <th className='text-left px-2 py-1 text-xs font-medium text-zinc-300'>
                 Categoria
               </th>
               {months.map((month) => (
                 <th
                   key={month}
-                  className='text-right p-3 text-sm font-medium text-zinc-300'
+                  className='text-right px-2 py-1 text-xs font-medium text-zinc-300'
                 >
                   {month}
                 </th>
               ))}
             </tr>
-            <tr className='border-b border-zinc-600'>
-              <th className='text-left p-3 text-sm font-bold text-zinc-200'>
+            <tr className='border-b border-zinc-600 hover:bg-zinc-700/50'>
+              <th className='text-left px-2 py-1 text-xs font-bold text-zinc-200'>
                 Total
               </th>
               {months.map((month) => (
                 <th
                   key={month}
-                  className='text-right p-3 text-sm font-bold text-zinc-200'
+                  className='text-right px-2 py-1 text-xs font-bold text-zinc-200'
                 >
                   {formatCurrency(getMonthTotal(month))}
                 </th>
@@ -75,11 +75,11 @@ export const SpendingByCategoryTable = ({ data }: SpendingByCategoryProps) => {
             {categories.map((category, index) => (
               <tr
                 key={category}
-                className={`border-b border-zinc-700 ${
+                className={`border-b border-zinc-700 hover:bg-zinc-700/50 ${
                   index % 2 === 0 ? 'bg-zinc-800' : 'bg-zinc-850'
                 }`}
               >
-                <td className='p-3 text-sm text-white font-medium'>
+                <td className='px-2 py-1 text-xs text-white font-medium'>
                   {CATEGORY_MAP[category]}
                 </td>
                 {months.map((month) => {
@@ -88,7 +88,7 @@ export const SpendingByCategoryTable = ({ data }: SpendingByCategoryProps) => {
                   return (
                     <td
                       key={month}
-                      className={`p-3 text-sm text-right text-zinc-300 ${
+                      className={`px-2 py-1 text-xs text-right text-zinc-300 ${
                         value ? '' : 'text-zinc-600'
                       }`}
                     >

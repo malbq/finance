@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../node_modules/@prisma-app/client"
+  provider        = "prisma-client-js"
+  output          = "../node_modules/@prisma-app/client"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -89,7 +90,7 @@ enum TransactionStatus {
 }
 
 model Account {
-  id            String          @id @default(uuid())
+  id            String          @id
   itemId        String
   number        String?
   type          AccountType
@@ -100,13 +101,11 @@ model Account {
   marketingName String?
   taxNumber     String?
   owner         String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  createdAt     DateTime
+  updatedAt     DateTime
   transactions  Transaction[]
   bankData      BankData?
   creditData    CreditData?
-
-  @@unique([itemId, number])
 }
 
 model BankData {
@@ -122,44 +121,24 @@ model BankData {
 }
 
 model CreditData {
-  id                        String                     @id @default(uuid())
-  accountId                 String                     @unique
-  level                     String
-  brand                     String
-  balanceCloseDate          DateTime?
-  balanceDueDate            DateTime
-  availableCreditLimit      Decimal
-  balanceForeignCurrency    Decimal?
-  minimumPayment            Decimal?
-  creditLimit               Decimal
-  isLimitFlexible           Boolean?
-  holderType                String?
-  status                    String?
-  additionalCards           String?
-  account                   Account                    @relation(fields: [accountId], references: [id])
-  disaggregatedCreditLimits DisaggregatedCreditLimit[]
-}
-
-model DisaggregatedCreditLimit {
-  id                          String     @id @default(uuid())
-  creditDataId                String
-  lineName                    String?
-  usedAmount                  Decimal?
-  limitAmount                 Decimal?
-  availableAmount             Decimal?
-  isLimitFlexible             Boolean?
-  consolidationType           String?
-  creditLineLimitType         String?
-  identificationNumber        String?
-  lineNameAdditionalInfo      String?
-  usedAmountCurrencyCode      String?
-  limitAmountCurrencyCode     String?
-  availableAmountCurrencyCode String?
-  creditData                  CreditData @relation(fields: [creditDataId], references: [id])
+  id                     String    @id @default(uuid())
+  accountId              String    @unique
+  level                  String
+  brand                  String
+  balanceCloseDate       DateTime?
+  balanceDueDate         DateTime
+  availableCreditLimit   Decimal
+  balanceForeignCurrency Decimal?
+  minimumPayment         Decimal?
+  creditLimit            Decimal
+  isLimitFlexible        Boolean?
+  holderType             String?
+  status                 String?
+  account                Account   @relation(fields: [accountId], references: [id])
 }
 
 model Transaction {
-  id                      String              @id @default(uuid())
+  id                      String              @id
   accountId               String
   description             String
   descriptionRaw          String?
@@ -175,8 +154,8 @@ model Transaction {
   type                    TransactionType
   operationType           String?
   providerId              String?
-  createdAt               DateTime            @default(now())
-  updatedAt               DateTime            @updatedAt
+  createdAt               DateTime
+  updatedAt               DateTime
   account                 Account             @relation(fields: [accountId], references: [id])
   paymentData             PaymentData?
   creditCardMetadata      CreditCardMetadata?
@@ -238,7 +217,7 @@ model Merchant {
 }
 
 model Investment {
-  id                     String                  @id @default(uuid())
+  id                     String                  @id
   itemId                 String
   type                   InvestmentType
   subtype                InvestmentSubtype?
@@ -271,15 +250,15 @@ model Investment {
   status                 InvestmentStatus?
   institution            String?
   metadata               String?
-  createdAt              DateTime                @default(now())
-  updatedAt              DateTime                @updatedAt
+  createdAt              DateTime
+  updatedAt              DateTime
   investmentTransactions InvestmentTransaction[]
 
   @@unique([itemId, id])
 }
 
 model InvestmentTransaction {
-  id              String                    @id @default(uuid())
+  id              String                    @id
   investmentId    String
   type            InvestmentTransactionType
   movementType    MovementType?
@@ -293,8 +272,6 @@ model InvestmentTransaction {
   tradeDate       DateTime?
   brokerageNumber String?
   expenses        String?
-  createdAt       DateTime                  @default(now())
-  updatedAt       DateTime                  @updatedAt
   investment      Investment                @relation(fields: [investmentId], references: [id])
 }
 
@@ -304,16 +281,11 @@ model Category {
   descriptionTranslated String
   parentId              String?
   parentDescription     String?
-  createdAt             DateTime   @default(now())
-  updatedAt             DateTime   @updatedAt
   parent                Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
   children              Category[] @relation("CategoryHierarchy")
 }
 
-// Database views for spending and income projections
-model MovingAverageProjections {
-  category String   @id
+view MovingAverageProjections {
+  category String   @unique
   value    Decimal?
-
-  @@map("moving_average_projections")
 }

@@ -1,5 +1,5 @@
-DROP VIEW IF EXISTS moving_average_projections;
-CREATE VIEW moving_average_projections AS WITH
+DROP VIEW IF EXISTS MovingAverageProjections;
+CREATE VIEW MovingAverageProjections AS WITH
 months_range AS (
   SELECT 1 as month_offset, date('now', '-1 month', 'start of month') as month_date
   UNION ALL SELECT 2, date('now', '-2 months', 'start of month')

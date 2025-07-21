@@ -1,133 +1,424 @@
-# Gerenciador de Finanças Familiares
+# Family Finance Manager
 
-Um painel financeiro pessoal que conecta suas contas bancárias, cartões de crédito e investimentos em uma única visão. Organize seus gastos por categoria, acompanhe a evolução do seu patrimônio e projete sua situação financeira futura baseada no seu histórico de receitas e despesas. Ideal para quem quer ter controle total sobre suas finanças sem precisar inserir dados manualmente.
+## Product Overview
 
-## **Arquitetura**
+A comprehensive personal finance dashboard that connects bank accounts, credit cards, and investments into a unified view. Users can organize expenses by category, track wealth evolution, and project future financial scenarios based on historical income and expense patterns. Designed for individuals and families who want complete financial control without manual data entry.
 
-- **API**: Integração com Pluggy API para dados bancários
-- **Banco de dados**: SQLite local com Prisma ORM
-- **Frontend**: React Router v7 com SSR
-- **Backend**: Server loaders e actions para processamento de dados
-- **Runtime**: Bun para desenvolvimento e execução
+## Core Features
 
-## **Funcionalidades Implementadas**
+### 1. Financial Dashboard
 
-### 1. Dashboard Principal
+**Objective**: Provide users with a comprehensive overview of their financial situation
 
-- **Visão geral financeira**: Saldo total dividido entre contas bancárias e investimentos
-- **Evolução patrimonial**: Gráfico de projeção de saldo baseado em médias móveis de 6 meses
-- **Análise de gastos**: Gráfico e tabela de gastos por categoria
-- **Métricas calculadas**: Renda mensal média, gastos mensais médios e economia esperada
+**Requirements**:
 
-### 2. Gestão de Transações
+- Display total balance across bank accounts and investments
+- Show wealth evolution projections using 6-month weighted moving averages
+- Present spending analysis through interactive charts and detailed category tables
+- Calculate key metrics: average monthly income, average monthly expenses, and expected savings
 
-- **Visualização por conta**: Cards de contas com saldos e informações específicas
-- **Tabela de transações**: Listagem completa com filtros por conta
-- **Edição de categorias**: Interface para reclassificar transações manualmente
-- **Suporte a cartões de crédito**: Tratamento diferenciado para transações de crédito
+**User Stories**:
 
-### 3. Projeção de Fluxo de Caixa
+- As a user, I want to see my total financial position at a glance
+- As a user, I want to understand how my wealth is projected to grow over time
+- As a user, I want to identify spending patterns by category
 
-- **Cashflow fixo**: Visualização de gastos fixos mensais (atualmente hardcoded para Julho 2025)
-- **Gráfico interativo**: Entradas, saídas e evolução do saldo
-- **Detalhamento diário**: Tooltip com transações específicas por data
+### 2. Transaction Management
 
-### 4. Sincronização com Pluggy
+**Objective**: Enable users to view, filter, and categorize their financial transactions
 
-- **Sync manual**: Endpoint `/api/sync` para sincronização completa
-- **Contas bancárias**: Importa contas correntes, poupança e cartões
-- **Transações**: Sincroniza histórico completo de movimentações
-- **Investimentos**: Importa posições e transações de investimento
-- **Tratamento de erros**: Logs estruturados e respostas de erro detalhadas
+**Requirements**:
 
-## **Integração com API Pluggy**
+- Display interactive account cards with balances and account-specific information
+- Provide responsive transaction tables with optimized layouts for bank accounts vs credit cards
+- Implement real-time filtering by date, description, details, and category
+- Enable category editing with dropdown interface and optimistic UI updates
+- Support credit card transaction details including installments and original purchase dates
+- Show complete payment information including payer/receiver details and merchant data
 
-### Autenticação
+**User Stories**:
 
-- Autenticação via API key configurada no `.env`
-- Cliente Pluggy centralizado para todas as operações
+- As a user, I want to view all my transactions organized by account
+- As a user, I want to filter transactions to find specific expenses
+- As a user, I want to recategorize transactions to improve my expense tracking
+- As a user, I want to see detailed information about credit card purchases and installments
 
-### Sincronização de Dados
+### 3. Cash Flow Projection
 
-- **Contas**: Busca e sincroniza todos os tipos de conta
-- **Transações**: Importa histórico com categorização automática básica
-- **Investimentos**: Sincroniza posições atuais e movimentações
-- **Idempotência**: Baseada em ID único da Pluggy para evitar duplicatas
-- **Sincronização completa**: Cada operação refaz toda a sincronização
+**Objective**: Help users understand and plan their future financial position
 
-### Tratamento de Erros
+**Requirements**:
 
-- Logs detalhados para debugging
-- Respostas estruturadas de erro
-- Graceful degradation em caso de falhas
+- Display monthly fixed expenses and income patterns
+- Provide interactive charts showing income, expenses, and balance evolution
+- Include daily transaction details in interactive tooltips
+- Project future cash flow based on historical patterns
 
-## **Modelagem de Dados (Prisma)**
+**User Stories**:
 
-### Schema Principal
+- As a user, I want to see my fixed monthly expenses
+- As a user, I want to understand my cash flow patterns over time
+- As a user, I want to project my future financial position
 
-- **Account**: Contas bancárias e cartões (type, subtype, balance, bankData, creditData)
-- **Transaction**: Transações com categorização (amount, date, category, merchant)
-- **Investment**: Investimentos com saldo atual (type, subtype, balance)
-- **Category**: Sistema de categorias para classificação
+### 4. Investment Tracking (Planned)
 
-### Relacionamentos
+## Technical Requirements
 
-- Transações vinculadas a contas específicas
-- Investimentos independentes
-- Categorias reutilizáveis entre transações
+### Frontend Technology Stack
 
-### Views e Agregações
+- **Framework**: React with modern hooks and functional components
+- **Styling**: TailwindCSS with dark theme implementation
+- **Charts**: Recharts library for all data visualizations including:
+  - Bar charts for balance evolution
+  - Composed charts (Line + Area) for spending analysis
+  - Interactive tooltips and responsive design
 
-- **category_spending_moving_average**: Médias móveis de gastos por categoria
-- **category_income_moving_average**: Médias móveis de receitas por categoria
+### Data Integration
 
-## **Análise e Projeções**
+- **Primary Data Source**: Pluggy API for automated financial data synchronization
+- **Authentication**: Secure API integration with client credentials
+- **Data Sync**: Real-time synchronization of:
+  - Bank accounts and credit cards
+  - Transaction history and metadata
+  - Investment positions and transactions
+  - Category mappings and hierarchies
 
-### Projeções Financeiras
+### User Experience Requirements
 
-- **Evolução patrimonial**: Baseada em médias móveis de 6 meses de receitas e gastos
-- **Projeção de 24 meses**: Estimativa de saldo futuro
-- **Categorização de gastos**: Análise mensal por categoria
+- **Performance**: Fast loading times with optimistic UI updates
+- **Real-time Updates**: Live data updates without page refresh
+- **Error Handling**: Graceful error states with user-friendly messaging
 
-### Métricas Calculadas
+## Pluggy API Integration Specifications
 
-- Renda mensal média (baseada em médias móveis)
-- Gastos mensais médios por categoria
-- Economia mensal esperada (receita - gastos)
+### Authentication & Security
 
-## **Interface de Usuário**
+- Secure client-side authentication using Pluggy credentials
+- Support for multiple financial institution connections
+- Automated token refresh and session management
 
-### Dashboard
+### Data Synchronization
 
-- Cards de resumo financeiro
-- Gráfico de evolução patrimonial
-- Análise de gastos por categoria (gráfico + tabela)
+- **Accounts**: Sync bank accounts and credit cards with complete metadata
+- **Transactions**: Historical data import with payment details, merchant information
+- **Investments**: Position synchronization with transaction history
+- **Categories**: Automatic category mapping with user customization options
+- **Frequency**: Manual sync with option for scheduled updates
 
-### Transações
+### Error Handling & Reliability
 
-- Seleção de conta via cards visuais
-- Tabela responsiva de transações
-- Edição inline de categorias
+- Comprehensive error logging and user notification
+- Graceful degradation for partial sync failures
+- Data validation and duplicate prevention
+- Retry mechanisms for failed synchronizations
 
-### Projeções
+## Data Model & Schema
 
-- Gráfico de cashflow com dados fixos
-- Visualização de entradas/saídas/saldo
+### Core Entities (JSON Structure View)
 
-## **Funcionalidades Não Implementadas**
+#### Account Entity
 
-- **Gestão de investimentos**: Interface está como placeholder
-- **Categorização automática inteligente**: Apenas categorização manual
-- **Detecção de padrões**: Não há análise automática de gastos atípicos
-- **Relatórios automatizados**: Não há geração de relatórios
-- **Metas financeiras**: Sistema de metas não implementado
-- **Sincronização incremental**: Apenas sincronização completa
-- **Refresh automático de tokens**: Gestão manual de autenticação
+```json
+{
+  "id": "uuid",
+  "itemId": "pluggy-item-identifier",
+  "number": "account-number",
+  "type": "BANK | CREDIT",
+  "subtype": "CHECKING_ACCOUNT | CREDIT_CARD",
+  "name": "Account Display Name",
+  "balance": 15000.0,
+  "currencyCode": "BRL",
+  "marketingName": "Bank Marketing Name",
+  "taxNumber": "12345678901",
+  "owner": "Account Owner Name",
+  "createdAt": "2024-01-01T00:00:00Z",
+  "updatedAt": "2024-01-01T00:00:00Z",
 
-## **Como Usar**
+  // Bank-specific data (when type = BANK)
+  "bankData": {
+    "transferNumber": "12345-6",
+    "closingBalance": 14800.0,
+    "automaticallyInvestedBalance": 5000.0,
+    "overdraftContractedLimit": 2000.0,
+    "overdraftUsedLimit": 200.0,
+    "unarrangedOverdraftAmount": 0.0
+  },
 
-1. **Configurar credenciais**: Adicionar API key do Pluggy no `.env`
-2. **Executar sincronização**: POST para `/api/sync` para importar dados
-3. **Navegar no dashboard**: Visualizar resumo financeiro
-4. **Gerenciar transações**: Editar categorias conforme necessário
-5. **Analisar cashflow**: Verificar projeções de fluxo de caixa
+  // Credit card data (when type = CREDIT)
+  "creditData": {
+    "level": "PLATINUM",
+    "brand": "VISA",
+    "balanceCloseDate": "2024-01-15T00:00:00Z",
+    "balanceDueDate": "2024-02-10T00:00:00Z",
+    "availableCreditLimit": 8000.0,
+    "creditLimit": 10000.0,
+    "minimumPayment": 450.0,
+    "isLimitFlexible": true,
+    "holderType": "PRIMARY",
+    "status": "ACTIVE",
+    "additionalCards": "2",
+    "disaggregatedLimits": [
+      {
+        "lineName": "PURCHASES",
+        "limitAmount": 8000.0,
+        "usedAmount": 2000.0,
+        "availableAmount": 6000.0,
+        "isLimitFlexible": false
+      }
+    ]
+  },
+
+  // Nested transactions
+  "transactions": [
+    // See Transaction Entity below
+  ]
+}
+```
+
+#### Transaction Entity
+
+```json
+{
+  "id": "transaction-uuid",
+  "accountId": "account-uuid",
+  "description": "PAGAMENTO PIX",
+  "descriptionRaw": "PIX ENVIADO JOAO SILVA",
+  "currencyCode": "BRL",
+  "amount": -250.0,
+  "amountInAccountCurrency": -250.0,
+  "date": "2024-01-15T14:30:00Z",
+  "category": "Alimentação",
+  "categoryId": "07010000",
+  "balance": 14750.0,
+  "status": "POSTED",
+  "type": "DEBIT",
+  "operationType": "PIX",
+  "createdAt": "2024-01-15T14:30:00Z",
+  "updatedAt": "2024-01-15T14:30:00Z",
+
+  // Payment details (PIX, TED, boleto, etc.)
+  "paymentData": {
+    "paymentMethod": "PIX",
+    "reason": "PAYMENT_FOR_GOODS_SERVICES",
+    "receiverReferenceId": "pix-reference-123",
+    "referenceNumber": "REF123456789",
+    "boletoMetadata": null,
+
+    "payer": {
+      "name": "João Silva",
+      "accountNumber": "12345-6",
+      "branchNumber": "0001",
+      "routingNumber": "123",
+      "routingNumberISPB": "12345678",
+      "documentNumber": {
+        "type": "CPF",
+        "value": "12345678901"
+      }
+    },
+
+    "receiver": {
+      "name": "Maria Santos",
+      "accountNumber": "98765-4",
+      "branchNumber": "0002",
+      "routingNumber": "456",
+      "routingNumberISPB": "87654321",
+      "documentNumber": {
+        "type": "CPF",
+        "value": "10987654321"
+      }
+    }
+  },
+
+  // Credit card specific data
+  "creditCardMetadata": {
+    "installmentNumber": 3,
+    "totalInstallments": 12,
+    "totalAmount": 3000.0,
+    "payeeMCC": "5411",
+    "purchaseDate": "2024-01-10T00:00:00Z",
+    "cardNumber": "**** **** **** 1234",
+    "billId": "bill-123"
+  },
+
+  // Merchant information
+  "merchant": {
+    "name": "SUPERMERCADO XYZ",
+    "businessName": "XYZ Comercio de Alimentos Ltda",
+    "cnpj": "12345678000190",
+    "cnae": "4711302",
+    "category": "GROCERY_STORES"
+  },
+
+  // Payment processor data
+  "acquirerData": {
+    "data": "acquirer-specific-metadata"
+  }
+}
+```
+
+#### Investment Entity
+
+```json
+{
+  "id": "investment-uuid",
+  "itemId": "pluggy-item-identifier",
+  "type": "FIXED_INCOME",
+  "subtype": "TREASURY",
+  "number": "TESOURO-12345",
+  "name": "Tesouro Direto IPCA+ 2029",
+  "balance": 50000.0,
+  "lastMonthRate": 0.85,
+  "lastTwelveMonthsRate": 10.25,
+  "annualRate": 12.15,
+  "currencyCode": "BRL",
+  "code": "NTNB",
+  "isin": "BRSTNCLF1018",
+  "value": 3456.78,
+  "quantity": 14.46,
+  "amount": 50000.0,
+  "taxes": 450.0,
+  "date": "2024-01-01T00:00:00Z",
+  "owner": "Investment Account Owner",
+  "amountProfit": 5000.0,
+  "amountWithdrawal": 0.0,
+  "amountOriginal": 45000.0,
+  "dueDate": "2029-05-15T00:00:00Z",
+  "issuer": "Tesouro Nacional",
+  "issuerCNPJ": "00000000000191",
+  "issueDate": "2023-05-15T00:00:00Z",
+  "rate": 6.25,
+  "rateType": "IPCA_PLUS_RATE",
+  "fixedAnnualRate": 6.25,
+  "status": "ACTIVE",
+  "institution": "Banco XYZ",
+  "metadata": "treasury-specific-data",
+
+  // Investment transaction history
+  "transactions": [
+    {
+      "id": "inv-transaction-uuid",
+      "type": "BUY",
+      "movementType": "DEBIT",
+      "quantity": 10.0,
+      "value": 3200.5,
+      "amount": 32005.0,
+      "netAmount": 31955.0,
+      "description": "Compra Tesouro IPCA+",
+      "agreedRate": 6.25,
+      "date": "2023-12-01T00:00:00Z",
+      "tradeDate": "2023-12-01T00:00:00Z",
+      "brokerageNumber": "12345",
+      "expenses": "taxa_custodia: 25.00, taxa_corretagem: 25.00"
+    },
+    {
+      "id": "inv-transaction-uuid-2",
+      "type": "INTEREST",
+      "movementType": "CREDIT",
+      "quantity": 0.0,
+      "value": 0.0,
+      "amount": 287.5,
+      "netAmount": 287.5,
+      "description": "Juros semestrais",
+      "date": "2024-01-01T00:00:00Z",
+      "expenses": null
+    }
+  ]
+}
+```
+
+#### Category Entity (Hierarchical)
+
+```json
+{
+  "id": "07000000",
+  "description": "Alimentação",
+  "descriptionTranslated": "Food",
+  "parentId": null,
+  "parentDescription": null,
+
+  // Child categories
+  "children": [
+    {
+      "id": "07010000",
+      "description": "Supermercados",
+      "descriptionTranslated": "Supermarkets",
+      "parentId": "07000000",
+      "parentDescription": "Alimentação",
+
+      "children": [
+        {
+          "id": "07010001",
+          "description": "Mercados Grandes",
+          "descriptionTranslated": "Large Supermarkets",
+          "parentId": "07010000",
+          "parentDescription": "Supermercados",
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "07020000",
+      "description": "Restaurantes",
+      "descriptionTranslated": "Restaurants",
+      "parentId": "07000000",
+      "parentDescription": "Alimentação",
+      "children": []
+    }
+  ]
+}
+```
+
+### Financial Analytics Views
+
+#### Moving Average Projections
+
+```sql
+-- SQL View for weighted 6-month moving averages
+CREATE VIEW moving_average_projections AS
+WITH months_range AS (
+  -- Last 6 months with weighting factors
+  SELECT 1 as month_offset, date('now', '-1 month', 'start of month') as month_date
+  UNION ALL SELECT 2, date('now', '-2 months', 'start of month')
+  -- ... continues for 6 months
+),
+spending_average AS (
+  SELECT ROUND(
+    SUM(spending_monthly.total * (7 - months_range.month_offset)) / 21.0, 2
+  ) as value
+  FROM spending_monthly
+  JOIN months_range ON spending_monthly.month_date = months_range.month_date
+),
+income_average AS (
+  SELECT ROUND(
+    SUM(income_monthly.total * (7 - months_range.month_offset)) / 21.0, 2
+  ) as value
+  FROM income_monthly
+  JOIN months_range ON income_monthly.month_date = months_range.month_date
+)
+```
+
+**Weighting Formula**: Recent months have higher impact using `(7 - month_offset) / 21.0`
+
+- Month 1 (current): Weight 6/21 ≈ 28.6%
+- Month 2: Weight 5/21 ≈ 23.8%
+- Month 6: Weight 1/21 ≈ 4.8%
+
+### Data Relationships & Integrity
+
+#### Account Hierarchies
+
+- **Bank Accounts**: Include overdraft limits, automatic investment balances
+- **Credit Cards**: Track utilization, payment due dates, available credit
+- **Investment Accounts**: Portfolio positions with performance metrics
+
+#### Transaction Enrichment
+
+- **Payment Flow**: Complete payer → receiver tracking with document validation
+- **Credit Card Details**: Full installment tracking, original purchase attribution
+- **Merchant Intelligence**: Business classification, tax identification
+
+#### Category Intelligence
+
+- **Hierarchical Structure**: Parent-child relationships for expense rollups
+- **Exclusion Logic**: Automated filtering of transfer/investment categories
+- **Custom Mapping**: User-defined category overrides

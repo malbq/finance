@@ -32,7 +32,7 @@ export const CreditCardTransactionRow = memo(function CreditCardTransactionRow({
   return (
     <tr
       key={transaction.id}
-      className={`relative not-last:border-b border-zinc-700 hover:bg-zinc-800/50 group ${
+      className={`relative not-last:border-b border-zinc-700 hover:bg-zinc-700/50 group ${
         isUpdating ? 'opacity-50' : ''
       }`}
     >
@@ -43,10 +43,10 @@ export const CreditCardTransactionRow = memo(function CreditCardTransactionRow({
       >
         <button
           onClick={copyTransactionId}
-          className='absolute left-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-zinc-600 hover:bg-zinc-500 text-zinc-100 p-1 rounded text-xs font-mono border border-zinc-500 z-10'
+          className='absolute left-[-10px] top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-100 bg-zinc-600 hover:bg-zinc-500 text-zinc-100 p-1 rounded-full text-xs font-mono border border-zinc-500 z-10'
           title='Copy transaction ID'
         >
-          📋
+          ID
         </button>
         {transaction.dateFormatted} {transaction.futurePayment ? '🕰️' : ''}
       </td>

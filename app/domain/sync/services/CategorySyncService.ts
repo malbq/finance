@@ -34,10 +34,7 @@ export class CategorySyncService {
 
     await this.prisma.category.upsert({
       where: { id: category.id },
-      update: {
-        ...categoryData,
-        updatedAt: new Date(),
-      },
+      update: categoryData,
       create: categoryData,
     })
   }

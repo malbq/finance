@@ -52,15 +52,9 @@ export class AccountSyncService {
 
       await tx.account.upsert({
         where: {
-          itemId_number: {
-            itemId: account.itemId,
-            number: account.number || account.id,
-          },
+          id: account.id,
         },
-        update: {
-          ...accountData,
-          updatedAt: new Date(),
-        },
+        update: accountData,
         create: accountData,
       })
 
