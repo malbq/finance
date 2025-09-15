@@ -50,9 +50,7 @@ export async function loader() {
   const data: Array<ChartData> = []
   let runningBalance = 0
   for (let day = 1; day <= lastMonthDay; day++) {
-    const date = `${month.toString().padStart(2, '0')}-${day
-      .toString()
-      .padStart(2, '0')}`
+    const date = `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
     const current: ChartData = {
       date,
       day,
@@ -80,8 +78,8 @@ export async function loader() {
           value: transaction.value,
         })
       })
-    current.incomeStack = current.income > 0 ? data[day - 2]?.balance ?? 0 : 0
-    current.expenseStack = current.expense > 0 ? current.balance ?? 0 : 0
+    current.incomeStack = current.income > 0 ? (data[day - 2]?.balance ?? 0) : 0
+    current.expenseStack = current.expense > 0 ? (current.balance ?? 0) : 0
     data.push(current)
   }
 
@@ -93,9 +91,7 @@ export default function Cashflow() {
 
   return (
     <div className='space-y-6 border border-zinc-600 rounded-lg p-4'>
-      <h2 className='text-xl font-semibold text-white mb-4'>
-        Movimentações fixas de Julho 2025
-      </h2>
+      <h2 className='text-xl font-semibold text-white mb-4'>Movimentações fixas de Julho 2025</h2>
       <div className='h-[500px]'>
         <ResponsiveContainer
           width='100%'
@@ -162,7 +158,7 @@ export default function Cashflow() {
                 position='top'
                 fill='#5dbd40'
                 fontSize={12}
-                formatter={formatKilo}
+                formatter={(value) => formatKilo(Number(value))}
               />
             </Bar>
             <Bar
@@ -183,7 +179,7 @@ export default function Cashflow() {
                 position='top'
                 fill='#ff6961'
                 fontSize={12}
-                formatter={(value: number) => formatKilo(-1 * value)}
+                formatter={(value) => formatKilo(-1 * Number(value))}
               />
             </Bar>
             <Area
@@ -195,10 +191,7 @@ export default function Cashflow() {
               fillOpacity={0.3}
             >
               <LabelList
-                valueAccessor={(
-                  { payload }: { payload: ChartData },
-                  index: number
-                ) => {
+                valueAccessor={({ payload }: { payload: ChartData }, index: number) => {
                   const { balance } = payload
                   const changed = balance !== data[index - 1]?.balance
                   return changed ? balance : 0
@@ -206,7 +199,7 @@ export default function Cashflow() {
                 position='insideTopLeft'
                 fill='#fff'
                 fontSize={12}
-                formatter={formatKilo}
+                formatter={(value) => formatKilo(Number(value))}
               />
             </Area>
           </ComposedChart>
@@ -264,25 +257,21 @@ const CustomCashflowTooltip = ({
         <>
           <hr className='border-zinc-600 my-2' />
           <div className='space-y-1'>
-            {chartDataPoint.transactions.map(
-              (transaction: any, index: number) => (
-                <div
-                  key={index}
-                  className='text-xs flex justify-between items-center'
+            {chartDataPoint.transactions.map((transaction: any, index: number) => (
+              <div
+                key={index}
+                className='text-xs flex justify-between items-center'
+              >
+                <span className='text-zinc-300 truncate mr-2'>{transaction.label}</span>
+                <span
+                  className={`font-medium ${
+                    transaction.value > 0 ? 'text-green-400' : 'text-red-400'
+                  }`}
                 >
-                  <span className='text-zinc-300 truncate mr-2'>
-                    {transaction.label}
-                  </span>
-                  <span
-                    className={`font-medium ${
-                      transaction.value > 0 ? 'text-green-400' : 'text-red-400'
-                    }`}
-                  >
-                    {formatCurrency(transaction.value)}
-                  </span>
-                </div>
-              )
-            )}
+                  {formatCurrency(transaction.value)}
+                </span>
+              </div>
+            ))}
           </div>
         </>
       )}

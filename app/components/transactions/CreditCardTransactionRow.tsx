@@ -1,22 +1,18 @@
 import { memo } from 'react'
 import type { Transaction } from '~/domain/transactions/entities/Transaction'
+import { useCategoryUpdate } from '~/hooks/useCategoryUpdate'
+import { CategoryDropdown } from './CategoryDropdown'
 
 interface CreditCardTransactionRowProps {
   transaction: Transaction
-  isUpdating: boolean
-  getOptimisticCategory: (transaction: Transaction) => {
-    categoryName: string | null
-  }
-  onCategoryCellClick: (event: React.MouseEvent, transactionId: string) => void
 }
 
 export const CreditCardTransactionRow = memo(function CreditCardTransactionRow({
   transaction,
-  isUpdating,
-  getOptimisticCategory,
-  onCategoryCellClick,
 }: CreditCardTransactionRowProps) {
-  const { categoryName } = getOptimisticCategory(transaction)
+  const { updateTransactionCategory, getOptimisticCategory, isUpdating } = useCategoryUpdate()
+  const { categoryId } = getOptimisticCategory(transaction)
+
   const isInstallment =
     transaction.creditCardMetadata?.totalInstallments &&
     transaction.creditCardMetadata?.installmentNumber
@@ -68,33 +64,24 @@ export const CreditCardTransactionRow = memo(function CreditCardTransactionRow({
         {transaction.creditCardMetadata?.purchaseDateFormatted}
       </td>
 
-      <td className='px-4 py-1  text-sm text-zinc-100'>
-        {transaction.description}
-      </td>
+      <td className='px-4 py-1  text-sm text-zinc-100'>{transaction.description}</td>
 
       <td className='px-4 py-1 text-sm text-zinc-100'>
         {transaction.merchant?.name}
-        {transaction.merchant?.name && transaction.merchant?.businessName && (
-          <br />
-        )}
+        {transaction.merchant?.name && transaction.merchant?.businessName && ' | '}
         {transaction.merchant?.businessName}
       </td>
 
-      <td className='px-2 py-0  text-sm text-zinc-100'>
-        <div
-          className='px-2 py-1 cursor-pointer hover:bg-zinc-700/50 rounded text-zinc-100'
-          onClick={(e) => onCategoryCellClick(e, transaction.id)}
-        >
-          {categoryName}
-        </div>
+      <td className='text-sm'>
+        <CategoryDropdown
+          transactionId={transaction.id}
+          categoryId={categoryId ?? transaction.categoryId}
+          onCategorySelect={updateTransactionCategory}
+        />
       </td>
 
       <td className='px-4 py-1  text-sm text-end'>
-        <div
-          className={` ${
-            transaction.type === 'CREDIT' ? 'text-green-400' : 'text-red-400'
-          }`}
-        >
+        <div className={` ${transaction.type === 'CREDIT' ? 'text-green-400' : 'text-red-400'}`}>
           {transaction.amountFormatted}
         </div>
       </td>

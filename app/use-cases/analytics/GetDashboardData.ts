@@ -1,8 +1,5 @@
 import { PrismaClient } from '@prisma-app/client'
-import type {
-  CategoryId,
-  CategoryName,
-} from '~/domain/transactions/entities/Categories'
+import type { CategoryId, CategoryName } from '~/domain/transactions/entities/Categories'
 import { formatCurrency } from '../../utils/formatCurrency'
 
 export interface DashboardData {
@@ -43,16 +40,11 @@ export class GetDashboardData {
         .filter((account) => account.type !== 'CREDIT')
         .reduce((sum, account) => sum + account.balance, 0)
 
-      const investmentBalance = investments.reduce(
-        (sum, investment) => sum + investment.balance,
-        0
-      )
+      const investmentBalance = investments.reduce((sum, investment) => sum + investment.balance, 0)
 
       const totalBalance = bankBalance + investmentBalance
 
-      const balanceEvolutionResult = await this.generateBalanceEvolution(
-        accounts
-      )
+      const balanceEvolutionResult = await this.generateBalanceEvolution(accounts)
       const spendingByCategory = this.generateSpendingByCategory(transactions)
 
       return {
@@ -95,7 +87,7 @@ export class GetDashboardData {
   private async loadTransactions() {
     const upperDate = new Date()
     upperDate.setMonth(upperDate.getMonth() + 1)
-    upperDate.setDate(upperDate.getDate() + 1)
+    upperDate.setDate(1)
     const lowerDate = new Date(upperDate)
     lowerDate.setMonth(lowerDate.getMonth() - 7)
     lowerDate.setDate(1)
@@ -176,32 +168,20 @@ export class GetDashboardData {
     const data = []
 
     const bankAccounts = accounts.filter((account) => account.type === 'BANK')
-    let currentBalance = bankAccounts.reduce(
-      (sum, account) => sum + account.balance,
-      0
-    )
+    let currentBalance = bankAccounts.reduce((sum, account) => sum + account.balance, 0)
 
-    const movingAverageProjections =
-      await this.prisma.movingAverageProjections.findMany()
+    const movingAverageProjections = await this.prisma.movingAverageProjections.findMany()
 
     const totalMonthlySpending =
-      movingAverageProjections
-        .find((p) => p.category === 'Spending')
-        ?.value?.toNumber() || 0
+      movingAverageProjections.find((p) => p.category === 'Spending')?.value?.toNumber() || 0
 
     const totalMonthlyIncome =
-      movingAverageProjections
-        .find((p) => p.category === 'Income')
-        ?.value?.toNumber() || 0
+      movingAverageProjections.find((p) => p.category === 'Income')?.value?.toNumber() || 0
 
     const monthlyProjectedSavings = totalMonthlyIncome - totalMonthlySpending
 
     for (let i = 1; i <= 24; i++) {
-      const futureDate = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth() + i,
-        1
-      )
+      const futureDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + i, 1)
       const monthName = futureDate.toLocaleDateString('pt-BR', {
         month: '2-digit',
         year: '2-digit',
@@ -228,8 +208,7 @@ export class GetDashboardData {
   private generateSpendingByCategory(
     transactions: Awaited<ReturnType<typeof this.loadTransactions>>
   ): DashboardData['spendingByCategory'] {
-    const data: Map<string, DashboardData['spendingByCategory'][number]> =
-      new Map()
+    const data: Map<string, DashboardData['spendingByCategory'][number]> = new Map()
 
     transactions.forEach((transaction) => {
       const { date, categoryId, amount, account, type } = transaction
@@ -248,11 +227,7 @@ export class GetDashboardData {
       }
       const monthData = data.get(monthKey)!
 
-      if (
-        account.type === 'BANK' &&
-        type === 'CREDIT' &&
-        categoryId === '01010000'
-      ) {
+      if (account.type === 'BANK' && type === 'CREDIT' && categoryId === '01010000') {
         monthData.salary += normalizedAmount
         return
       }

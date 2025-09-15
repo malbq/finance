@@ -5,8 +5,6 @@ import { formatTime } from '~/utils/formatTime'
 import type { CategoryId, CategoryName } from '../entities/Categories'
 import type { Transaction } from '../entities/Transaction'
 
-const TODAY = new Date()
-
 export class TransactionService {
   constructor(private prisma: PrismaClient) {}
 
@@ -82,16 +80,10 @@ export class TransactionService {
       date: transactionData.date,
       dateFormatted: formatDate(transactionData.date),
       timeFormatted: formatTime(transactionData.date),
-      futurePayment: transactionData.date > TODAY,
-      category: (transactionData.category ?? undefined) as
-        | CategoryName
-        | undefined,
-      categoryId: (transactionData.categoryId ?? undefined) as
-        | CategoryId
-        | undefined,
-      balance: transactionData.balance
-        ? Number(transactionData.balance)
-        : undefined,
+      futurePayment: transactionData.date > new Date(),
+      category: (transactionData.category ?? undefined) as CategoryName | undefined,
+      categoryId: (transactionData.categoryId ?? undefined) as CategoryId | undefined,
+      balance: transactionData.balance ? Number(transactionData.balance) : undefined,
       status: transactionData.status,
       type: transactionData.type,
       operationType: transactionData.operationType ?? undefined,
@@ -101,50 +93,30 @@ export class TransactionService {
         ? {
             id: transactionData.paymentData.id,
             transactionId: transactionData.paymentData.transactionId,
-            paymentMethod:
-              transactionData.paymentData.paymentMethod ?? undefined,
+            paymentMethod: transactionData.paymentData.paymentMethod ?? undefined,
             payer: transactionData.paymentData.payer
               ? {
                   id: transactionData.paymentData.payer.id,
-                  accountNumber:
-                    transactionData.paymentData.payer.accountNumber ??
-                    undefined,
-                  branchNumber:
-                    transactionData.paymentData.payer.branchNumber ?? undefined,
-                  documentValue:
-                    transactionData.paymentData.payer.documentValue ??
-                    undefined,
+                  accountNumber: transactionData.paymentData.payer.accountNumber ?? undefined,
+                  branchNumber: transactionData.paymentData.payer.branchNumber ?? undefined,
+                  documentValue: transactionData.paymentData.payer.documentValue ?? undefined,
                   name: transactionData.paymentData.payer.name ?? undefined,
-                  routingNumber:
-                    transactionData.paymentData.payer.routingNumber ??
-                    undefined,
+                  routingNumber: transactionData.paymentData.payer.routingNumber ?? undefined,
                   routingNumberISPB:
-                    transactionData.paymentData.payer.routingNumberISPB ??
-                    undefined,
+                    transactionData.paymentData.payer.routingNumberISPB ?? undefined,
                 }
               : undefined,
             receiver: transactionData.paymentData.receiver
               ? {
                   id: transactionData.paymentData.receiver.id,
-                  accountNumber:
-                    transactionData.paymentData.receiver.accountNumber ??
-                    undefined,
-                  branchNumber:
-                    transactionData.paymentData.receiver.branchNumber ??
-                    undefined,
-                  documentType:
-                    transactionData.paymentData.receiver.documentType ??
-                    undefined,
-                  documentValue:
-                    transactionData.paymentData.receiver.documentValue ??
-                    undefined,
+                  accountNumber: transactionData.paymentData.receiver.accountNumber ?? undefined,
+                  branchNumber: transactionData.paymentData.receiver.branchNumber ?? undefined,
+                  documentType: transactionData.paymentData.receiver.documentType ?? undefined,
+                  documentValue: transactionData.paymentData.receiver.documentValue ?? undefined,
                   name: transactionData.paymentData.receiver.name ?? undefined,
-                  routingNumber:
-                    transactionData.paymentData.receiver.routingNumber ??
-                    undefined,
+                  routingNumber: transactionData.paymentData.receiver.routingNumber ?? undefined,
                   routingNumberISPB:
-                    transactionData.paymentData.receiver.routingNumberISPB ??
-                    undefined,
+                    transactionData.paymentData.receiver.routingNumberISPB ?? undefined,
                 }
               : undefined,
           }

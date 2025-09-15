@@ -1,3 +1,4 @@
+import os from 'node:os'
 import { createRequestHandler } from 'react-router'
 // @ts-ignore - build output doesn't have types
 import * as build from './build/server/index.js'
@@ -5,7 +6,7 @@ import * as build from './build/server/index.js'
 const clientBuild = './build/client'
 
 Bun.serve({
-  port: 7777,
+  port: Number(import.meta.env.PORT),
   hostname: '0.0.0.0',
   routes: {
     '/.well-known/appspecific/com.chrome.devtools.json': () =>
@@ -28,6 +29,21 @@ Bun.serve({
   fetch: (request) => createRequestHandler(build, 'development')(request),
 })
 
-console.log('Server started on port 7777')
+const port = Number(import.meta.env.PORT)
+const urls = Object.values(os.networkInterfaces())
+  .flatMap((netifs) => netifs ?? [])
+  .filter((details) => {
+    const family = (details as unknown as { family: string | number }).family
+    const isIPv4 = family === 'IPv4' || family === 4
+    return !details.internal && isIPv4
+  })
+  .map((details) => `${details.address}:${port}`)
 
-export {}
+if (urls.length > 0) {
+  console.log(`Server started on ${urls.join(', ')}`)
+} else {
+  console.log(`Server started on port ${port}`)
+}
+
+export { }
+

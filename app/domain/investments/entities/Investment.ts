@@ -73,8 +73,6 @@ export interface InvestmentTransactionData {
   tradeDate?: Date
   brokerageNumber?: string
   expenses?: string
-  createdAt: Date
-  updatedAt: Date
 }
 
 export interface InvestmentData {

@@ -118,8 +118,6 @@ export class InvestmentService {
         tradeDate: transaction.tradeDate ?? undefined,
         brokerageNumber: transaction.brokerageNumber ?? undefined,
         expenses: transaction.expenses ?? undefined,
-        createdAt: transaction.createdAt,
-        updatedAt: transaction.updatedAt,
       }))
 
     const investmentData: InvestmentData = {

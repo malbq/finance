@@ -1,0 +1,17 @@
+[Unit]
+Description=Finance (Bun)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=mauro
+Group=mauro
+WorkingDirectory=/home/mauro/dev/finance
+Environment=NODE_ENV=production
+EnvironmentFile=/home/mauro/dev/finance/.env
+ExecStart=/home/mauro/.bun/bin/bun server.ts
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

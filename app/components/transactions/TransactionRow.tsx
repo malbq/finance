@@ -1,25 +1,15 @@
 import { memo } from 'react'
-import type { AccountType } from '~/domain/accounts/entities/Account'
 import type { Transaction } from '~/domain/transactions/entities/Transaction'
+import { useCategoryUpdate } from '~/hooks/useCategoryUpdate'
+import { CategoryDropdown } from './CategoryDropdown'
 
 interface TransactionRowProps {
   transaction: Transaction
-  isUpdating: boolean
-  accountType: AccountType
-  getOptimisticCategory: (transaction: Transaction) => {
-    categoryName: string | null
-  }
-  onCategoryCellClick: (event: React.MouseEvent, transactionId: string) => void
 }
 
-export const TransactionRow = memo(function TransactionRow({
-  transaction,
-  isUpdating,
-  accountType,
-  getOptimisticCategory,
-  onCategoryCellClick,
-}: TransactionRowProps) {
-  const { categoryName } = getOptimisticCategory(transaction)
+export const TransactionRow = memo(function TransactionRow({ transaction }: TransactionRowProps) {
+  const { updateTransactionCategory, getOptimisticCategory, isUpdating } = useCategoryUpdate()
+  const { categoryId } = getOptimisticCategory(transaction)
 
   const merchantName =
     transaction.merchant?.name &&
@@ -49,59 +39,48 @@ export const TransactionRow = memo(function TransactionRow({
         {transaction.dateFormatted}
       </td>
 
-      <td className='px-2 py-1 text-sm text-zinc-100'>
-        {transaction.description}
+      <td className='px-2 py-1 text-sm text-zinc-100'>{transaction.description}</td>
+
+      <td className='px-2 py-1 text-xs text-zinc-100'>
+        {transaction.paymentData?.payer?.name ? (
+          <div>
+            {transaction.paymentData.payer.name}
+            {transaction.paymentData.payer.documentValue && (
+              <span className='text-zinc-400'>
+                {' '}
+                ({transaction.paymentData.payer.documentValue})
+              </span>
+            )}
+          </div>
+        ) : (
+          <>
+            {merchantName}
+            {merchantName.length > 0 && transaction.paymentData?.receiver && <br />}
+            {transaction.paymentData?.receiver?.name && (
+              <>
+                {transaction.paymentData.receiver.name}
+                {transaction.paymentData.receiver.documentValue && (
+                  <span className='text-zinc-400'>
+                    {' '}
+                    ({transaction.paymentData.receiver.documentValue})
+                  </span>
+                )}
+              </>
+            )}
+          </>
+        )}
       </td>
 
-      {accountType === 'BANK' && (
-        <td className='px-2 py-1 text-xs text-zinc-100'>
-          {transaction.paymentData?.payer?.name ? (
-            <div>
-              {transaction.paymentData.payer.name}
-              {transaction.paymentData.payer.documentValue && (
-                <span className='text-zinc-400'>
-                  {' '}
-                  ({transaction.paymentData.payer.documentValue})
-                </span>
-              )}
-            </div>
-          ) : (
-            <>
-              {merchantName}
-              {merchantName.length > 0 && transaction.paymentData?.receiver && (
-                <br />
-              )}
-              {transaction.paymentData?.receiver?.name && (
-                <>
-                  {transaction.paymentData.receiver.name}
-                  {transaction.paymentData.receiver.documentValue && (
-                    <span className='text-zinc-400'>
-                      {' '}
-                      ({transaction.paymentData.receiver.documentValue})
-                    </span>
-                  )}
-                </>
-              )}
-            </>
-          )}
-        </td>
-      )}
-
-      <td className='text-sm text-zinc-100'>
-        <div
-          className='px-2 py-1 cursor-pointer hover:bg-zinc-700/50 rounded'
-          onClick={(e) => onCategoryCellClick(e, transaction.id)}
-        >
-          {categoryName || '-'}
-        </div>
+      <td className='text-sm'>
+        <CategoryDropdown
+          transactionId={transaction.id}
+          categoryId={categoryId ?? transaction.categoryId}
+          onCategorySelect={updateTransactionCategory}
+        />
       </td>
 
       <td className='px-2 py-1 text-sm text-end font-medium'>
-        <div
-          className={`${
-            transaction.amount > 0 ? 'text-green-400' : 'text-red-400'
-          }`}
-        >
+        <div className={`${transaction.amount > 0 ? 'text-green-400' : 'text-red-400'}`}>
           {transaction.amountFormatted}
         </div>
       </td>

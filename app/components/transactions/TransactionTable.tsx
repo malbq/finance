@@ -1,8 +1,6 @@
 import type { AccountType } from '~/domain/accounts/entities/Account'
 import type { Transaction } from '../../domain/transactions/entities/Transaction'
-import { useCategoryUpdate } from '../../hooks/useCategoryUpdate'
 import { useTransactionFilters } from '../../hooks/useTransactionFilters'
-import { CategoryDropdown } from './CategoryDropdown'
 import { CreditCardTransactionRow } from './CreditCardTransactionRow'
 import { TransactionFilters } from './TransactionFilters'
 import { TransactionRow } from './TransactionRow'
@@ -12,26 +10,14 @@ interface TransactionTableProps {
   accountType: AccountType
 }
 
-export const TransactionTable = ({
-  transactions,
-  accountType,
-}: TransactionTableProps) => {
+export const TransactionTable = ({ transactions, accountType }: TransactionTableProps) => {
   const { filters, updateFilter, filteredTransactions } = useTransactionFilters(
     transactions,
     accountType
   )
 
-  const {
-    categoryDropdown,
-    dropdownRef,
-    updateTransactionCategory,
-    handleCategoryCellClick,
-    getOptimisticCategory,
-    isUpdating,
-  } = useCategoryUpdate()
-
   return (
-    <>
+    <div>
       <table className='min-w-full'>
         <TransactionFilters
           filters={filters}
@@ -42,29 +28,17 @@ export const TransactionTable = ({
         <tbody className='overflow-y-auto h-[600px]'>
           {filteredTransactions.map((transaction) => {
             const TransactionRowComponent =
-              accountType === 'CREDIT'
-                ? CreditCardTransactionRow
-                : TransactionRow
+              accountType === 'CREDIT' ? CreditCardTransactionRow : TransactionRow
 
             return (
               <TransactionRowComponent
                 key={transaction.id}
                 transaction={transaction}
-                isUpdating={isUpdating}
-                accountType={accountType}
-                getOptimisticCategory={getOptimisticCategory}
-                onCategoryCellClick={handleCategoryCellClick}
               />
             )
           })}
         </tbody>
       </table>
-
-      <CategoryDropdown
-        ref={dropdownRef}
-        categoryDropdown={categoryDropdown}
-        onCategorySelect={updateTransactionCategory}
-      />
-    </>
+    </div>
   )
 }
