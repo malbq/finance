@@ -2,12 +2,12 @@ import { PrismaClient } from '@prisma-app/client'
 import { CategoryService } from '../../domain/transactions/services/CategoryService'
 import { TransactionService } from '../../domain/transactions/services/TransactionService'
 
-export interface UpdateCategoryRequest {
+interface UpdateCategoryRequest {
   transactionId: string
   categoryId: string
 }
 
-export interface UpdateCategoryResponse {
+interface UpdateCategoryResponse {
   success: boolean
   error?: string
 }
@@ -21,10 +21,7 @@ export class UpdateTransactionCategory {
     this.categoryService = new CategoryService(prisma)
   }
 
-  async execute(
-    transactionId: string,
-    categoryId: string
-  ): Promise<UpdateCategoryResponse> {
+  async execute(transactionId: string, categoryId: string): Promise<UpdateCategoryResponse> {
     try {
       if (!transactionId || !categoryId) {
         return {
@@ -66,15 +63,10 @@ export class UpdateTransactionCategory {
         },
       })
 
-      console.info(
-        `Successfully updated transaction ${transactionId} with category ${categoryId}`
-      )
+      console.info(`Successfully updated transaction ${transactionId} with category ${categoryId}`)
       return { success: true }
     } catch (error) {
-      console.error(
-        `Error updating transaction category for transaction ${transactionId}:`,
-        error
-      )
+      console.error(`Error updating transaction category for transaction ${transactionId}:`, error)
       if (error instanceof Error) {
         console.error('Update category error details:', {
           transactionId,
@@ -90,16 +82,11 @@ export class UpdateTransactionCategory {
     }
   }
 
-  async executeBatch(
-    requests: UpdateCategoryRequest[]
-  ): Promise<UpdateCategoryResponse[]> {
+  async executeBatch(requests: UpdateCategoryRequest[]): Promise<UpdateCategoryResponse[]> {
     const results: UpdateCategoryResponse[] = []
 
     for (const request of requests) {
-      const result = await this.execute(
-        request.transactionId,
-        request.categoryId
-      )
+      const result = await this.execute(request.transactionId, request.categoryId)
       results.push(result)
     }
 

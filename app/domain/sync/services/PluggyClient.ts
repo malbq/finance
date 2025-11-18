@@ -1,17 +1,13 @@
-export interface PluggyAuthResponse {
+interface PluggyAuthResponse {
   apiKey: string
 }
 
-export interface PluggyApiResponse<T> {
+interface PluggyApiResponse<T> {
   results: T[]
 }
 
 export class PluggyApiError extends Error {
-  constructor(
-    message: string,
-    public statusCode?: number,
-    public endpoint?: string
-  ) {
+  constructor(message: string, public statusCode?: number, public endpoint?: string) {
     super(message)
     this.name = 'PluggyApiError'
   }
@@ -53,9 +49,7 @@ export const PluggyClient = {
         throw error
       }
       throw new PluggyApiError(
-        `Authentication request failed: ${
-          error instanceof Error ? error.message : 'Unknown error'
-        }`
+        `Authentication request failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
     }
   },

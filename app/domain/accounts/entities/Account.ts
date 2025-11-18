@@ -1,9 +1,6 @@
 export type AccountType = 'BANK' | 'CREDIT'
 
-export type AccountSubtype =
-  | 'CHECKING_ACCOUNT'
-  | 'SAVINGS_ACCOUNT'
-  | 'CREDIT_CARD'
+type AccountSubtype = 'CHECKING_ACCOUNT' | 'SAVINGS_ACCOUNT' | 'CREDIT_CARD'
 
 export interface Account {
   id: string
@@ -16,7 +13,7 @@ export interface Account {
   creditData?: CreditDataInfo
 }
 
-export interface CreditDataInfo {
+interface CreditDataInfo {
   level: string
   brand: string
   balanceDueDate: Date

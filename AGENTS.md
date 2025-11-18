@@ -1,9 +1,3 @@
----
-description:
-globs:
-alwaysApply: true
----
-
 This project uses bun as dev runtime.
 Always use `bun` and `bunx` instead of `node`, `npm` and `npx.
 This project is built with React v19 and React Router v7 in framework mode.

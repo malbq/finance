@@ -4,11 +4,11 @@ import { AccountService } from '~/domain/accounts/services/AccountService'
 import type { Transaction } from '~/domain/transactions/entities/Transaction'
 import { TransactionService } from '../../domain/transactions/services/TransactionService'
 
-export type AccountWithTransactions = Account & {
+type AccountWithTransactions = Account & {
   transactions: Transaction[]
 }
 
-export interface TransactionsData {
+interface TransactionsData {
   accounts: Array<AccountWithTransactions>
 }
 
@@ -28,19 +28,14 @@ export class GetTransactionsData {
       const accountsWithTransactions = await Promise.all(
         accounts.map<Promise<AccountWithTransactions>>(async (account) => {
           try {
-            const transactions = await this.transactionService.findByAccountId(
-              account.id
-            )
+            const transactions = await this.transactionService.findByAccountId(account.id)
             const accountWithTx: AccountWithTransactions = {
               ...account,
               transactions,
             }
             return accountWithTx
           } catch (transactionError) {
-            console.error(
-              `Error loading transactions for account ${account.id}:`,
-              transactionError
-            )
+            console.error(`Error loading transactions for account ${account.id}:`, transactionError)
             return {
               ...account,
               transactions: [],

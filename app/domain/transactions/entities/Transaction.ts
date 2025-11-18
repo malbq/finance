@@ -1,10 +1,10 @@
 import type { CategoryId, CategoryName } from './Categories'
 
-export type TransactionType = 'CREDIT' | 'DEBIT'
+type TransactionType = 'CREDIT' | 'DEBIT'
 
-export type TransactionStatus = 'POSTED' | 'PENDING'
+type TransactionStatus = 'POSTED' | 'PENDING'
 
-export interface PaymentParticipantData {
+interface PaymentParticipantData {
   id: string
   accountNumber?: string
   branchNumber?: string
@@ -15,7 +15,7 @@ export interface PaymentParticipantData {
   routingNumberISPB?: string
 }
 
-export interface PaymentData {
+interface PaymentData {
   id: string
   transactionId: string
   paymentMethod?: string
@@ -23,7 +23,7 @@ export interface PaymentData {
   receiver?: PaymentParticipantData
 }
 
-export interface CreditCardMetadata {
+interface CreditCardMetadata {
   id: string
   transactionId: string
   cardNumber?: string
@@ -34,7 +34,7 @@ export interface CreditCardMetadata {
   installmentNumber?: number
 }
 
-export interface MerchantData {
+interface MerchantData {
   id: string
   transactionId: string
   cnae?: string

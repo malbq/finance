@@ -21,8 +21,8 @@ export default function Dashboard() {
   } = useLoaderData<typeof loader>()
 
   return (
-    <div className='grid grid-cols-2 gap-4'>
-      <div className='col-span-2'>
+    <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+      <div className='lg:col-span-2'>
         <BalanceEvolutionChart
           data={balanceEvolution}
           totalBalance={totalBalanceFormatted}

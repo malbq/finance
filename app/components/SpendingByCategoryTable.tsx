@@ -1,7 +1,4 @@
-import {
-  CATEGORY_MAP,
-  type CategoryId,
-} from '~/domain/transactions/entities/Categories'
+import { CATEGORY_MAP, type CategoryId } from '~/domain/transactions/entities/Categories'
 import type { DashboardData } from '~/use-cases/analytics/GetDashboardData'
 import { formatCurrency } from '~/utils/formatCurrency'
 
@@ -22,10 +19,13 @@ export const SpendingByCategoryTable = ({ data }: SpendingByCategoryProps) => {
       }
     })
   })
-  const categories = Array.from(allKeys).sort((a, b) =>
-    CATEGORY_MAP[a].localeCompare(CATEGORY_MAP[b])
-  )
   const months = data.map((item) => item.month)
+  const lastMonth = months[months.length - 1]
+  const categories = Array.from(allKeys).sort((a, b) => {
+    const aValue = data.find((item) => item.month === lastMonth)?.[a] || 0
+    const bValue = data.find((item) => item.month === lastMonth)?.[b] || 0
+    return bValue - aValue
+  })
 
   if (categories.length === 0) {
     return <div>Nenhuma categoria de despesas encontrada</div>
@@ -38,16 +38,12 @@ export const SpendingByCategoryTable = ({ data }: SpendingByCategoryProps) => {
 
   return (
     <div className='bg-zinc-800 rounded-lg p-4'>
-      <h2 className='text-xl font-semibold text-white mb-4'>
-        Despesas por Categoria
-      </h2>
+      <h2 className='text-xl font-semibold text-white mb-4'>Despesas por Categoria</h2>
       <div className='overflow-x-auto'>
         <table className='w-full border-collapse'>
           <thead>
             <tr className='border-b border-zinc-700'>
-              <th className='text-left px-2 py-1 text-xs font-medium text-zinc-300'>
-                Categoria
-              </th>
+              <th className='text-left px-2 py-1 text-xs font-medium text-zinc-300'>Categoria</th>
               {months.map((month) => (
                 <th
                   key={month}
@@ -58,9 +54,7 @@ export const SpendingByCategoryTable = ({ data }: SpendingByCategoryProps) => {
               ))}
             </tr>
             <tr className='border-b border-zinc-600 hover:bg-zinc-700/50'>
-              <th className='text-left px-2 py-1 text-xs font-bold text-zinc-200'>
-                Total
-              </th>
+              <th className='text-left px-2 py-1 text-xs font-bold text-zinc-200'>Total</th>
               {months.map((month) => (
                 <th
                   key={month}

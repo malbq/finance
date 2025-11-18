@@ -5,7 +5,7 @@ import { InvestmentSyncService } from './InvestmentSyncService'
 import { PluggyApiError, PluggyClient } from './PluggyClient'
 import { TransactionSyncService } from './TransactionSyncService'
 
-export interface SyncResult {
+interface SyncResult {
   success: boolean
   message: string
   details: {
@@ -36,14 +36,8 @@ export class SyncOrchestrator {
       console.log('Authentication successful')
 
       const accountSyncService = new AccountSyncService(this.prisma, apiKey)
-      const transactionSyncService = new TransactionSyncService(
-        this.prisma,
-        apiKey
-      )
-      const investmentSyncService = new InvestmentSyncService(
-        this.prisma,
-        apiKey
-      )
+      const transactionSyncService = new TransactionSyncService(this.prisma, apiKey)
+      const investmentSyncService = new InvestmentSyncService(this.prisma, apiKey)
       const categorySyncService = new CategorySyncService(this.prisma, apiKey)
 
       console.log('Syncing accounts...')
@@ -87,9 +81,7 @@ export class SyncOrchestrator {
 
       const success = errors.length === 0
       console.log(
-        success
-          ? 'Data synchronized successfully!'
-          : 'Data synchronized with some errors'
+        success ? 'Data synchronized successfully!' : 'Data synchronized with some errors'
       )
 
       return {
@@ -167,10 +159,7 @@ export class SyncOrchestrator {
     try {
       const apiKey = await PluggyClient.authenticate()
       const accountSyncService = new AccountSyncService(this.prisma, apiKey)
-      const transactionSyncService = new TransactionSyncService(
-        this.prisma,
-        apiKey
-      )
+      const transactionSyncService = new TransactionSyncService(this.prisma, apiKey)
 
       const accounts = await accountSyncService.syncAccounts()
       await transactionSyncService.syncTransactions(accounts)
@@ -207,10 +196,7 @@ export class SyncOrchestrator {
   async executeInvestments(): Promise<SyncResult> {
     try {
       const apiKey = await PluggyClient.authenticate()
-      const investmentSyncService = new InvestmentSyncService(
-        this.prisma,
-        apiKey
-      )
+      const investmentSyncService = new InvestmentSyncService(this.prisma, apiKey)
 
       const investments = await investmentSyncService.syncInvestments()
       await investmentSyncService.syncInvestmentTransactions(investments)
@@ -262,9 +248,7 @@ export class SyncOrchestrator {
 
   private getErrorMessage(error: unknown): string {
     if (error instanceof PluggyApiError) {
-      return `Pluggy API Error: ${error.message}${
-        error.endpoint ? ` (${error.endpoint})` : ''
-      }`
+      return `Pluggy API Error: ${error.message}${error.endpoint ? ` (${error.endpoint})` : ''}`
     }
 
     if (error instanceof Error) {
