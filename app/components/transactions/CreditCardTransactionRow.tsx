@@ -1,6 +1,6 @@
 import { memo } from 'react'
-import type { Transaction } from '~/domain/transactions/entities/Transaction'
-import { useCategoryUpdate } from '~/hooks/useCategoryUpdate'
+import type { Transaction } from '../../../domain/Transaction'
+import { useCategoryUpdate } from '../../hooks/useCategoryUpdate'
 import { CategoryDropdown } from './CategoryDropdown'
 
 interface CreditCardTransactionRowProps {

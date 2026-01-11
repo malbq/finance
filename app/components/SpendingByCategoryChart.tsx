@@ -8,9 +8,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { CATEGORY_MAP, type CategoryId } from '~/domain/transactions/entities/Categories'
-import type { DashboardData } from '~/use-cases/analytics/GetDashboardData'
-import { formatCurrency } from '~/utils/formatCurrency'
+import type { DashboardData } from '../../api/lib/getDashboardData'
+import { CATEGORY_MAP, type CategoryId } from '../../domain/Categories'
+import { formatCurrency } from '../../utils/formatCurrency'
 import { ChartTooltip } from './chart/ChartTooltip'
 
 interface SpendingChartProps {
@@ -43,10 +43,11 @@ export const SpendingByCategoryChart = ({ data }: SpendingChartProps) => {
     })
   })
 
+  const monthToSortBy = data.at(-1)
+
   const categories = Array.from(allKeys).sort((catA, catB) => {
-    const lastMonth = data[data.length - 2]
-    const catAValue = lastMonth[catA] || 0
-    const catBValue = lastMonth[catB] || 0
+    const catAValue = monthToSortBy?.[catA] || 0
+    const catBValue = monthToSortBy?.[catB] || 0
     return catBValue - catAValue
   })
 

@@ -1,6 +1,6 @@
-import { CATEGORY_MAP, type CategoryId } from '~/domain/transactions/entities/Categories'
-import type { DashboardData } from '~/use-cases/analytics/GetDashboardData'
-import { formatCurrency } from '~/utils/formatCurrency'
+import type { DashboardData } from '../../api/lib/getDashboardData'
+import { CATEGORY_MAP, type CategoryId } from '../../domain/Categories'
+import { formatCurrency } from '../../utils/formatCurrency'
 
 interface SpendingByCategoryProps {
   data: DashboardData['spendingByCategory']

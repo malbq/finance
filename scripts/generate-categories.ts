@@ -1,31 +1,17 @@
-import { PrismaClient } from '@prisma-app/client'
 import { writeFileSync } from 'fs'
 import { join } from 'path'
+import { createDatabase } from '../api/db/drizzle'
+import { categories, type Category } from '../api/db/schema'
 
-const prisma = new PrismaClient()
+const db = createDatabase()
 
 try {
-  // Fetch all categories from the database
-  const categories = await prisma.category.findMany({
-    select: {
-      id: true,
-      descriptionTranslated: true,
-    },
-  })
+  const categoryResults = (await db.select().from(categories as any)) as Category[]
 
-  type CategoryData = { id: string; descriptionTranslated: string }
+  const categoryIds = categoryResults.map((cat) => `'${cat.id}'`).join(' | ')
 
-  // Generate union type from category IDs
-  const categoryIds = categories
-    .map((cat: CategoryData) => `'${cat.id}'`)
-    .join(' | ')
+  const categoryNames = categoryResults.map((cat) => `'${cat.descriptionTranslated}'`).join(' | ')
 
-  // Generate union type from translated descriptions
-  const categoryNames = categories
-    .map((cat: CategoryData) => `'${cat.descriptionTranslated}'`)
-    .join(' | ')
-
-  // Create the TypeScript content
   const content = `// This file is auto-generated. Do not edit manually.
 // Run: bun run generate:categories
 
@@ -42,25 +28,15 @@ export type CategoryId = ${categoryIds || "'unknown'"}
 export type CategoryName = ${categoryNames || "'Outros'"}
 
 export const CATEGORY_MAP: Record<CategoryId, CategoryName> = {
-${categories
-  .map((cat: CategoryData) => `  '${cat.id}': '${cat.descriptionTranslated}'`)
-  .join(',\n')}
+${categoryResults.map((cat) => `  '${cat.id}': '${cat.descriptionTranslated}'`).join(',\n')}
 } as const
 `
 
-  // Write to Categories.ts
-  const filePath = join(
-    process.cwd(),
-    'app/domain/transactions/entities/Categories.ts'
-  )
+  const filePath = join(process.cwd(), 'app/domain/transactions/entities/Categories.ts')
   writeFileSync(filePath, content, 'utf8')
 
-  console.log(
-    `✅ Generated ${categories.length} category types in Categories.ts`
-  )
+  console.log(`✅ Generated ${categoryResults.length} category types in Categories.ts`)
 } catch (error) {
   console.error('❌ Error generating categories:', error)
   process.exit(1)
-} finally {
-  await prisma.$disconnect()
 }

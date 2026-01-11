@@ -1,49 +1,33 @@
-import { useState } from 'react'
-import { NavLink, useRevalidator } from 'react-router'
+import { Link } from '@tanstack/react-router'
+import { useSyncMutation } from '../hooks/useSyncMutation'
 import { Toast, toast } from './toast'
 
 interface LayoutProps {
   children: React.ReactNode
 }
 
-interface Link {
+interface NavLink {
   to: string
   label: string
 }
-const links: Link[] = [
+const links: NavLink[] = [
   { to: '/', label: 'Home' },
   { to: '/transactions', label: 'Transactions' },
-  { to: '/investments', label: 'Investments' },
-  { to: '/cashflow', label: 'Cash Flow' },
 ]
 
 export function Layout({ children }: LayoutProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const revalidator = useRevalidator()
+  const syncMutation = useSyncMutation()
 
   const handleSync = async () => {
-    setIsLoading(true)
-
     try {
-      const response = await fetch('/api/sync', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        toast.success(data.message)
-        revalidator.revalidate()
+      const result = await syncMutation.mutateAsync()
+      if (result.success) {
+        toast.success(result.message)
       } else {
-        toast.error(data.error || 'Sync failed')
+        toast.error(result.error || 'Sync failed')
       }
-    } catch {
-      toast.error('Network error occurred during sync')
-    } finally {
-      setIsLoading(false)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Network error occurred during sync')
     }
   }
 
@@ -52,26 +36,24 @@ export function Layout({ children }: LayoutProps) {
       <header className='bg-neutral-900 px-4 flex justify-between items-center'>
         <nav className='flex space-x-1'>
           {links.map((link) => (
-            <NavLink
+            <Link
               key={link.to}
               to={link.to}
-              className={({ isActive }) =>
-                `px-6 py-2 text-sm font-medium transition-colors ${
-                  isActive ? 'bg-neutral-800' : 'hover:bg-neutral-800/50'
-                }`
-              }
+              activeProps={{ className: 'bg-neutral-800' }}
+              inactiveProps={{ className: 'hover:bg-neutral-800/50' }}
+              className='px-6 py-2 text-sm font-medium transition-colors'
             >
               {link.label}
-            </NavLink>
+            </Link>
           ))}
         </nav>
 
         <button
           onClick={handleSync}
-          disabled={isLoading}
+          disabled={syncMutation.isPending}
           className='bg-blue-900/50 hover:bg-blue-900 disabled:bg-slate-800 px-2 py-1 rounded text-sm font-medium transition-colors flex items-center space-x-2'
         >
-          {isLoading ? (
+          {syncMutation.isPending ? (
             <>
               <svg
                 className='w-4 h-4 animate-spin'

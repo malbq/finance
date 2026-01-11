@@ -1,103 +1,61 @@
+import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
-import { useLoaderData, type ActionFunctionArgs } from 'react-router'
-import { prisma } from '~/lib/db.server'
-import { GetTransactionsData } from '~/use-cases/transactions/GetTransactionsData'
-import { UpdateTransactionCategory } from '~/use-cases/transactions/UpdateTransactionCategory'
-import { formatCurrency } from '~/utils/formatCurrency'
+import type { Account } from '../../domain/Account'
+import type { Transaction } from '../../domain/Transaction'
+import { formatCurrency } from '../../utils/formatCurrency'
 import { AccountCard } from '../components/AccountCard'
 import { EmptyState } from '../components/EmptyState'
 import { TransactionTable } from '../components/transactions/TransactionTable'
+import { useTransactionsData } from '../hooks/useTransactionsData'
 
-export async function action({ request }: ActionFunctionArgs) {
-  if (request.method !== 'POST') {
-    return Response.json(
-      { success: false, error: 'Method not allowed' },
-      { status: 405 }
-    )
-  }
-
-  try {
-    const formData = await request.formData()
-    const transactionId = formData.get('transactionId') as string
-    const categoryId = formData.get('categoryId') as string
-
-    if (!transactionId || !categoryId) {
-      return Response.json(
-        { success: false, error: 'Invalid parameters' },
-        { status: 400 }
-      )
-    }
-
-    const updateTransactionCategory = new UpdateTransactionCategory(prisma)
-    const result = await updateTransactionCategory.execute(
-      transactionId,
-      categoryId
-    )
-
-    if (result.success) {
-      return Response.json({ success: true })
-    } else {
-      return Response.json(
-        { success: false, error: result.error },
-        { status: 500 }
-      )
-    }
-  } catch (error) {
-    console.error('Error updating transaction category:', error)
-    return Response.json(
-      { success: false, error: 'Failed to update category' },
-      { status: 500 }
-    )
-  }
+type AccountWithTransactions = Account & {
+  transactions: Transaction[]
 }
 
-const getTransactionsData = new GetTransactionsData(prisma)
+export const Route = createFileRoute('/transactions')({
+  component: Transactions,
+})
 
-export async function loader() {
-  try {
-    return await getTransactionsData.execute()
-  } catch (error) {
-    console.error('Error loading transactions:', error)
-    return {
-      accounts: [],
+function Transactions() {
+  const { data, isLoading, error } = useTransactionsData()
+  const accounts = data?.accounts || []
+  const [activeTab, setActiveTab] = useState<string>('')
+
+  const effectiveActiveTab = useMemo(() => {
+    if (activeTab && accounts.some((acc) => acc.id === activeTab)) {
+      return activeTab
     }
-  }
-}
-
-export default function Transactions() {
-  const { accounts = [] } = useLoaderData<typeof loader>()
-  const [activeTab, setActiveTab] = useState<string>(accounts[0]?.id || '')
+    return accounts[0]?.id || ''
+  }, [accounts, activeTab])
 
   const formattedAccounts = useMemo(() => {
-    return accounts.map((account: any) => ({
+    return accounts.map((account: AccountWithTransactions) => ({
       ...account,
       balanceFormatted: formatCurrency(account.balance),
-      bankData: account.bankData
-        ? {
-            ...account.bankData,
-            closingBalanceFormatted: account.bankData.closingBalance
-              ? formatCurrency(account.bankData.closingBalance)
-              : null,
-          }
-        : null,
       creditData: account.creditData
         ? {
             ...account.creditData,
-            availableCreditLimitFormatted: account.creditData
-              .availableCreditLimit
-              ? formatCurrency(account.creditData.availableCreditLimit)
-              : null,
-            creditLimitFormatted: account.creditData.creditLimit
-              ? formatCurrency(account.creditData.creditLimit)
-              : null,
+            availableCreditLimitFormatted: formatCurrency(account.creditData.availableCreditLimit),
+            creditLimitFormatted: formatCurrency(account.creditData.creditLimit),
           }
-        : null,
+        : undefined,
     }))
   }, [accounts])
 
-  const activeAccount = formattedAccounts.find(
-    (account) => account.id === activeTab
-  )
+  const activeAccount = useMemo(() => {
+    if (formattedAccounts.length === 0) return undefined
+    return formattedAccounts.find(
+      (account: AccountWithTransactions) => account.id === effectiveActiveTab
+    )
+  }, [formattedAccounts, effectiveActiveTab])
+
+  if (isLoading) {
+    return <div className='text-zinc-300'>Loading...</div>
+  }
+
+  if (error) {
+    return <div className='text-red-400'>Error loading transactions</div>
+  }
 
   if (accounts.length === 0) {
     return (
@@ -113,11 +71,11 @@ export default function Transactions() {
   return (
     <div className='flex flex-col gap-4 pb-48'>
       <div className='grid gap-4 grid-cols-6'>
-        {formattedAccounts.map((account) => (
+        {formattedAccounts.map((account: AccountWithTransactions) => (
           <AccountCard
             key={account.id}
             account={account}
-            isActive={activeTab === account.id}
+            isActive={effectiveActiveTab === account.id}
             onClick={() => setActiveTab(account.id)}
           />
         ))}

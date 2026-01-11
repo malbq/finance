@@ -5,7 +5,7 @@ import {
   excludedCategories,
   sortedCategories,
   type CategoryId,
-} from '../../domain/transactions/entities/Categories'
+} from '../../../domain/Categories'
 
 interface CategoryDropdownProps {
   transactionId: string
@@ -44,7 +44,9 @@ export const CategoryDropdown = ({
       onClose={() => setQuery('')}
     >
       <ComboboxInput
-        className={`px-2 py-1 cursor-pointer hover:bg-zinc-700/50 rounded ${categoryId && excludedCategories.includes(categoryId) ? 'italic text-zinc-500' : ''}`}
+        className={`px-2 py-1 cursor-pointer hover:bg-zinc-700/50 rounded ${
+          categoryId && excludedCategories.includes(categoryId) ? 'italic text-zinc-500' : ''
+        }`}
         displayValue={(categoryId?: CategoryId) => (categoryId ? CATEGORY_MAP[categoryId] : '')}
         onChange={(event) => setQuery(event.target.value)}
         onFocus={(e: React.FocusEvent<HTMLInputElement>) => e.target.select()}

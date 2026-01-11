@@ -1,5 +1,5 @@
-import type { AccountType } from '~/domain/accounts/entities/Account'
-import type { TransactionFilters as TFilters } from '~/hooks/useTransactionFilters'
+import type { AccountType } from '../../../domain/Account'
+import type { TransactionFilters as TFilters } from '../../hooks/useTransactionFilters'
 
 interface TransactionFiltersProps {
   filters: TFilters
@@ -71,9 +71,7 @@ export const TransactionFilters = ({
           />
         </th>
 
-        <th className='w-[1px] px-2 py-1 text-xs font-medium text-zinc-400'>
-          VALOR
-        </th>
+        <th className='w-[1px] px-2 py-1 text-xs font-medium text-zinc-400'>VALOR</th>
       </tr>
     </thead>
   )

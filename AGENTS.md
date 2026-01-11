@@ -1,6 +1,6 @@
-This project uses bun as dev runtime.
-Always use `bun` and `bunx` instead of `node`, `npm` and `npx.
-This project is built with React v19 and React Router v7 in framework mode.
-Prisma is used to interface with a sqlite database in `.db/finance.db`.
-All style must be dark themed.
-Always assume the dev server is running.
+# Project Rules
+- Runtime: use Bun; commands like `bun test`, `bunx drizzle-kit`.
+- Frontend: React v19.
+- Database: Drizzle + SQLite at `./db/finance.db`.
+- UI: dark theme only.
+- Types: never use `any` to fix type errors.

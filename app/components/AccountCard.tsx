@@ -1,4 +1,4 @@
-import type { Account } from '~/domain/accounts/entities/Account'
+import type { Account } from '../../domain/Account'
 
 interface AccountCardProps {
   account: Account
@@ -27,9 +27,7 @@ export function AccountCard({ account, isActive, onClick }: AccountCardProps) {
         <span className='truncate text-sm mb-2'>{account.name}</span>
         <span
           className={`px-1.5 py-0.5 text-xs rounded-full ${
-            account.type === 'BANK'
-              ? 'bg-blue-900 text-blue-300'
-              : 'bg-purple-800 text-purple-200'
+            account.type === 'BANK' ? 'bg-blue-900 text-blue-300' : 'bg-purple-800 text-purple-200'
           }`}
         >
           {account.type === 'BANK' ? 'Banco' : 'Cartão'}

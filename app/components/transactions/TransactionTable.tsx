@@ -1,5 +1,5 @@
-import type { AccountType } from '~/domain/accounts/entities/Account'
-import type { Transaction } from '../../domain/transactions/entities/Transaction'
+import type { AccountType } from '../../../domain/Account'
+import type { Transaction } from '../../../domain/Transaction'
 import { useTransactionFilters } from '../../hooks/useTransactionFilters'
 import { CreditCardTransactionRow } from './CreditCardTransactionRow'
 import { TransactionFilters } from './TransactionFilters'

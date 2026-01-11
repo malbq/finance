@@ -2,7 +2,7 @@
 
 ## Product Overview
 
-A comprehensive personal finance dashboard that connects bank accounts, credit cards, and investments into a unified view. Users can organize expenses by category, track wealth evolution, and project future financial scenarios based on historical income and expense patterns. Designed for individuals and families who want complete financial control without manual data entry.
+A comprehensive personal finance dashboard that connects bank accounts and credit cards into a unified view. Users can organize expenses by category, track wealth evolution, and visualize spending patterns. Designed for individuals and families who want complete financial control without manual data entry.
 
 ## Core Features
 
@@ -43,24 +43,20 @@ A comprehensive personal finance dashboard that connects bank accounts, credit c
 - As a user, I want to recategorize transactions to improve my expense tracking
 - As a user, I want to see detailed information about credit card purchases and installments
 
-### 3. Cash Flow Projection
+### 3. Cash Flow Visualization
 
-**Objective**: Help users understand and plan their future financial position
+**Objective**: Help users understand their financial flow patterns
 
 **Requirements**:
 
-- Display monthly fixed expenses and income patterns
+- Display monthly expenses and income patterns
 - Provide interactive charts showing income, expenses, and balance evolution
 - Include daily transaction details in interactive tooltips
-- Project future cash flow based on historical patterns
 
 **User Stories**:
 
-- As a user, I want to see my fixed monthly expenses
+- As a user, I want to see my monthly expenses and income
 - As a user, I want to understand my cash flow patterns over time
-- As a user, I want to project my future financial position
-
-### 4. Investment Tracking (Planned)
 
 ## Technical Requirements
 
@@ -80,7 +76,6 @@ A comprehensive personal finance dashboard that connects bank accounts, credit c
 - **Data Sync**: Real-time synchronization of:
   - Bank accounts and credit cards
   - Transaction history and metadata
-  - Investment positions and transactions
   - Category mappings and hierarchies
 
 ### User Experience Requirements
@@ -101,7 +96,6 @@ A comprehensive personal finance dashboard that connects bank accounts, credit c
 
 - **Accounts**: Sync bank accounts and credit cards with complete metadata
 - **Transactions**: Historical data import with payment details, merchant information
-- **Investments**: Position synchronization with transaction history
 - **Categories**: Automatic category mapping with user customization options
 - **Frequency**: Manual sync with option for scheduled updates
 
@@ -409,7 +403,6 @@ income_average AS (
 
 - **Bank Accounts**: Include overdraft limits, automatic investment balances
 - **Credit Cards**: Track utilization, payment due dates, available credit
-- **Investment Accounts**: Portfolio positions with performance metrics
 
 #### Transaction Enrichment
 

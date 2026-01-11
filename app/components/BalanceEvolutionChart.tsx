@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Bar, BarChart, LabelList, ResponsiveContainer, XAxis } from 'recharts'
 import type { Props as LabelProps } from 'recharts/types/component/Label'
-import { formatCurrency } from '~/utils/formatCurrency'
-import { formatKilo } from '~/utils/formatKilo'
+import { formatCurrency } from '../../utils/formatCurrency'
+import { formatKilo } from '../../utils/formatKilo'
 
 const CustomLabel = (props: LabelProps) => {
   const { x, y, width, height, value } = props
@@ -28,10 +28,29 @@ const CustomLabel = (props: LabelProps) => {
   )
 }
 
-const customBarShape = (props: any) => {
-  const { payload, x, y, width, height } = props
+interface BarShapeProps {
+  payload: BalanceEvolutionData
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+}
+
+const customBarShape = (props: unknown) => {
+  if (!props || typeof props !== 'object') {
+    return <rect x={0} y={0} width={0} height={0} fill='transparent' />
+  }
+
+  const typedProps = props as BarShapeProps
+  const { payload, x = 0, y = 0, width = 0, height = 0 } = typedProps
+
+  if (!payload) {
+    return <rect x={0} y={0} width={0} height={0} fill='transparent' />
+  }
+
   const barFill = payload.balance >= 0 ? '#05df72' : '#ef4444'
   const barHeight = Math.abs(height)
+
   return (
     <rect
       x={x}

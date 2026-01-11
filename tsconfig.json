@@ -1,28 +1,23 @@
 {
-  "include": [
-    "server.ts",
-    "**/*",
-    "**/.server/**/*",
-    "**/.client/**/*",
-    ".react-router/types/**/*"
-  ],
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["bun", "node", "vite/client"],
-    "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "allowJs": true,
     "jsx": "react-jsx",
-    "rootDirs": [".", "./.react-router/types"],
-    "baseUrl": ".",
-    "paths": {
-      "~/*": ["./app/*"]
-    },
-    "esModuleInterop": true,
-    "verbatimModuleSyntax": true,
+    "lib": ["ESNext", "DOM"],
+    "module": "Preserve",
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
     "noEmit": true,
-    "resolveJsonModule": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "skipLibCheck": true,
-    "strict": true
-  }
+    "strict": true,
+    "target": "ESNext",
+    "verbatimModuleSyntax": true
+  },
+  "exclude": ["dist", "node_modules"]
 }

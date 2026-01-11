@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
-import type { AccountType } from '~/domain/accounts/entities/Account'
-import { CATEGORY_MAP } from '~/domain/transactions/entities/Categories'
-import type { Transaction } from '~/domain/transactions/entities/Transaction'
+import type { AccountType } from '../../domain/Account'
+import { CATEGORY_MAP } from '../../domain/Categories'
+import type { Transaction } from '../../domain/Transaction'
 
 export interface TransactionFilters {
   date: string
@@ -21,20 +21,12 @@ export const useTransactionFilters = (
     category: '',
   })
 
-  const updateFilter = useCallback(
-    (column: keyof TransactionFilters, value: string) => {
-      setFilters((prev) => ({ ...prev, [column]: value }))
-    },
-    []
-  )
+  const updateFilter = useCallback((column: keyof TransactionFilters, value: string) => {
+    setFilters((prev) => ({ ...prev, [column]: value }))
+  }, [])
 
   const filteredTransactions = useMemo(() => {
-    if (
-      !filters.date &&
-      !filters.description &&
-      !filters.details &&
-      !filters.category
-    ) {
+    if (!filters.date && !filters.description && !filters.details && !filters.category) {
       return transactions
     }
 
@@ -44,13 +36,10 @@ export const useTransactionFilters = (
     const categoryFilter = filters.category.toLowerCase()
 
     return transactions.filter((transaction) => {
-      const dateMatch =
-        !dateFilter ||
-        transaction.dateFormatted.toLowerCase().includes(dateFilter)
+      const dateMatch = !dateFilter || transaction.dateFormatted.toLowerCase().includes(dateFilter)
 
       const descriptionMatch =
-        !descriptionFilter ||
-        transaction.description.toLowerCase().includes(descriptionFilter)
+        !descriptionFilter || transaction.description.toLowerCase().includes(descriptionFilter)
 
       let detailsMatch = true
       if (detailsFilter) {
@@ -69,9 +58,7 @@ export const useTransactionFilters = (
       const categoryMatch =
         !categoryFilter ||
         (transaction.categoryId &&
-          CATEGORY_MAP[transaction.categoryId]
-            .toLowerCase()
-            .includes(categoryFilter))
+          CATEGORY_MAP[transaction.categoryId].toLowerCase().includes(categoryFilter))
 
       return dateMatch && descriptionMatch && detailsMatch && categoryMatch
     })

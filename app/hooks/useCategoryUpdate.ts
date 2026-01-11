@@ -1,50 +1,48 @@
-import { useCallback, useMemo } from 'react'
-import { useFetcher } from 'react-router'
-import { CATEGORY_MAP, type CategoryId } from '~/domain/transactions/entities/Categories'
-import type { Transaction } from '~/domain/transactions/entities/Transaction'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback, useState } from 'react'
+import { CATEGORY_MAP } from '../../domain/Categories'
+import type { Transaction } from '../../domain/Transaction'
 
 export const useCategoryUpdate = () => {
-  const fetcher = useFetcher()
-
-  const updatingTransactionData = useMemo(() => {
-    if (fetcher.state === 'idle' || !fetcher.formData) {
-      return null
-    }
-    return {
-      transactionId: fetcher.formData.get('transactionId') as string,
-      categoryId: fetcher.formData.get('categoryId') as CategoryId,
-    }
-  }, [fetcher.state, fetcher.formData])
+  const [updatingTransactionId, setUpdatingTransactionId] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
   const updateTransactionCategory = useCallback(
-    (transactionId: string, categoryId: string) => {
-      fetcher.submit({ transactionId, categoryId }, { method: 'post' })
-    },
-    [fetcher]
-  )
+    async (transactionId: string, categoryId: string) => {
+      setUpdatingTransactionId(transactionId)
+      try {
+        const response = await fetch('/api/transactions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ transactionId, categoryId }),
+        })
 
-  const getOptimisticCategory = useCallback(
-    (transaction: Transaction) => {
-      if (updatingTransactionData && updatingTransactionData.transactionId === transaction.id) {
-        return {
-          categoryId: updatingTransactionData.categoryId,
-          categoryName: updatingTransactionData.categoryId
-            ? CATEGORY_MAP[updatingTransactionData.categoryId]
-            : '-',
+        if (!response.ok) {
+          throw new Error('Failed to update transaction category')
         }
-      }
 
-      return {
-        categoryId: transaction.categoryId,
-        categoryName: transaction.categoryId ? CATEGORY_MAP[transaction.categoryId] || '-' : '-',
+        queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      } catch (error) {
+        console.error('Error updating transaction category:', error)
+      } finally {
+        setUpdatingTransactionId(null)
       }
     },
-    [updatingTransactionData]
+    [queryClient]
   )
+
+  const getOptimisticCategory = useCallback((transaction: Transaction) => {
+    return {
+      categoryId: transaction.categoryId,
+      categoryName: transaction.categoryId ? CATEGORY_MAP[transaction.categoryId] || '-' : '-',
+    }
+  }, [])
 
   return {
     updateTransactionCategory,
     getOptimisticCategory,
-    isUpdating: fetcher.state !== 'idle',
+    isUpdating: updatingTransactionId !== null,
   }
 }
