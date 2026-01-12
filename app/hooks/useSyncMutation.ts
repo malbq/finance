@@ -20,8 +20,8 @@ export function useSyncMutation() {
       return await response.json()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      // Invalidate bootstrap query to refetch all data and rehydrate local store
+      queryClient.invalidateQueries({ queryKey: ['bootstrap'] })
     },
   })
 }

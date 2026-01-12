@@ -10,14 +10,21 @@ import {
 } from 'recharts'
 import type { DashboardData } from '../../api/lib/getDashboardData'
 import { CATEGORY_MAP, type CategoryId } from '../../domain/Categories'
-import { formatCurrency } from '../../utils/formatCurrency'
 import { ChartTooltip } from './chart/ChartTooltip'
 
 interface SpendingChartProps {
   data: DashboardData['spendingByCategory']
 }
 
-const colors = [
+function monthKeyToIndex(monthKey: string): number {
+  const [mmStr, yyStr] = monthKey.split('/')
+  const mm = Number(mmStr)
+  const yy = Number(yyStr)
+  if (!Number.isFinite(mm) || !Number.isFinite(yy)) return 0
+  return (2000 + yy) * 12 + (mm - 1)
+}
+
+const STACK_COLORS = [
   'hsl(25, 90%, 50%)',
   'hsl(50, 100%, 50%)',
   'hsl(150, 90%, 40%)',
@@ -34,8 +41,10 @@ export const SpendingByCategoryChart = ({ data }: SpendingChartProps) => {
     return <div>Nenhum dado de despesas disponível</div>
   }
 
+  const sortedData = [...data].sort((a, b) => monthKeyToIndex(a.month) - monthKeyToIndex(b.month))
+
   const allKeys = new Set<CategoryId>()
-  data.forEach((item) => {
+  sortedData.forEach((item) => {
     Object.keys(item).forEach((key) => {
       if (key !== 'month' && key !== 'total' && key !== 'salary') {
         allKeys.add(key as CategoryId)
@@ -43,11 +52,10 @@ export const SpendingByCategoryChart = ({ data }: SpendingChartProps) => {
     })
   })
 
-  const monthToSortBy = data.at(-1)
-
+  const monthToSortBy = sortedData.at(-1)!
   const categories = Array.from(allKeys).sort((catA, catB) => {
-    const catAValue = monthToSortBy?.[catA] || 0
-    const catBValue = monthToSortBy?.[catB] || 0
+    const catAValue = monthToSortBy[catA] || 0
+    const catBValue = monthToSortBy[catB] || 0
     return catBValue - catAValue
   })
 
@@ -63,7 +71,7 @@ export const SpendingByCategoryChart = ({ data }: SpendingChartProps) => {
           width='100%'
           height='100%'
         >
-          <ComposedChart data={data}>
+          <ComposedChart data={sortedData}>
             <CartesianGrid
               strokeDasharray='3 3'
               stroke='#444'
@@ -76,7 +84,7 @@ export const SpendingByCategoryChart = ({ data }: SpendingChartProps) => {
             <YAxis
               stroke='#aaa'
               fontSize={12}
-              tickFormatter={formatCurrency}
+              tickFormatter={(value: number) => `${value / 1000}k`}
             />
             <Tooltip content={<ChartTooltip />} />
             <Line
@@ -85,7 +93,7 @@ export const SpendingByCategoryChart = ({ data }: SpendingChartProps) => {
               name='Entradas'
               stroke='#0c0'
               strokeWidth={3}
-              dot={{ fill: '#22C55E', strokeWidth: 2, r: 4 }}
+              dot={{ fill: '#0c0', r: 4 }}
             />
             <Line
               type='monotone'
@@ -93,7 +101,7 @@ export const SpendingByCategoryChart = ({ data }: SpendingChartProps) => {
               name='Saídas'
               stroke='#f33'
               strokeWidth={3}
-              dot={{ fill: '#ff4444', strokeWidth: 2, r: 4 }}
+              dot={{ fill: '#f33', r: 4 }}
             />
             {categories.map((category, index) => (
               <Area
@@ -101,9 +109,9 @@ export const SpendingByCategoryChart = ({ data }: SpendingChartProps) => {
                 type='monotone'
                 dataKey={category}
                 stackId='1'
-                stroke={colors[index % colors.length]}
-                fill={colors[index % colors.length]}
-                fillOpacity={0.6}
+                stroke={STACK_COLORS[index % STACK_COLORS.length]}
+                fill={STACK_COLORS[index % STACK_COLORS.length]}
+                fillOpacity={0.2}
                 name={CATEGORY_MAP[category]}
               />
             ))}

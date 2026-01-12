@@ -80,11 +80,15 @@ export class AccountSyncService {
           account.id,
           account.creditData
         )
+        const balanceDueDate =
+          typeof rawCreditData.balanceDueDate === 'number'
+            ? rawCreditData.balanceDueDate
+            : new Date(rawCreditData.balanceDueDate ?? Date.now()).getTime()
         const creditDataRecord = {
           ...rawCreditData,
           brand: rawCreditData.brand || '',
           level: rawCreditData.level || '',
-          balanceDueDate: rawCreditData.balanceDueDate || new Date(),
+          balanceDueDate,
           creditLimit: rawCreditData.creditLimit || 0,
           availableCreditLimit: rawCreditData.availableCreditLimit || 0,
         }

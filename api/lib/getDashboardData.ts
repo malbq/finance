@@ -216,11 +216,12 @@ async function generateBalanceEvolution(
   const monthlyProjectedSavings = totalMonthlyIncome - totalMonthlySpending
 
   for (let i = 1; i <= 24; i++) {
-    const futureDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + i, 1)
-    const monthName = futureDate.toLocaleDateString('pt-BR', {
+    const futureDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth() + i, 1))
+    const monthName = new Intl.DateTimeFormat('pt-BR', {
       month: '2-digit',
       year: '2-digit',
-    })
+      timeZone: 'UTC',
+    }).format(futureDate)
 
     currentBalance += monthlyProjectedSavings
 
@@ -253,10 +254,11 @@ function generateSpendingByCategory(
     }
 
     const normalizedAmount = account.type === 'BANK' ? amount : amount * -1
-    const monthKey = date.toLocaleDateString('pt-BR', {
+    const monthKey = new Intl.DateTimeFormat('pt-BR', {
       month: '2-digit',
       year: '2-digit',
-    })
+      timeZone: 'UTC',
+    }).format(date)
 
     if (!data.has(monthKey)) {
       data.set(monthKey, {

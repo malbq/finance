@@ -18,7 +18,7 @@ export const TransactionRow = memo(function TransactionRow({ transaction }: Tran
       : ''
 
   const copyTransactionId = () => {
-    navigator.clipboard.writeText(transaction.id)
+    navigator.clipboard?.writeText(transaction.id)
   }
 
   return (

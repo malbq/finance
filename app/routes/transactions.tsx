@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import type { Account } from '../../domain/Account'
 import type { Transaction } from '../../domain/Transaction'
 import { formatCurrency } from '../../utils/formatCurrency'
@@ -17,16 +17,8 @@ export const Route = createFileRoute('/transactions')({
 })
 
 function Transactions() {
-  const { data, isLoading, error } = useTransactionsData()
+  const { data, isLoading, error, activeAccountId, setActiveAccount } = useTransactionsData()
   const accounts = data?.accounts || []
-  const [activeTab, setActiveTab] = useState<string>('')
-
-  const effectiveActiveTab = useMemo(() => {
-    if (activeTab && accounts.some((acc) => acc.id === activeTab)) {
-      return activeTab
-    }
-    return accounts[0]?.id || ''
-  }, [accounts, activeTab])
 
   const formattedAccounts = useMemo(() => {
     return accounts.map((account: AccountWithTransactions) => ({
@@ -45,9 +37,9 @@ function Transactions() {
   const activeAccount = useMemo(() => {
     if (formattedAccounts.length === 0) return undefined
     return formattedAccounts.find(
-      (account: AccountWithTransactions) => account.id === effectiveActiveTab
+      (account: AccountWithTransactions) => account.id === activeAccountId
     )
-  }, [formattedAccounts, effectiveActiveTab])
+  }, [formattedAccounts, activeAccountId])
 
   if (isLoading) {
     return <div className='text-zinc-300'>Loading...</div>
@@ -75,8 +67,8 @@ function Transactions() {
           <AccountCard
             key={account.id}
             account={account}
-            isActive={effectiveActiveTab === account.id}
-            onClick={() => setActiveTab(account.id)}
+            isActive={activeAccountId === account.id}
+            onClick={() => setActiveAccount(account.id)}
           />
         ))}
       </div>

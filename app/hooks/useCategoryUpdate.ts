@@ -1,15 +1,24 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
-import { CATEGORY_MAP } from '../../domain/Categories'
+import { CATEGORY_MAP, type CategoryId } from '../../domain/Categories'
 import type { Transaction } from '../../domain/Transaction'
+import { localStore } from '../lib/localStore'
 
 export const useCategoryUpdate = () => {
   const [updatingTransactionId, setUpdatingTransactionId] = useState<string | null>(null)
   const queryClient = useQueryClient()
 
   const updateTransactionCategory = useCallback(
-    async (transactionId: string, categoryId: string) => {
+    async (transactionId: string, categoryId: CategoryId) => {
       setUpdatingTransactionId(transactionId)
+
+      // Capture previous state for rollback
+      const previousTransaction = localStore.getTransaction(transactionId)
+      const previousCategoryId = previousTransaction?.categoryId
+
+      // Optimistic update - update local store immediately
+      localStore.updateTransaction(transactionId, { categoryId })
+
       try {
         const response = await fetch('/api/transactions', {
           method: 'POST',
@@ -23,9 +32,15 @@ export const useCategoryUpdate = () => {
           throw new Error('Failed to update transaction category')
         }
 
-        queryClient.invalidateQueries({ queryKey: ['transactions'] })
+        // Invalidate bootstrap to ensure consistency on next refetch
+        queryClient.invalidateQueries({ queryKey: ['bootstrap'] })
       } catch (error) {
         console.error('Error updating transaction category:', error)
+
+        // Rollback on failure
+        if (previousCategoryId !== undefined) {
+          localStore.updateTransaction(transactionId, { categoryId: previousCategoryId })
+        }
       } finally {
         setUpdatingTransactionId(null)
       }
@@ -44,5 +59,6 @@ export const useCategoryUpdate = () => {
     updateTransactionCategory,
     getOptimisticCategory,
     isUpdating: updatingTransactionId !== null,
+    updatingTransactionId,
   }
 }

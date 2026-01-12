@@ -1,3 +1,4 @@
+import { createBootstrapHandler } from './api/bootstrap'
 import { createDashboardHandler } from './api/dashboard'
 import { createDatabase } from './api/db/drizzle'
 import { createSyncHandler } from './api/sync'
@@ -13,6 +14,7 @@ Bun.serve({
     console: true,
   },
   routes: {
+    '/api/bootstrap': createBootstrapHandler(db),
     '/api/dashboard': createDashboardHandler(db),
     '/api/transactions': createTransactionsHandler(db),
     '/api/sync': createSyncHandler(db),

@@ -22,7 +22,7 @@ export const CreditCardTransactionRow = memo(function CreditCardTransactionRow({
       transaction.creditCardMetadata!.totalInstallments!
 
   const copyTransactionId = () => {
-    navigator.clipboard.writeText(transaction.id)
+    navigator.clipboard?.writeText(transaction.id)
   }
 
   return (

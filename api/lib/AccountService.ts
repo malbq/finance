@@ -41,7 +41,7 @@ export class AccountService {
       account.creditData = {
         level: creditData.level,
         brand: creditData.brand,
-        balanceDueDate: creditData.balanceDueDate,
+        balanceDueDate: new Date(creditData.balanceDueDate),
         creditLimit: creditData.creditLimit,
         creditLimitFormatted: formatCurrency(creditData.creditLimit),
         availableCreditLimit: creditData.availableCreditLimit,

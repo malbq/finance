@@ -9,7 +9,7 @@ months_range AS (
   UNION ALL SELECT 6, date('now', '-6 months', 'start of month')
 ),
 spending_monthly AS (
-  SELECT date(strftime('%Y-%m', datetime(t."date" / 1000, 'unixepoch', '-3 hours')) || '-01') as month_date,
+  SELECT date(strftime('%Y-%m', datetime(t."date" / 1000, 'unixepoch')) || '-01') as month_date,
     SUM(ABS(t."amount")) as total
   FROM "Transaction" t JOIN "Account" a ON t."accountId" = a."id"
   WHERE t."type" = 'DEBIT' AND t."categoryId" NOT IN (
@@ -28,7 +28,7 @@ spending_average AS (
 ),
 income_monthly AS (
   SELECT 
-    date(strftime('%Y-%m', datetime(t."date" / 1000, 'unixepoch', '-3 hours')) || '-01') as month_date,
+    date(strftime('%Y-%m', datetime(t."date" / 1000, 'unixepoch')) || '-01') as month_date,
     SUM(ABS(t."amount")) as total
   FROM "Transaction" t JOIN "Account" a ON t."accountId" = a."id"
   WHERE a."type" = 'BANK' AND t."type" = 'CREDIT' AND t."categoryId" = '01010000'

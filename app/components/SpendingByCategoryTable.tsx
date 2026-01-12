@@ -6,6 +6,14 @@ interface SpendingByCategoryProps {
   data: DashboardData['spendingByCategory']
 }
 
+function monthKeyToIndex(monthKey: string): number {
+  const [mmStr, yyStr] = monthKey.split('/')
+  const mm = Number(mmStr)
+  const yy = Number(yyStr)
+  if (!Number.isFinite(mm) || !Number.isFinite(yy)) return 0
+  return (2000 + yy) * 12 + (mm - 1)
+}
+
 export const SpendingByCategoryTable = ({ data }: SpendingByCategoryProps) => {
   if (!data || data.length === 0) {
     return <div>Nenhum dado de despesas disponível</div>
@@ -19,7 +27,9 @@ export const SpendingByCategoryTable = ({ data }: SpendingByCategoryProps) => {
       }
     })
   })
-  const months = data.map((item) => item.month)
+  const months = Array.from(new Set(data.map((item) => item.month))).sort(
+    (a, b) => monthKeyToIndex(a) - monthKeyToIndex(b)
+  )
   const lastMonth = months[months.length - 1]
   const categories = Array.from(allKeys).sort((a, b) => {
     const aValue = data.find((item) => item.month === lastMonth)?.[a] || 0
