@@ -1,4 +1,3 @@
-import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 import { CATEGORY_MAP, type CategoryId } from '../../domain/Categories'
 import type { Transaction } from '../../domain/Transaction'
@@ -6,7 +5,6 @@ import { localStore } from '../lib/localStore'
 
 export const useCategoryUpdate = () => {
   const [updatingTransactionId, setUpdatingTransactionId] = useState<string | null>(null)
-  const queryClient = useQueryClient()
 
   const updateTransactionCategory = useCallback(
     async (transactionId: string, categoryId: CategoryId) => {
@@ -32,8 +30,8 @@ export const useCategoryUpdate = () => {
           throw new Error('Failed to update transaction category')
         }
 
-        // Invalidate bootstrap to ensure consistency on next refetch
-        queryClient.invalidateQueries({ queryKey: ['bootstrap'] })
+        // No query invalidation - rely on optimistic update
+        // Next delta sync will pick up the change if needed
       } catch (error) {
         console.error('Error updating transaction category:', error)
 
@@ -45,7 +43,7 @@ export const useCategoryUpdate = () => {
         setUpdatingTransactionId(null)
       }
     },
-    [queryClient]
+    []
   )
 
   const getOptimisticCategory = useCallback((transaction: Transaction) => {

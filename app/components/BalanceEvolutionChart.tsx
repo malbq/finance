@@ -38,14 +38,30 @@ interface BarShapeProps {
 
 const customBarShape = (props: unknown) => {
   if (!props || typeof props !== 'object') {
-    return <rect x={0} y={0} width={0} height={0} fill='transparent' />
+    return (
+      <rect
+        x={0}
+        y={0}
+        width={0}
+        height={0}
+        fill='transparent'
+      />
+    )
   }
 
   const typedProps = props as BarShapeProps
   const { payload, x = 0, y = 0, width = 0, height = 0 } = typedProps
 
   if (!payload) {
-    return <rect x={0} y={0} width={0} height={0} fill='transparent' />
+    return (
+      <rect
+        x={0}
+        y={0}
+        width={0}
+        height={0}
+        fill='transparent'
+      />
+    )
   }
 
   const barFill = payload.balance >= 0 ? '#05df72' : '#ef4444'
@@ -79,6 +95,7 @@ interface BalanceEvolutionChartProps {
   totalBalance: string
   bankBalance: number
   investmentBalance: number
+  className?: string
 }
 
 export const BalanceEvolutionChart = ({
@@ -87,6 +104,7 @@ export const BalanceEvolutionChart = ({
   totalBalance,
   bankBalance,
   investmentBalance,
+  className = '',
 }: BalanceEvolutionChartProps) => {
   const [windowWidth, setWindowWidth] = useState(0)
 
@@ -107,7 +125,7 @@ export const BalanceEvolutionChart = ({
   const visibleData = getVisibleData()
 
   return (
-    <div className='bg-zinc-800 rounded-lg p-4 grid gap-x-8 grid-cols-2 lg:grid-cols-[auto_auto_1fr]'>
+    <div className={`grid gap-x-8 grid-cols-2 lg:grid-cols-[auto_auto_1fr] ${className}`}>
       <span className='col-span-2 text-lg font-semibold'>Projeção de Saldo</span>
 
       <div>

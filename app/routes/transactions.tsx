@@ -61,8 +61,8 @@ function Transactions() {
   }
 
   return (
-    <div className='flex flex-col gap-4 pb-48'>
-      <div className='grid gap-4 grid-cols-6'>
+    <div className='flex flex-col gap-4 h-full p-8 '>
+      <div className='grid gap-4 grid-cols-2 md:grid-cols-4 xl:grid-cols-6'>
         {formattedAccounts.map((account: AccountWithTransactions) => (
           <AccountCard
             key={account.id}
@@ -73,7 +73,7 @@ function Transactions() {
         ))}
       </div>
       {activeAccount && (
-        <div className='bg-zinc-800 rounded-lg'>
+        <div className='bg-zinc-800 rounded-lg overflow-y-auto'>
           {activeAccount.transactions.length === 0 ? (
             <div className='text-center py-8 text-zinc-400'>
               No transactions found for this account

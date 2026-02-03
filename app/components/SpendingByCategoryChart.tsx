@@ -8,12 +8,20 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import type { DashboardData } from '../../api/lib/getDashboardData'
 import { CATEGORY_MAP, type CategoryId } from '../../domain/Categories'
 import { ChartTooltip } from './chart/ChartTooltip'
 
 interface SpendingChartProps {
-  data: DashboardData['spendingByCategory']
+  data: Array<
+    {
+      month: string
+      total: number
+      salary: number
+    } & {
+      [categoryId in CategoryId]?: number
+    }
+  >
+  className?: string
 }
 
 function monthKeyToIndex(monthKey: string): number {
@@ -36,7 +44,7 @@ const STACK_COLORS = [
   'hsl(345, 100%, 70%)',
 ]
 
-export const SpendingByCategoryChart = ({ data }: SpendingChartProps) => {
+export const SpendingByCategoryChart = ({ data, className = '' }: SpendingChartProps) => {
   if (!data || data.length === 0) {
     return <div>Nenhum dado de despesas disponível</div>
   }
@@ -64,9 +72,9 @@ export const SpendingByCategoryChart = ({ data }: SpendingChartProps) => {
   }
 
   return (
-    <div className='bg-zinc-800 rounded-lg p-4'>
+    <div className={className}>
       <h2 className='text-xl font-semibold text-white mb-4'>Movimentação</h2>
-      <div className='h-200'>
+      <div className='h-120'>
         <ResponsiveContainer
           width='100%'
           height='100%'

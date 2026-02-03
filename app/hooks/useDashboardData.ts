@@ -1,5 +1,7 @@
 import { useMemo, useSyncExternalStore } from 'react'
-import type { CategoryId, CategoryName } from '../../domain/Categories'
+import type { Account } from '../../domain/Account'
+import type { CategoryId } from '../../domain/Categories'
+import type { Transaction } from '../../domain/Transaction'
 import { formatCurrency } from '../../utils/formatCurrency'
 import { localStore } from '../lib/localStore'
 import { useBootstrapQuery } from './useBootstrapQuery'
@@ -29,31 +31,32 @@ export interface DashboardData {
   >
 }
 
+/** Categories excluded from spending calculations (income, transfers, etc.) */
 const excludedCategories = new Set([
-  '01000000',
-  '01010000',
-  '01020000',
-  '01030000',
-  '01040000',
-  '01050000',
-  '03000000',
-  '03010000',
-  '03020000',
-  '03030000',
-  '03040000',
-  '03050000',
-  '03060000',
-  '03070000',
-  '04000000',
-  '05100000',
-  '12',
+  '01000000', // Income (parent)
+  '01010000', // Salary
+  '01020000', // Other income
+  '01030000', // Investments income
+  '01040000', // Bonus
+  '01050000', // Refund
+  '03000000', // Transfers (parent)
+  '03010000', // Transfer in
+  '03020000', // Transfer out
+  '03030000', // PIX in
+  '03040000', // PIX out
+  '03050000', // TED/DOC
+  '03060000', // Payment
+  '03070000', // Credit card payment
+  '04000000', // Investments
+  '05100000', // Credit card bill
+  '12',       // Uncategorized
 ])
 
 export { excludedCategories }
 
 /**
  * Hook to compute dashboard data from local store.
- * Returns the same shape as the original useDashboardData for backwards compatibility.
+ * All data is computed client-side from in-memory transactions.
  */
 export function useDashboardData() {
   const bootstrapQuery = useBootstrapQuery()
@@ -68,7 +71,6 @@ export function useDashboardData() {
 
     const accounts = localStore.getAccounts()
     const transactions = localStore.getTransactions()
-    const movingAverages = localStore.getMovingAverages()
 
     const bankBalance = accounts
       .filter((account) => account.type !== 'CREDIT')
@@ -78,9 +80,12 @@ export function useDashboardData() {
 
     const totalBalance = bankBalance + investmentBalance
 
+    // Compute moving averages from transactions
+    const movingAverages = computeMovingAverages(transactions, accounts)
+
     const balanceEvolution = generateBalanceEvolution(
       bankBalance,
-      movingAverages.totalMonthlyIncome - movingAverages.totalMonthlySpending
+      movingAverages.expectedSavings
     )
 
     const spendingByCategory = generateSpendingByCategory(transactions, accounts)
@@ -103,6 +108,80 @@ export function useDashboardData() {
     error: bootstrapQuery.error,
     isPending: bootstrapQuery.isPending,
     refetch: bootstrapQuery.refetch,
+  }
+}
+
+/**
+ * Compute moving averages for income and spending from transactions.
+ * Uses a 3-month rolling average of completed months.
+ */
+function computeMovingAverages(
+  transactions: Transaction[],
+  accounts: Account[]
+): DashboardData['movingAverages'] {
+  const accountTypeMap = new Map(accounts.map((a) => [a.id, a.type]))
+
+  // Group transactions by month
+  const monthlyTotals = new Map<string, { income: number; spending: number }>()
+
+  for (const tx of transactions) {
+    const accountType = accountTypeMap.get(tx.accountId)
+    if (!accountType || !tx.categoryId) continue
+
+    const txDate = new Date(tx.date)
+    // Use YYYY-MM format for proper sorting
+    const monthKey = `${txDate.getFullYear()}-${String(txDate.getMonth() + 1).padStart(2, '0')}`
+
+    if (!monthlyTotals.has(monthKey)) {
+      monthlyTotals.set(monthKey, { income: 0, spending: 0 })
+    }
+    const month = monthlyTotals.get(monthKey)!
+
+    // Check if this is salary/income
+    const isSalary =
+      accountType === 'BANK' && tx.type === 'CREDIT' && tx.categoryId === '01010000'
+
+    if (isSalary) {
+      month.income += tx.amount
+      continue
+    }
+
+    // Skip excluded categories for spending
+    if (excludedCategories.has(tx.categoryId)) continue
+
+    // Spending (negative amounts represent spending, so negate)
+    month.spending += Math.abs(tx.amount < 0 ? tx.amount : -tx.amount)
+  }
+
+  // Get the last 3 complete months (exclude current month)
+  const now = new Date()
+  const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+
+  const completedMonths = Array.from(monthlyTotals.entries())
+    .filter(([key]) => key < currentMonthKey)
+    .sort((a, b) => b[0].localeCompare(a[0])) // Sort descending
+    .slice(0, 3) // Take last 3 months
+
+  if (completedMonths.length === 0) {
+    return {
+      totalMonthlyIncome: 0,
+      totalMonthlySpending: 0,
+      expectedSavings: 0,
+    }
+  }
+
+  const totalIncome = completedMonths.reduce((sum, [, m]) => sum + m.income, 0)
+  const totalSpending = completedMonths.reduce((sum, [, m]) => sum + m.spending, 0)
+  const monthCount = completedMonths.length
+
+  const totalMonthlyIncome = totalIncome / monthCount
+  const totalMonthlySpending = totalSpending / monthCount
+  const expectedSavings = totalMonthlyIncome - totalMonthlySpending
+
+  return {
+    totalMonthlyIncome,
+    totalMonthlySpending,
+    expectedSavings,
   }
 }
 
@@ -134,8 +213,8 @@ function generateBalanceEvolution(
 }
 
 function generateSpendingByCategory(
-  transactions: ReturnType<typeof localStore.getTransactions>,
-  accounts: ReturnType<typeof localStore.getAccounts>
+  transactions: Transaction[],
+  accounts: Account[]
 ): DashboardData['spendingByCategory'] {
   const accountTypeMap = new Map(accounts.map((a) => [a.id, a.type]))
 

@@ -1,0 +1,1947 @@
+{
+  "dialect": "sqlite",
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevIds": [],
+  "version": "7",
+  "ddl": [
+    {
+      "name": "Merchant",
+      "entityType": "tables"
+    },
+    {
+      "name": "Account",
+      "entityType": "tables"
+    },
+    {
+      "name": "Category",
+      "entityType": "tables"
+    },
+    {
+      "name": "Investment",
+      "entityType": "tables"
+    },
+    {
+      "name": "Transaction",
+      "entityType": "tables"
+    },
+    {
+      "name": "CreditData",
+      "entityType": "tables"
+    },
+    {
+      "name": "InvestmentTransaction",
+      "entityType": "tables"
+    },
+    {
+      "name": "SpendingGoal",
+      "entityType": "tables"
+    },
+    {
+      "name": "BankData",
+      "entityType": "tables"
+    },
+    {
+      "name": "PaymentData",
+      "entityType": "tables"
+    },
+    {
+      "name": "PaymentParticipant",
+      "entityType": "tables"
+    },
+    {
+      "name": "CreditCardMetadata",
+      "entityType": "tables"
+    },
+    {
+      "name": "AcquirerData",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "Merchant"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "Account"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "Category"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "CreditData"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "categoryId",
+      "entityType": "columns",
+      "table": "SpendingGoal"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "BankData"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "PaymentData"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "PaymentParticipant"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "CreditCardMetadata"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "AcquirerData"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "transactionId",
+      "entityType": "columns",
+      "table": "Merchant"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "itemId",
+      "entityType": "columns",
+      "table": "Account"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "description",
+      "entityType": "columns",
+      "table": "Category"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "itemId",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "accountId",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "accountId",
+      "entityType": "columns",
+      "table": "CreditData"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "investmentId",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "goal",
+      "entityType": "columns",
+      "table": "SpendingGoal"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "accountId",
+      "entityType": "columns",
+      "table": "BankData"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "transactionId",
+      "entityType": "columns",
+      "table": "PaymentData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "accountNumber",
+      "entityType": "columns",
+      "table": "PaymentParticipant"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "transactionId",
+      "entityType": "columns",
+      "table": "CreditCardMetadata"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "transactionId",
+      "entityType": "columns",
+      "table": "AcquirerData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "cnae",
+      "entityType": "columns",
+      "table": "Merchant"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "number",
+      "entityType": "columns",
+      "table": "Account"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "descriptionTranslated",
+      "entityType": "columns",
+      "table": "Category"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "type",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "description",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "level",
+      "entityType": "columns",
+      "table": "CreditData"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "type",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "tolerance",
+      "entityType": "columns",
+      "table": "SpendingGoal"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "transferNumber",
+      "entityType": "columns",
+      "table": "BankData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "paymentMethod",
+      "entityType": "columns",
+      "table": "PaymentData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "branchNumber",
+      "entityType": "columns",
+      "table": "PaymentParticipant"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "data",
+      "entityType": "columns",
+      "table": "CreditCardMetadata"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "data",
+      "entityType": "columns",
+      "table": "AcquirerData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "cnpj",
+      "entityType": "columns",
+      "table": "Merchant"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "type",
+      "entityType": "columns",
+      "table": "Account"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "parentId",
+      "entityType": "columns",
+      "table": "Category"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "subtype",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "descriptionRaw",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "brand",
+      "entityType": "columns",
+      "table": "CreditData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "movementType",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "table": "SpendingGoal"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "closingBalance",
+      "entityType": "columns",
+      "table": "BankData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "reason",
+      "entityType": "columns",
+      "table": "PaymentData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "documentType",
+      "entityType": "columns",
+      "table": "PaymentParticipant"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "Merchant"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "subtype",
+      "entityType": "columns",
+      "table": "Account"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "parentDescription",
+      "entityType": "columns",
+      "table": "Category"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "number",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'BRL'",
+      "generated": null,
+      "name": "currencyCode",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "numeric",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "balanceCloseDate",
+      "entityType": "columns",
+      "table": "CreditData"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "quantity",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "automaticallyInvestedBalance",
+      "entityType": "columns",
+      "table": "BankData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "receiverReferenceId",
+      "entityType": "columns",
+      "table": "PaymentData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "documentValue",
+      "entityType": "columns",
+      "table": "PaymentParticipant"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "category",
+      "entityType": "columns",
+      "table": "Merchant"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "Account"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "balance",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "amount",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "balanceDueDate",
+      "entityType": "columns",
+      "table": "CreditData"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "value",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "overdraftContractedLimit",
+      "entityType": "columns",
+      "table": "BankData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "referenceNumber",
+      "entityType": "columns",
+      "table": "PaymentData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "PaymentParticipant"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "businessName",
+      "entityType": "columns",
+      "table": "Merchant"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "balance",
+      "entityType": "columns",
+      "table": "Account"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "numeric",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "amountInAccountCurrency",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "availableCreditLimit",
+      "entityType": "columns",
+      "table": "CreditData"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "amount",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "overdraftUsedLimit",
+      "entityType": "columns",
+      "table": "BankData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "boletoMetadata",
+      "entityType": "columns",
+      "table": "PaymentData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "routingNumber",
+      "entityType": "columns",
+      "table": "PaymentParticipant"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'BRL'",
+      "generated": null,
+      "name": "currencyCode",
+      "entityType": "columns",
+      "table": "Account"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "lastMonthRate",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "date",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "numeric",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "balanceForeignCurrency",
+      "entityType": "columns",
+      "table": "CreditData"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "netAmount",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "unarrangedOverdraftAmount",
+      "entityType": "columns",
+      "table": "BankData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "routingNumberISPB",
+      "entityType": "columns",
+      "table": "PaymentParticipant"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "marketingName",
+      "entityType": "columns",
+      "table": "Account"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "lastTwelveMonthsRate",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "category",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "numeric",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "minimumPayment",
+      "entityType": "columns",
+      "table": "CreditData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "description",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "payerPaymentDataId",
+      "entityType": "columns",
+      "table": "PaymentParticipant"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "taxNumber",
+      "entityType": "columns",
+      "table": "Account"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "annualRate",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "categoryId",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "creditLimit",
+      "entityType": "columns",
+      "table": "CreditData"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "agreedRate",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "receiverPaymentDataId",
+      "entityType": "columns",
+      "table": "PaymentParticipant"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "owner",
+      "entityType": "columns",
+      "table": "Account"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'BRL'",
+      "generated": null,
+      "name": "currencyCode",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "numeric",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "balance",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "numeric",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "isLimitFlexible",
+      "entityType": "columns",
+      "table": "CreditData"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "date",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "table": "Account"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "code",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "providerCode",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "holderType",
+      "entityType": "columns",
+      "table": "CreditData"
+    },
+    {
+      "type": "numeric",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "tradeDate",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "table": "Account"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "isin",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "status",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "status",
+      "entityType": "columns",
+      "table": "CreditData"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "brokerageNumber",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "value",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "type",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "expenses",
+      "entityType": "columns",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "quantity",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "operationType",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "amount",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "providerId",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "taxes",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "taxes2",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "table": "Transaction"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "date",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "owner",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "amountProfit",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "amountWithdrawal",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "amountOriginal",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "numeric",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "dueDate",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "issuer",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "issuerCNPJ",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "numeric",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "issueDate",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "rate",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "rateType",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "fixedAnnualRate",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "status",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "institution",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "metadata",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "type": "numeric",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updatedAt",
+      "entityType": "columns",
+      "table": "Investment"
+    },
+    {
+      "columns": [
+        "transactionId"
+      ],
+      "tableTo": "Transaction",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "Merchant_transactionId_fkey",
+      "entityType": "fks",
+      "table": "Merchant"
+    },
+    {
+      "columns": [
+        "parentId"
+      ],
+      "tableTo": "Category",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "SET NULL",
+      "nameExplicit": true,
+      "name": "Category_parentId_fkey",
+      "entityType": "fks",
+      "table": "Category"
+    },
+    {
+      "columns": [
+        "accountId"
+      ],
+      "tableTo": "Account",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "Transaction_accountId_fkey",
+      "entityType": "fks",
+      "table": "Transaction"
+    },
+    {
+      "columns": [
+        "accountId"
+      ],
+      "tableTo": "Account",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "CreditData_accountId_fkey",
+      "entityType": "fks",
+      "table": "CreditData"
+    },
+    {
+      "columns": [
+        "investmentId"
+      ],
+      "tableTo": "Investment",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "RESTRICT",
+      "nameExplicit": true,
+      "name": "InvestmentTransaction_investmentId_fkey",
+      "entityType": "fks",
+      "table": "InvestmentTransaction"
+    },
+    {
+      "columns": [
+        "accountId"
+      ],
+      "tableTo": "Account",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "nameExplicit": true,
+      "name": "fk_BankData_accountId_Account_id_fk",
+      "entityType": "fks",
+      "table": "BankData"
+    },
+    {
+      "columns": [
+        "transactionId"
+      ],
+      "tableTo": "Transaction",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "nameExplicit": true,
+      "name": "fk_PaymentData_transactionId_Transaction_id_fk",
+      "entityType": "fks",
+      "table": "PaymentData"
+    },
+    {
+      "columns": [
+        "receiverPaymentDataId"
+      ],
+      "tableTo": "PaymentData",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "nameExplicit": true,
+      "name": "fk_PaymentParticipant_receiverPaymentDataId_PaymentData_id_fk",
+      "entityType": "fks",
+      "table": "PaymentParticipant"
+    },
+    {
+      "columns": [
+        "payerPaymentDataId"
+      ],
+      "tableTo": "PaymentData",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "nameExplicit": true,
+      "name": "fk_PaymentParticipant_payerPaymentDataId_PaymentData_id_fk",
+      "entityType": "fks",
+      "table": "PaymentParticipant"
+    },
+    {
+      "columns": [
+        "transactionId"
+      ],
+      "tableTo": "Transaction",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "nameExplicit": true,
+      "name": "fk_CreditCardMetadata_transactionId_Transaction_id_fk",
+      "entityType": "fks",
+      "table": "CreditCardMetadata"
+    },
+    {
+      "columns": [
+        "transactionId"
+      ],
+      "tableTo": "Transaction",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "nameExplicit": true,
+      "name": "fk_AcquirerData_transactionId_Transaction_id_fk",
+      "entityType": "fks",
+      "table": "AcquirerData"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "Merchant_pk",
+      "table": "Merchant",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "Account_pk",
+      "table": "Account",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "Category_pk",
+      "table": "Category",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "Investment_pk",
+      "table": "Investment",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "Transaction_pk",
+      "table": "Transaction",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "CreditData_pk",
+      "table": "CreditData",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "InvestmentTransaction_pk",
+      "table": "InvestmentTransaction",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "categoryId"
+      ],
+      "nameExplicit": true,
+      "name": "SpendingGoal_pk",
+      "table": "SpendingGoal",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "BankData_pk",
+      "table": "BankData",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "PaymentData_pk",
+      "table": "PaymentData",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "PaymentParticipant_pk",
+      "table": "PaymentParticipant",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "CreditCardMetadata_pk",
+      "table": "CreditCardMetadata",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "AcquirerData_pk",
+      "table": "AcquirerData",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "transactionId",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "AcquirerData_transactionId_unique",
+      "entityType": "indexes",
+      "table": "AcquirerData"
+    },
+    {
+      "columns": [
+        {
+          "value": "accountId",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "BankData_accountId_unique",
+      "entityType": "indexes",
+      "table": "BankData"
+    },
+    {
+      "columns": [
+        {
+          "value": "transactionId",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "CreditCardMetadata_transactionId_unique",
+      "entityType": "indexes",
+      "table": "CreditCardMetadata"
+    },
+    {
+      "columns": [
+        {
+          "value": "accountId",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "CreditData_accountId_unique",
+      "entityType": "indexes",
+      "table": "CreditData"
+    },
+    {
+      "columns": [
+        {
+          "value": "accountId",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "CreditData_accountId_key",
+      "entityType": "indexes",
+      "table": "CreditData"
+    },
+    {
+      "columns": [
+        {
+          "value": "itemId",
+          "isExpression": false
+        },
+        {
+          "value": "id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "itemId_id_idx",
+      "entityType": "indexes",
+      "table": "Investment"
+    },
+    {
+      "columns": [
+        {
+          "value": "itemId",
+          "isExpression": false
+        },
+        {
+          "value": "id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "Investment_itemId_id_key",
+      "entityType": "indexes",
+      "table": "Investment"
+    },
+    {
+      "columns": [
+        {
+          "value": "transactionId",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "Merchant_transactionId_unique",
+      "entityType": "indexes",
+      "table": "Merchant"
+    },
+    {
+      "columns": [
+        {
+          "value": "transactionId",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "Merchant_transactionId_key",
+      "entityType": "indexes",
+      "table": "Merchant"
+    },
+    {
+      "columns": [
+        {
+          "value": "transactionId",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "PaymentData_transactionId_unique",
+      "entityType": "indexes",
+      "table": "PaymentData"
+    },
+    {
+      "columns": [
+        {
+          "value": "receiverPaymentDataId",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "PaymentParticipant_receiverPaymentDataId_unique",
+      "entityType": "indexes",
+      "table": "PaymentParticipant"
+    },
+    {
+      "columns": [
+        {
+          "value": "payerPaymentDataId",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "PaymentParticipant_payerPaymentDataId_unique",
+      "entityType": "indexes",
+      "table": "PaymentParticipant"
+    },
+    {
+      "columns": [
+        {
+          "value": "date",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "date_idx",
+      "entityType": "indexes",
+      "table": "Transaction"
+    },
+    {
+      "columns": [
+        {
+          "value": "accountId",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "account_idx",
+      "entityType": "indexes",
+      "table": "Transaction"
+    }
+  ],
+  "renames": []
+}

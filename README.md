@@ -13,7 +13,6 @@ A comprehensive personal finance dashboard that connects bank accounts and credi
 **Requirements**:
 
 - Display total balance across bank accounts and investments
-- Show wealth evolution projections using 6-month weighted moving averages
 - Present spending analysis through interactive charts and detailed category tables
 - Calculate key metrics: average monthly income, average monthly expenses, and expected savings
 
@@ -361,41 +360,6 @@ A comprehensive personal finance dashboard that connects bank accounts and credi
   ]
 }
 ```
-
-### Financial Analytics Views
-
-#### Moving Average Projections
-
-```sql
--- SQL View for weighted 6-month moving averages
-CREATE VIEW moving_average_projections AS
-WITH months_range AS (
-  -- Last 6 months with weighting factors
-  SELECT 1 as month_offset, date('now', '-1 month', 'start of month') as month_date
-  UNION ALL SELECT 2, date('now', '-2 months', 'start of month')
-  -- ... continues for 6 months
-),
-spending_average AS (
-  SELECT ROUND(
-    SUM(spending_monthly.total * (7 - months_range.month_offset)) / 21.0, 2
-  ) as value
-  FROM spending_monthly
-  JOIN months_range ON spending_monthly.month_date = months_range.month_date
-),
-income_average AS (
-  SELECT ROUND(
-    SUM(income_monthly.total * (7 - months_range.month_offset)) / 21.0, 2
-  ) as value
-  FROM income_monthly
-  JOIN months_range ON income_monthly.month_date = months_range.month_date
-)
-```
-
-**Weighting Formula**: Recent months have higher impact using `(7 - month_offset) / 21.0`
-
-- Month 1 (current): Weight 6/21 ≈ 28.6%
-- Month 2: Weight 5/21 ≈ 23.8%
-- Month 6: Weight 1/21 ≈ 4.8%
 
 ### Data Relationships & Integrity
 

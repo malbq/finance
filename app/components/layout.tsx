@@ -109,15 +109,15 @@ export function Layout({ children }: LayoutProps) {
   const isExportDisabled = !localStore.isHydrated()
 
   return (
-    <div className='min-h-screen h-screen grid grid-rows-[auto_1fr]'>
-      <header className='bg-neutral-900 px-4 flex justify-between items-center'>
+    <div className='h-screen grid grid-rows-[auto_1fr]'>
+      <header className='bg-neutral-800 px-4 flex justify-between items-center'>
         <nav className='flex space-x-1'>
           {links.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              activeProps={{ className: 'bg-neutral-800' }}
-              inactiveProps={{ className: 'hover:bg-neutral-800/50' }}
+              activeProps={{ className: 'bg-neutral-700' }}
+              inactiveProps={{ className: 'hover:bg-neutral-700/50' }}
               className='px-6 py-2 text-sm font-medium transition-colors'
             >
               {link.label}
@@ -125,7 +125,7 @@ export function Layout({ children }: LayoutProps) {
           ))}
         </nav>
 
-        <div className='flex items-center space-x-2'>
+        <div className='flex items-center space-x-4'>
           <button
             onClick={handleExport}
             disabled={isExportDisabled}
@@ -197,7 +197,7 @@ export function Layout({ children }: LayoutProps) {
         </div>
       </header>
 
-      <main className='p-4 overflow-y-auto'>{children}</main>
+      <main className='overflow-hidden'>{children}</main>
 
       <Toast />
     </div>

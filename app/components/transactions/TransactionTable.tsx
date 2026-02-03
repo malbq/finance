@@ -17,28 +17,26 @@ export const TransactionTable = ({ transactions, accountType }: TransactionTable
   )
 
   return (
-    <div>
-      <table className='min-w-full'>
-        <TransactionFilters
-          filters={filters}
-          onFilterChange={updateFilter}
-          accountType={accountType}
-        />
+    <table className='min-w-full'>
+      <TransactionFilters
+        filters={filters}
+        onFilterChange={updateFilter}
+        accountType={accountType}
+      />
 
-        <tbody className='overflow-y-auto h-[600px]'>
-          {filteredTransactions.map((transaction) => {
-            const TransactionRowComponent =
-              accountType === 'CREDIT' ? CreditCardTransactionRow : TransactionRow
+      <tbody className='overflow-y-auto'>
+        {filteredTransactions.map((transaction) => {
+          const TransactionRowComponent =
+            accountType === 'CREDIT' ? CreditCardTransactionRow : TransactionRow
 
-            return (
-              <TransactionRowComponent
-                key={transaction.id}
-                transaction={transaction}
-              />
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
+          return (
+            <TransactionRowComponent
+              key={transaction.id}
+              transaction={transaction}
+            />
+          )
+        })}
+      </tbody>
+    </table>
   )
 }

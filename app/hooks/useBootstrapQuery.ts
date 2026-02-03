@@ -5,7 +5,9 @@ import { localStore } from '../lib/localStore'
 
 /**
  * Hook to fetch bootstrap data and hydrate the local store.
- * This is the single source of truth for loading data from the server.
+ * Supports incremental sync via cursor:
+ * - If no local cursor exists, fetches full data and calls hydrateFull()
+ * - If local cursor exists, fetches delta with since=cursor and calls applyDelta()
  */
 export function useBootstrapQuery() {
   const queryClient = useQueryClient()
@@ -13,7 +15,12 @@ export function useBootstrapQuery() {
   const query = useQuery<BootstrapData>({
     queryKey: ['bootstrap'],
     queryFn: async () => {
-      const response = await fetch('/api/bootstrap')
+      const cursor = localStore.getBootstrapCursor()
+      const url = cursor
+        ? `/api/bootstrap?since=${cursor}`
+        : '/api/bootstrap'
+
+      const response = await fetch(url)
       if (!response.ok) {
         throw new Error('Failed to fetch bootstrap data')
       }
@@ -23,10 +30,14 @@ export function useBootstrapQuery() {
     refetchOnWindowFocus: false,
   })
 
-  // Hydrate local store when data is fetched
+  // Hydrate or apply delta to local store when data is fetched
   useEffect(() => {
     if (query.data) {
-      localStore.hydrate(query.data)
+      if (query.data.isDelta) {
+        localStore.applyDelta(query.data)
+      } else {
+        localStore.hydrateFull(query.data)
+      }
     }
   }, [query.data])
 

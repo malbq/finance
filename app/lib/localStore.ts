@@ -1,53 +1,54 @@
 /**
  * Local-first store for client-side data management.
  * Uses in-memory storage with IndexedDB persistence.
+ *
+ * Categories are static and accessed via CATEGORY_MAP from domain/Categories.
+ * Moving averages are computed client-side from transactions.
  */
 
-import type { Account } from '../../domain/Account'
-import type { Category } from '../../domain/Categories'
-import type { Transaction } from '../../domain/Transaction'
 import type { BootstrapData } from '../../api/bootstrap'
+import type { Account } from '../../domain/Account'
+import type { CategoryId } from '../../domain/Categories'
+import type { Transaction } from '../../domain/Transaction'
+
+type Goal = {
+  goal: number | null
+  tolerance: number | null
+}
+
+type GoalsByCategory = Partial<Record<CategoryId, Goal>>
 
 export interface LocalStoreMeta {
-  lastBootstrapAt: number | null
-  rangeFrom: number | null
-  rangeTo: number | null
+  /** Cursor for delta sync: max Transaction.updatedAt from last bootstrap */
+  bootstrapCursor: number | null
 }
 
 export interface LocalStoreState {
   accounts: Map<string, Account>
-  categories: Map<string, Category>
   transactions: Map<string, Transaction>
-  movingAverages: {
-    totalMonthlyIncome: number
-    totalMonthlySpending: number
-    expectedSavings: number
-  }
+  spendingGoals: GoalsByCategory
   meta: LocalStoreMeta
 }
 
 type Listener = () => void
 
 const DB_NAME = 'finance-local-store'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const STORE_NAME = 'data'
 
 class LocalStore {
   private state: LocalStoreState = {
     accounts: new Map(),
-    categories: new Map(),
     transactions: new Map(),
-    movingAverages: {
-      totalMonthlyIncome: 0,
-      totalMonthlySpending: 0,
-      expectedSavings: 0,
-    },
+    spendingGoals: {},
     meta: {
-      lastBootstrapAt: null,
-      rangeFrom: null,
-      rangeTo: null,
+      bootstrapCursor: null,
     },
   }
+
+  /** Version counter to create new snapshot references on state changes */
+  private version = 0
+  private cachedSnapshot: LocalStoreState | undefined
 
   private listeners: Set<Listener> = new Set()
   private dbPromise: Promise<IDBDatabase> | null = null
@@ -89,17 +90,10 @@ class LocalStore {
       if (savedState) {
         this.state = {
           accounts: new Map(savedState.accounts || []),
-          categories: new Map(savedState.categories || []),
           transactions: new Map(savedState.transactions || []),
-          movingAverages: savedState.movingAverages || {
-            totalMonthlyIncome: 0,
-            totalMonthlySpending: 0,
-            expectedSavings: 0,
-          },
-          meta: savedState.meta || {
-            lastBootstrapAt: null,
-            rangeFrom: null,
-            rangeTo: null,
+          spendingGoals: savedState.spendingGoals || {},
+          meta: {
+            bootstrapCursor: savedState.meta?.bootstrapCursor ?? null,
           },
         }
         this.notifyListeners()
@@ -114,9 +108,8 @@ class LocalStore {
 
     const serializedState = {
       accounts: Array.from(this.state.accounts.entries()),
-      categories: Array.from(this.state.categories.entries()),
       transactions: Array.from(this.state.transactions.entries()),
-      movingAverages: this.state.movingAverages,
+      spendingGoals: this.state.spendingGoals,
       meta: this.state.meta,
     }
 
@@ -124,6 +117,9 @@ class LocalStore {
   }
 
   private notifyListeners(): void {
+    // Invalidate cached snapshot so getSnapshot returns a new reference
+    this.version++
+    this.cachedSnapshot = undefined
     this.listeners.forEach((listener) => listener())
   }
 
@@ -133,19 +129,14 @@ class LocalStore {
   }
 
   /**
-   * Hydrate the store from bootstrap data
+   * Full hydration: clear all data and repopulate from bootstrap response.
+   * Used when no local cursor exists (fresh load).
    */
-  hydrate(data: BootstrapData): void {
+  hydrateFull(data: BootstrapData): void {
     // Clear and repopulate accounts
     this.state.accounts.clear()
     for (const account of data.accounts) {
       this.state.accounts.set(account.id, account)
-    }
-
-    // Clear and repopulate categories
-    this.state.categories.clear()
-    for (const category of data.categories) {
-      this.state.categories.set(category.id, category)
     }
 
     // Clear and repopulate transactions
@@ -154,14 +145,41 @@ class LocalStore {
       this.state.transactions.set(transaction.id, transaction)
     }
 
-    // Update moving averages
-    this.state.movingAverages = data.movingAverages
+    this.state.spendingGoals = data.spendingGoals ?? {}
 
     // Update meta
     this.state.meta = {
-      lastBootstrapAt: data.generatedAt,
-      rangeFrom: data.range.from,
-      rangeTo: data.range.to,
+      bootstrapCursor: data.cursor,
+    }
+
+    this.saveToIndexedDB()
+    this.notifyListeners()
+  }
+
+  /**
+   * Apply delta: upsert transactions by id without clearing existing data.
+   * Used when a local cursor exists (incremental sync).
+   */
+  applyDelta(data: BootstrapData): void {
+    // Update accounts (full replace since account list is small)
+    this.state.accounts.clear()
+    for (const account of data.accounts) {
+      this.state.accounts.set(account.id, account)
+    }
+
+    // Upsert transactions (do not clear existing)
+    for (const transaction of data.transactions) {
+      this.state.transactions.set(transaction.id, transaction)
+    }
+
+    this.state.spendingGoals = {
+      ...this.state.spendingGoals,
+      ...(data.spendingGoals ?? {}),
+    }
+
+    // Update meta
+    this.state.meta = {
+      bootstrapCursor: data.cursor,
     }
 
     this.saveToIndexedDB()
@@ -184,18 +202,55 @@ class LocalStore {
     return updated
   }
 
+  upsertSpendingGoal(categoryId: CategoryId, goal: Goal): void {
+    this.state.spendingGoals = {
+      ...this.state.spendingGoals,
+      [categoryId]: goal,
+    }
+
+    this.saveToIndexedDB()
+    this.notifySpendingGoalListeners(categoryId)
+  }
+
+  private spendingGoalListeners: Map<CategoryId, Set<Listener>> = new Map()
+
+  subscribeSpendingGoal(categoryId: CategoryId, listener: Listener): () => void {
+    const existing = this.spendingGoalListeners.get(categoryId)
+    if (existing) {
+      existing.add(listener)
+    } else {
+      this.spendingGoalListeners.set(categoryId, new Set([listener]))
+    }
+
+    return () => {
+      const set = this.spendingGoalListeners.get(categoryId)
+      if (!set) return
+      set.delete(listener)
+      if (set.size === 0) this.spendingGoalListeners.delete(categoryId)
+    }
+  }
+
+  private notifySpendingGoalListeners(categoryId: CategoryId): void {
+    const listeners = this.spendingGoalListeners.get(categoryId)
+    if (!listeners) return
+    listeners.forEach((listener) => listener())
+  }
+
+  private emptySpendingGoal: Goal = { goal: null, tolerance: null }
+
+  getSpendingGoal(categoryId: CategoryId): Goal {
+    return this.state.spendingGoals[categoryId] ?? this.emptySpendingGoal
+  }
+
+  getSpendingGoals(): GoalsByCategory {
+    return this.state.spendingGoals
+  }
+
   /**
    * Get all accounts
    */
   getAccounts(): Account[] {
     return Array.from(this.state.accounts.values())
-  }
-
-  /**
-   * Get all categories
-   */
-  getCategories(): Category[] {
-    return Array.from(this.state.categories.values())
   }
 
   /**
@@ -220,13 +275,6 @@ class LocalStore {
   }
 
   /**
-   * Get moving averages
-   */
-  getMovingAverages() {
-    return this.state.movingAverages
-  }
-
-  /**
    * Get store metadata
    */
   getMeta(): LocalStoreMeta {
@@ -234,17 +282,35 @@ class LocalStore {
   }
 
   /**
-   * Check if store has been hydrated
+   * Get the bootstrap cursor for delta sync
    */
-  isHydrated(): boolean {
-    return this.state.meta.lastBootstrapAt !== null
+  getBootstrapCursor(): number | null {
+    return this.state.meta.bootstrapCursor
   }
 
   /**
-   * Get snapshot for React useSyncExternalStore
+   * Check if store has been hydrated
+   */
+  isHydrated(): boolean {
+    return this.state.meta.bootstrapCursor !== null
+  }
+
+  /**
+   * Get snapshot for React useSyncExternalStore.
+   * Returns a new object reference when state changes to trigger re-renders.
    */
   getSnapshot(): LocalStoreState {
-    return this.state
+    if (!this.cachedSnapshot) {
+      // Create a new object reference so React detects the change
+        this.cachedSnapshot = {
+          accounts: this.state.accounts,
+          transactions: this.state.transactions,
+          spendingGoals: this.state.spendingGoals,
+          meta: this.state.meta,
+        }
+
+    }
+    return this.cachedSnapshot
   }
 }
 

@@ -130,10 +130,7 @@ export const transactions = sqliteTable(
     createdAt: integer('createdAt', { mode: 'number' }).notNull(),
     updatedAt: integer('updatedAt', { mode: 'number' }).notNull(),
   },
-  (table) => ({
-    accountIdx: index('account_idx').on(table.accountId),
-    dateIdx: index('date_idx').on(table.date),
-  })
+  (table) => [index('account_idx').on(table.accountId), index('date_idx').on(table.date)]
 )
 
 export const paymentData = sqliteTable('PaymentData', {
@@ -246,9 +243,7 @@ export const investments = sqliteTable(
     createdAt: integer('createdAt', { mode: 'number' }).notNull(),
     updatedAt: integer('updatedAt', { mode: 'number' }).notNull(),
   },
-  (table) => ({
-    itemIdIdIdx: index('itemId_id_idx').on(table.itemId, table.id),
-  })
+  (table) => [index('itemId_id_idx').on(table.itemId, table.id)]
 )
 
 export const investmentTransactions = sqliteTable('InvestmentTransaction', {
@@ -278,9 +273,11 @@ export const categories = sqliteTable('Category', {
   parentDescription: text('parentDescription'),
 })
 
-export const movingAverageProjections = sqliteTable('MovingAverageProjections', {
-  category: text('category').unique().notNull(),
-  value: real('value'),
+export const spendingGoals = sqliteTable('SpendingGoal', {
+  categoryId: text('categoryId').primaryKey(),
+  goal: real('goal'),
+  tolerance: integer('tolerance'),
+  updatedAt: integer('updatedAt', { mode: 'number' }).notNull(),
 })
 
 // Types
@@ -320,4 +317,5 @@ export type NewInvestmentTransaction = typeof investmentTransactions.$inferInser
 export type Category = typeof categories.$inferSelect
 export type NewCategory = typeof categories.$inferInsert
 
-export type MovingAverageProjection = typeof movingAverageProjections.$inferSelect
+export type SpendingGoal = typeof spendingGoals.$inferSelect
+export type NewSpendingGoal = typeof spendingGoals.$inferInsert

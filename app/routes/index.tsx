@@ -33,22 +33,17 @@ function Dashboard() {
   } = data
 
   return (
-    <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
-      <div className='lg:col-span-2'>
-        <BalanceEvolutionChart
-          data={balanceEvolution}
-          totalBalance={totalBalanceFormatted}
-          bankBalance={bankBalance}
-          investmentBalance={investmentBalance}
-          movingAverages={movingAverages}
-        />
-      </div>
-      <div>
-        <SpendingByCategoryChart data={spendingByCategory} />
-      </div>
-      <div>
-        <SpendingByCategoryTable data={spendingByCategory} />
-      </div>
+    <div className='p-8 grid grid-cols-1 lg:grid-cols-2 gap-12 h-full overflow-x-auto'>
+      <BalanceEvolutionChart
+        className='lg:col-span-2'
+        data={balanceEvolution}
+        totalBalance={totalBalanceFormatted}
+        bankBalance={bankBalance}
+        investmentBalance={investmentBalance}
+        movingAverages={movingAverages}
+      />
+      <SpendingByCategoryTable data={spendingByCategory} />
+      <SpendingByCategoryChart data={spendingByCategory} />
     </div>
   )
 }
