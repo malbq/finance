@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, max } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/bun-sqlite'
 import {
   acquirerData,
@@ -26,6 +26,7 @@ export class TransactionSyncService {
   }
 
   private async syncAccountTransactions(account: PluggyAccount): Promise<void> {
+    const latestUpdatedAt = await this.getLatestUpdatedAt(account.id)
     const params: Record<string, string> = {
       accountId: account.id,
       pageSize: '500',
@@ -40,6 +41,10 @@ export class TransactionSyncService {
     )
 
     for (const transaction of response.results) {
+      const incomingUpdatedAt = new Date(transaction.updatedAt).getTime()
+      if (Number.isFinite(incomingUpdatedAt) && incomingUpdatedAt <= latestUpdatedAt) {
+        continue
+      }
       try {
         await this.syncSingleTransaction(transaction)
       } catch (error) {
@@ -47,6 +52,15 @@ export class TransactionSyncService {
         throw error
       }
     }
+  }
+
+  private async getLatestUpdatedAt(accountId: string): Promise<number> {
+    const result = await this.db
+      .select({ maxUpdatedAt: max(transactions.updatedAt) })
+      .from(transactions)
+      .where(eq(transactions.accountId, accountId))
+
+    return result[0]?.maxUpdatedAt ?? 0
   }
 
   private async syncSingleTransaction(transaction: PluggyTransaction): Promise<void> {

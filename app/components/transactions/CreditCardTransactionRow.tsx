@@ -8,7 +8,7 @@ interface CreditCardTransactionRowProps {
 }
 
 export const CreditCardTransactionRow = memo(function CreditCardTransactionRow({
-  transaction,
+  transaction
 }: CreditCardTransactionRowProps) {
   const { updateTransactionCategory, getOptimisticCategory, isUpdating } = useCategoryUpdate()
   const { categoryId } = getOptimisticCategory(transaction)
@@ -39,7 +39,7 @@ export const CreditCardTransactionRow = memo(function CreditCardTransactionRow({
       >
         <button
           onClick={copyTransactionId}
-          className='absolute left-[-10px] top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-100 bg-zinc-600 hover:bg-zinc-500 text-zinc-100 p-1 rounded-full text-xs font-mono border border-zinc-500 z-10'
+          className='absolute top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-100 bg-zinc-600 hover:bg-zinc-500 text-zinc-100 p-1 rounded-full text-xs font-mono border border-zinc-500 z-10'
           title='Copy transaction ID'
         >
           ID

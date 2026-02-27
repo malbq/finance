@@ -3,6 +3,6 @@ export function formatDate(date: Date): string {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-    timeZone: 'UTC',
+    timeZone: 'UTC'
   }).format(new Date(date))
 }

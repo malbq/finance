@@ -50,15 +50,13 @@ const CategoryRow = memo(function CategoryRow({
   months,
   lastMonth,
   monthDataByMonth,
-  updateGoal,
+  updateGoal
 }: CategoryRowProps) {
   // This subscribes to only this category goal changes.
   const goal = useSpendingGoal(category)
 
   const getGoalStatus = useCallback(
     (month: string, value: number | undefined) => {
-      if (!lastMonth) return ''
-      if (month !== lastMonth) return ''
       if (value === undefined) return ''
       if (goal.goal === null) return ''
 
@@ -144,13 +142,13 @@ const CategoryRow = memo(function CategoryRow({
             className={`
                          px-2 py-1 text-xs text-right
                          ${
-                           value === 0
+                           value === 0 || value === undefined
                              ? 'text-zinc-600'
                              : goalStatus === 'over'
-                             ? 'text-red-400 font-extrabold text-shadow-[0px_0_10px_red]'
-                             : goalStatus === 'under'
-                             ? 'text-green-400 text-shadow-[0px_0_10px_#0d0]'
-                             : `text-zinc-300`
+                               ? 'text-red-400 font-extrabold text-shadow-[0px_0_10px_red]'
+                               : goalStatus === 'under'
+                                 ? 'text-green-400 text-shadow-[0px_0_10px_#0d0]'
+                                 : `text-zinc-300`
                          }
                          ${index % 2 === 0 ? `bg-zinc-800` : `bg-zinc-900`}`}
           >
@@ -197,7 +195,6 @@ export const SpendingByCategoryTable = ({ data, className = '' }: SpendingByCate
 
     return { months, lastMonth, monthDataByMonth, categories }
   }, [data])
-
 
   if (categories.length === 0) {
     return <div>Nenhuma categoria de despesas encontrada</div>

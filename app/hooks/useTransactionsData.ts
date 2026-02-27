@@ -1,4 +1,4 @@
-import { useMemo, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useSyncExternalStore } from 'react'
 import type { Account } from '../../domain/Account'
 import type { Transaction } from '../../domain/Transaction'
 import { activeAccountStore } from '../lib/activeAccountStore'
@@ -70,9 +70,11 @@ export function useTransactionsData() {
 
   // Set active account in store if it changed (e.g., when accounts load for the first time)
   // This keeps store in sync with effective value
-  if (effectiveActiveTab && effectiveActiveTab !== activeTab) {
-    activeAccountStore.setActiveAccount(effectiveActiveTab)
-  }
+  useEffect(() => {
+    if (effectiveActiveTab && effectiveActiveTab !== activeTab) {
+      activeAccountStore.setActiveAccount(effectiveActiveTab)
+    }
+  }, [activeTab, effectiveActiveTab])
 
   return {
     data,
