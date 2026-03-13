@@ -1,12 +1,12 @@
 import { writeFileSync } from 'fs'
 import { join } from 'path'
 import { createDatabase } from '../api/db/drizzle'
-import { categories, type Category } from '../api/db/schema'
+import { category, type Category } from '../api/db/schema'
 
 const db = createDatabase()
 
 try {
-  const categoryResults = (await db.select().from(categories as any)) as Category[]
+  const categoryResults = (await db.select().from(category as any)) as Category[]
 
   const categoryIds = categoryResults.map((cat) => `'${cat.id}'`).join(' | ')
 

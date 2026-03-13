@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/bun-sqlite'
-import { categories } from '../db/schema'
+import { category as categoryTable } from '../db/schema'
 import { PluggyClient } from './PluggyClient'
 import { PluggyDataMapper, type PluggyCategory } from './PluggyDataMapper'
 
@@ -30,14 +30,14 @@ export class CategorySyncService {
 
     const existingCategory = await this.db
       .select()
-      .from(categories)
-      .where(eq(categories.id, category.id))
+      .from(categoryTable)
+      .where(eq(categoryTable.id, category.id))
       .limit(1)
 
     if (existingCategory.length > 0) {
-      await this.db.update(categories).set(categoryData).where(eq(categories.id, category.id))
+      await this.db.update(categoryTable).set(categoryData).where(eq(categoryTable.id, category.id))
     } else {
-      await this.db.insert(categories).values(categoryData)
+      await this.db.insert(categoryTable).values(categoryData)
     }
   }
 }

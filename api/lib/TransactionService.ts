@@ -6,43 +6,43 @@ import { formatCurrency } from '../../utils/formatCurrency'
 import { formatDate } from '../../utils/formatDate'
 import { formatTime } from '../../utils/formatTime'
 import {
-  accounts,
+  account,
   acquirerData,
   creditCardMetadata,
-  merchants,
+  merchant,
   paymentData,
-  paymentParticipants,
-  transactions,
+  paymentParticipant,
+  transaction,
 } from '../db/schema'
 
 export class TransactionService {
   constructor(private db: ReturnType<typeof drizzle>) {}
 
   async findByAccountId(accountId: string): Promise<Transaction[]> {
-    const payer = aliasedTable(paymentParticipants, 'payer')
-    const receiver = aliasedTable(paymentParticipants, 'receiver')
+    const payer = aliasedTable(paymentParticipant, 'payer')
+    const receiver = aliasedTable(paymentParticipant, 'receiver')
 
     const result = await this.db
       .select({
-        transaction: transactions,
-        account: { type: accounts.type },
+        transaction: transaction,
+        account: { type: account.type },
         paymentData: paymentData,
         payer: payer,
         receiver: receiver,
         creditCardMetadata: creditCardMetadata,
         acquirerData: acquirerData,
-        merchant: merchants,
+        merchant: merchant,
       })
-      .from(transactions)
-      .leftJoin(accounts, eq(transactions.accountId, accounts.id))
-      .leftJoin(paymentData, eq(transactions.id, paymentData.transactionId))
+      .from(transaction)
+      .leftJoin(account, eq(transaction.accountId, account.id))
+      .leftJoin(paymentData, eq(transaction.id, paymentData.transactionId))
       .leftJoin(payer, eq(paymentData.id, payer.payerPaymentDataId))
       .leftJoin(receiver, eq(paymentData.id, receiver.receiverPaymentDataId))
-      .leftJoin(creditCardMetadata, eq(transactions.id, creditCardMetadata.transactionId))
-      .leftJoin(acquirerData, eq(transactions.id, acquirerData.transactionId))
-      .leftJoin(merchants, eq(transactions.id, merchants.transactionId))
-      .where(eq(transactions.accountId, accountId))
-      .orderBy(desc(transactions.date))
+      .leftJoin(creditCardMetadata, eq(transaction.id, creditCardMetadata.transactionId))
+      .leftJoin(acquirerData, eq(transaction.id, acquirerData.transactionId))
+      .leftJoin(merchant, eq(transaction.id, merchant.transactionId))
+      .where(eq(transaction.accountId, accountId))
+      .orderBy(desc(transaction.date))
 
     // Group results by transaction ID since joins can create duplicates
     const transactionMap = new Map<string, any>()
@@ -73,20 +73,20 @@ export class TransactionService {
   }
 
   async updateCategory(id: string, categoryId: string): Promise<void> {
-    await this.db.update(transactions).set({ categoryId }).where(eq(transactions.id, id))
+    await this.db.update(transaction).set({ categoryId }).where(eq(transaction.id, id))
   }
 
   private mapToEntity = (row: {
-    transaction: typeof transactions.$inferSelect
+    transaction: typeof transaction.$inferSelect
     account: { type: string } | null
     paymentData: typeof paymentData.$inferSelect | null
-    payer: typeof paymentParticipants.$inferSelect | null
-    receiver: typeof paymentParticipants.$inferSelect | null
+    payer: typeof paymentParticipant.$inferSelect | null
+    receiver: typeof paymentParticipant.$inferSelect | null
     creditCardMetadata: typeof creditCardMetadata.$inferSelect | null
     acquirerData: typeof acquirerData.$inferSelect | null
-    merchant: typeof merchants.$inferSelect | null
-    payers?: (typeof paymentParticipants.$inferSelect)[]
-    receivers?: (typeof paymentParticipants.$inferSelect)[]
+    merchant: typeof merchant.$inferSelect | null
+    payers?: (typeof paymentParticipant.$inferSelect)[]
+    receivers?: (typeof paymentParticipant.$inferSelect)[]
   }): Transaction => {
     const transactionData = row.transaction
     const accountType = row.account?.type

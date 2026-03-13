@@ -10,6 +10,47 @@ import type { BootstrapData } from '../../api/bootstrap'
 import type { Account } from '../../domain/Account'
 import type { CategoryId } from '../../domain/Categories'
 import type { Transaction } from '../../domain/Transaction'
+import type { Serialized } from '../../utils/Serialized'
+
+/** Wire format of BootstrapData as received from the API (Date fields are strings). */
+export type SerializedBootstrapData = Serialized<BootstrapData>
+
+/**
+ * Deserialize a Transaction as received via JSON (Date fields are strings)
+ * back into a proper Transaction with Date objects.
+ */
+function deserializeTransaction(tx: Serialized<Transaction>): Transaction {
+  return {
+    ...tx,
+    date: new Date(tx.date),
+    createdAt: new Date(tx.createdAt),
+    updatedAt: new Date(tx.updatedAt),
+    creditCardMetadata: tx.creditCardMetadata
+      ? {
+          ...tx.creditCardMetadata,
+          purchaseDate: tx.creditCardMetadata.purchaseDate
+            ? new Date(tx.creditCardMetadata.purchaseDate)
+            : undefined,
+        }
+      : undefined,
+  }
+}
+
+/**
+ * Deserialize an Account as received via JSON (Date fields are strings)
+ * back into a proper Account with Date objects.
+ */
+function deserializeAccount(account: Serialized<Account>): Account {
+  return {
+    ...account,
+    creditData: account.creditData
+      ? {
+          ...account.creditData,
+          balanceDueDate: new Date(account.creditData.balanceDueDate),
+        }
+      : undefined,
+  }
+}
 
 type Goal = {
   goal: number | null
@@ -132,17 +173,17 @@ class LocalStore {
    * Full hydration: clear all data and repopulate from bootstrap response.
    * Used when no local cursor exists (fresh load).
    */
-  hydrateFull(data: BootstrapData): void {
+  hydrateFull(data: SerializedBootstrapData): void {
     // Clear and repopulate accounts
     this.state.accounts.clear()
     for (const account of data.accounts) {
-      this.state.accounts.set(account.id, account)
+      this.state.accounts.set(account.id, deserializeAccount(account))
     }
 
     // Clear and repopulate transactions
     this.state.transactions.clear()
     for (const transaction of data.transactions) {
-      this.state.transactions.set(transaction.id, transaction)
+      this.state.transactions.set(transaction.id, deserializeTransaction(transaction))
     }
 
     this.state.spendingGoals = data.spendingGoals ?? {}
@@ -160,16 +201,16 @@ class LocalStore {
    * Apply delta: upsert transactions by id without clearing existing data.
    * Used when a local cursor exists (incremental sync).
    */
-  applyDelta(data: BootstrapData): void {
+  applyDelta(data: SerializedBootstrapData): void {
     // Update accounts (full replace since account list is small)
     this.state.accounts.clear()
     for (const account of data.accounts) {
-      this.state.accounts.set(account.id, account)
+      this.state.accounts.set(account.id, deserializeAccount(account))
     }
 
     // Upsert transactions (do not clear existing)
     for (const transaction of data.transactions) {
-      this.state.transactions.set(transaction.id, transaction)
+      this.state.transactions.set(transaction.id, deserializeTransaction(transaction))
     }
 
     this.state.spendingGoals = {

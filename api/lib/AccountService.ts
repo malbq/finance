@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/bun-sqlite'
 import type { Account } from '../../domain/Account'
 import { formatCurrency } from '../../utils/formatCurrency'
-import { accounts, creditData } from '../db/schema'
+import { account, creditData } from '../db/schema'
 
 export class AccountService {
   constructor(private db: ReturnType<typeof drizzle>) {}
@@ -10,18 +10,18 @@ export class AccountService {
   async findAll(): Promise<Account[]> {
     const result = await this.db
       .select({
-        account: accounts,
+        account: account,
         creditData: creditData,
       })
-      .from(accounts)
-      .leftJoin(creditData, eq(accounts.id, creditData.accountId))
-      .orderBy(accounts.type, accounts.itemId)
+      .from(account)
+      .leftJoin(creditData, eq(account.id, creditData.accountId))
+      .orderBy(account.type, account.itemId)
 
     return result.map(this.mapToEntity)
   }
 
   private mapToEntity = (result: {
-    account: typeof accounts.$inferSelect
+    account: typeof account.$inferSelect
     creditData: typeof creditData.$inferSelect | null
   }): Account => {
     const accountData = result.account

@@ -53,7 +53,7 @@ export const movementType = ['CREDIT', 'DEBIT'] as const
 export const transactionType = ['CREDIT', 'DEBIT'] as const
 export const transactionStatus = ['POSTED', 'PENDING'] as const
 
-export const accounts = sqliteTable('Account', {
+export const account = sqliteTable('Account', {
   id: text('id').primaryKey(),
   itemId: text('itemId').notNull(),
   number: text('number'),
@@ -75,7 +75,7 @@ export const bankData = sqliteTable('BankData', {
     .$defaultFn(() => crypto.randomUUID()),
   accountId: text('accountId')
     .notNull()
-    .references(() => accounts.id)
+    .references(() => account.id)
     .unique(),
   transferNumber: text('transferNumber'),
   closingBalance: real('closingBalance'),
@@ -91,7 +91,7 @@ export const creditData = sqliteTable('CreditData', {
     .$defaultFn(() => crypto.randomUUID()),
   accountId: text('accountId')
     .notNull()
-    .references(() => accounts.id)
+    .references(() => account.id)
     .unique(),
   level: text('level').notNull(),
   brand: text('brand').notNull(),
@@ -106,13 +106,13 @@ export const creditData = sqliteTable('CreditData', {
   status: text('status'),
 })
 
-export const transactions = sqliteTable(
+export const transaction = sqliteTable(
   'Transaction',
   {
     id: text('id').primaryKey(),
     accountId: text('accountId')
       .notNull()
-      .references(() => accounts.id),
+      .references(() => account.id),
     description: text('description').notNull(),
     descriptionRaw: text('descriptionRaw'),
     currencyCode: text('currencyCode').default('BRL').notNull(),
@@ -139,7 +139,7 @@ export const paymentData = sqliteTable('PaymentData', {
     .$defaultFn(() => crypto.randomUUID()),
   transactionId: text('transactionId')
     .notNull()
-    .references(() => transactions.id)
+    .references(() => transaction.id)
     .unique(),
   paymentMethod: text('paymentMethod'),
   reason: text('reason'),
@@ -148,7 +148,7 @@ export const paymentData = sqliteTable('PaymentData', {
   boletoMetadata: text('boletoMetadata'),
 })
 
-export const paymentParticipants = sqliteTable('PaymentParticipant', {
+export const paymentParticipant = sqliteTable('PaymentParticipant', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -173,7 +173,7 @@ export const creditCardMetadata = sqliteTable('CreditCardMetadata', {
     .$defaultFn(() => crypto.randomUUID()),
   transactionId: text('transactionId')
     .notNull()
-    .references(() => transactions.id)
+    .references(() => transaction.id)
     .unique(),
   data: text('data'),
 })
@@ -184,18 +184,18 @@ export const acquirerData = sqliteTable('AcquirerData', {
     .$defaultFn(() => crypto.randomUUID()),
   transactionId: text('transactionId')
     .notNull()
-    .references(() => transactions.id)
+    .references(() => transaction.id)
     .unique(),
   data: text('data'),
 })
 
-export const merchants = sqliteTable('Merchant', {
+export const merchant = sqliteTable('Merchant', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   transactionId: text('transactionId')
     .notNull()
-    .references(() => transactions.id)
+    .references(() => transaction.id)
     .unique(),
   cnae: text('cnae'),
   cnpj: text('cnpj'),
@@ -204,7 +204,7 @@ export const merchants = sqliteTable('Merchant', {
   businessName: text('businessName'),
 })
 
-export const investments = sqliteTable(
+export const investment = sqliteTable(
   'Investment',
   {
     id: text('id').primaryKey(),
@@ -246,11 +246,11 @@ export const investments = sqliteTable(
   (table) => [index('itemId_id_idx').on(table.itemId, table.id)]
 )
 
-export const investmentTransactions = sqliteTable('InvestmentTransaction', {
+export const investmentTransaction = sqliteTable('InvestmentTransaction', {
   id: text('id').primaryKey(),
   investmentId: text('investmentId')
     .notNull()
-    .references(() => investments.id),
+    .references(() => investment.id),
   type: text('type', { enum: investmentTransactionType }).notNull(),
   movementType: text('movementType', { enum: movementType }),
   quantity: real('quantity'),
@@ -265,7 +265,7 @@ export const investmentTransactions = sqliteTable('InvestmentTransaction', {
   expenses: text('expenses'),
 })
 
-export const categories = sqliteTable('Category', {
+export const category = sqliteTable('Category', {
   id: text('id').primaryKey(),
   description: text('description').notNull(),
   descriptionTranslated: text('descriptionTranslated').notNull(),
@@ -273,7 +273,7 @@ export const categories = sqliteTable('Category', {
   parentDescription: text('parentDescription'),
 })
 
-export const spendingGoals = sqliteTable('SpendingGoal', {
+export const spendingGoal = sqliteTable('SpendingGoal', {
   categoryId: text('categoryId').primaryKey(),
   goal: real('goal'),
   tolerance: integer('tolerance'),
@@ -281,8 +281,8 @@ export const spendingGoals = sqliteTable('SpendingGoal', {
 })
 
 // Types
-export type Account = typeof accounts.$inferSelect
-export type NewAccount = typeof accounts.$inferInsert
+export type Account = typeof account.$inferSelect
+export type NewAccount = typeof account.$inferInsert
 
 export type BankData = typeof bankData.$inferSelect
 export type NewBankData = typeof bankData.$inferInsert
@@ -290,14 +290,14 @@ export type NewBankData = typeof bankData.$inferInsert
 export type CreditData = typeof creditData.$inferSelect
 export type NewCreditData = typeof creditData.$inferInsert
 
-export type Transaction = typeof transactions.$inferSelect
-export type NewTransaction = typeof transactions.$inferInsert
+export type Transaction = typeof transaction.$inferSelect
+export type NewTransaction = typeof transaction.$inferInsert
 
 export type PaymentData = typeof paymentData.$inferSelect
 export type NewPaymentData = typeof paymentData.$inferInsert
 
-export type PaymentParticipant = typeof paymentParticipants.$inferSelect
-export type NewPaymentParticipant = typeof paymentParticipants.$inferInsert
+export type PaymentParticipant = typeof paymentParticipant.$inferSelect
+export type NewPaymentParticipant = typeof paymentParticipant.$inferInsert
 
 export type CreditCardMetadata = typeof creditCardMetadata.$inferSelect
 export type NewCreditCardMetadata = typeof creditCardMetadata.$inferInsert
@@ -305,17 +305,17 @@ export type NewCreditCardMetadata = typeof creditCardMetadata.$inferInsert
 export type AcquirerData = typeof acquirerData.$inferSelect
 export type NewAcquirerData = typeof acquirerData.$inferInsert
 
-export type Merchant = typeof merchants.$inferSelect
-export type NewMerchant = typeof merchants.$inferInsert
+export type Merchant = typeof merchant.$inferSelect
+export type NewMerchant = typeof merchant.$inferInsert
 
-export type Investment = typeof investments.$inferSelect
-export type NewInvestment = typeof investments.$inferInsert
+export type Investment = typeof investment.$inferSelect
+export type NewInvestment = typeof investment.$inferInsert
 
-export type InvestmentTransaction = typeof investmentTransactions.$inferSelect
-export type NewInvestmentTransaction = typeof investmentTransactions.$inferInsert
+export type InvestmentTransaction = typeof investmentTransaction.$inferSelect
+export type NewInvestmentTransaction = typeof investmentTransaction.$inferInsert
 
-export type Category = typeof categories.$inferSelect
-export type NewCategory = typeof categories.$inferInsert
+export type Category = typeof category.$inferSelect
+export type NewCategory = typeof category.$inferInsert
 
-export type SpendingGoal = typeof spendingGoals.$inferSelect
-export type NewSpendingGoal = typeof spendingGoals.$inferInsert
+export type SpendingGoal = typeof spendingGoal.$inferSelect
+export type NewSpendingGoal = typeof spendingGoal.$inferInsert

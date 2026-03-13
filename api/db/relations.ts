@@ -2,19 +2,19 @@ import { defineRelations } from 'drizzle-orm'
 import * as schema from './schema'
 
 const tablesOnlySchema = {
-  accounts: schema.accounts,
+  accounts: schema.account,
   bankData: schema.bankData,
   creditData: schema.creditData,
-  transactions: schema.transactions,
+  transactions: schema.transaction,
   paymentData: schema.paymentData,
-  paymentParticipants: schema.paymentParticipants,
+  paymentParticipants: schema.paymentParticipant,
   creditCardMetadata: schema.creditCardMetadata,
   acquirerData: schema.acquirerData,
-  merchants: schema.merchants,
-  investments: schema.investments,
-  investmentTransactions: schema.investmentTransactions,
-  categories: schema.categories,
-  spendingGoals: schema.spendingGoals,
+  merchants: schema.merchant,
+  investments: schema.investment,
+  investmentTransactions: schema.investmentTransaction,
+  categories: schema.category,
+  spendingGoals: schema.spendingGoal,
 }
 
 export const relations = defineRelations(tablesOnlySchema, (r) => ({

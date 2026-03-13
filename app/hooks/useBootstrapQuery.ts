@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect } from 'react'
-import type { BootstrapData } from '../../api/bootstrap'
-import { localStore } from '../lib/localStore'
+import { type SerializedBootstrapData, localStore } from '../lib/localStore'
 
 /**
  * Hook to fetch bootstrap data and hydrate the local store.
@@ -12,7 +11,7 @@ import { localStore } from '../lib/localStore'
 export function useBootstrapQuery() {
   const queryClient = useQueryClient()
 
-  const query = useQuery<BootstrapData>({
+  const query = useQuery<SerializedBootstrapData>({
     queryKey: ['bootstrap'],
     queryFn: async () => {
       const cursor = localStore.getBootstrapCursor()

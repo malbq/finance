@@ -88,7 +88,15 @@ export function useDashboardData() {
       movingAverages.expectedSavings
     )
 
-    const spendingByCategory = generateSpendingByCategory(transactions, accounts)
+    // For dashboard charts, only consider transactions up to today (future installments
+    // are available in the store for the transactions view but should not affect the dashboard)
+    const threeMonthsAgo = new Date()
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 1)
+    threeMonthsAgo.setDate(1)
+    threeMonthsAgo.setHours(0, 0, 0, 0)
+    const _transactions = transactions.filter((tx) => tx.date.getTime() >= threeMonthsAgo.getTime())
+
+    const spendingByCategory = generateSpendingByCategory(_transactions, accounts)
 
     return {
       totalBalance,

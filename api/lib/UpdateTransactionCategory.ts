@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/bun-sqlite'
-import { categories, transactions } from '../db/schema'
+import { category, transaction } from '../db/schema'
 import { CategoryService } from './CategoryService'
 import { TransactionService } from './TransactionService'
 
@@ -34,20 +34,12 @@ export class UpdateTransactionCategory {
 
       const categoryResult = await this.db
         .select()
-        .from(categories)
-        .where(eq(categories.id, categoryId))
+        .from(category)
+        .where(eq(category.id, categoryId))
         .limit(1)
 
-      if (categoryResult.length === 0) {
-        console.warn(`Category not found: ${categoryId}`)
-        return {
-          success: false,
-          error: 'Category not found',
-        }
-      }
-
-      const category = categoryResult[0]
-      if (!category) {
+      const foundCategory = categoryResult[0]
+      if (!foundCategory) {
         console.warn(`Category not found: ${categoryId}`)
         return {
           success: false,
@@ -57,8 +49,8 @@ export class UpdateTransactionCategory {
 
       const transactionResult = await this.db
         .select()
-        .from(transactions)
-        .where(eq(transactions.id, transactionId))
+        .from(transaction)
+        .where(eq(transaction.id, transactionId))
         .limit(1)
 
       if (transactionResult.length === 0) {
@@ -70,13 +62,13 @@ export class UpdateTransactionCategory {
       }
 
       await this.db
-        .update(transactions)
+        .update(transaction)
         .set({
           categoryId: categoryId,
-          category: category.descriptionTranslated,
+          category: foundCategory.descriptionTranslated,
           updatedAt: Date.now(),
         })
-        .where(eq(transactions.id, transactionId))
+        .where(eq(transaction.id, transactionId))
 
       console.info(`Successfully updated transaction ${transactionId} with category ${categoryId}`)
       return { success: true }

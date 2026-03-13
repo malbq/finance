@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/bun-sqlite'
-import { accounts, bankData, creditData } from '../db/schema'
+import { account as accountTable, bankData, creditData } from '../db/schema'
 import { PluggyClient } from './PluggyClient'
 import { PluggyDataMapper, type PluggyAccount } from './PluggyDataMapper'
 
@@ -49,14 +49,14 @@ export class AccountSyncService {
 
       const existingAccount = await tx
         .select()
-        .from(accounts)
-        .where(eq(accounts.id, account.id))
+        .from(accountTable)
+        .where(eq(accountTable.id, account.id))
         .limit(1)
 
       if (existingAccount.length > 0) {
-        await tx.update(accounts).set(accountData).where(eq(accounts.id, account.id))
+        await tx.update(accountTable).set(accountData).where(eq(accountTable.id, account.id))
       } else {
-        await tx.insert(accounts).values(accountData)
+        await tx.insert(accountTable).values(accountData)
       }
 
       if (account.bankData) {

@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/bun-sqlite'
 import type { CategoryId } from '../domain/Categories'
-import { spendingGoals } from './db/schema'
+import { spendingGoal } from './db/schema'
 
 function toNullableNumber(value: unknown): number | null {
   if (value === '' || value === null || value === undefined) return null
@@ -49,13 +49,13 @@ export function createSpendingGoalsHandler(db: Db) {
       // Create on first write; never delete.
       // Null values mean "blank" in the UI.
       const existing = await db
-        .select({ categoryId: spendingGoals.categoryId })
-        .from(spendingGoals)
-        .where(eq(spendingGoals.categoryId, categoryId))
+        .select({ categoryId: spendingGoal.categoryId })
+        .from(spendingGoal)
+        .where(eq(spendingGoal.categoryId, categoryId))
         .limit(1)
 
       if (existing.length === 0) {
-        await db.insert(spendingGoals).values({
+        await db.insert(spendingGoal).values({
           categoryId,
           goal,
           tolerance,
@@ -63,13 +63,13 @@ export function createSpendingGoalsHandler(db: Db) {
         })
       } else {
         await db
-          .update(spendingGoals)
+          .update(spendingGoal)
           .set({
             goal,
             tolerance,
             updatedAt: now,
           })
-          .where(eq(spendingGoals.categoryId, categoryId))
+          .where(eq(spendingGoal.categoryId, categoryId))
       }
 
       return Response.json({ success: true, data: { categoryId, goal, tolerance } })

@@ -1,4 +1,4 @@
-import { aliasedTable, and, desc, eq, gt, gte, lte, max } from 'drizzle-orm'
+import { aliasedTable, and, desc, eq, gt, gte, max } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/bun-sqlite'
 import type { Account } from '../domain/Account'
 import type { CategoryId } from '../domain/Categories'
@@ -7,15 +7,15 @@ import { formatCurrency } from '../utils/formatCurrency'
 import { formatDate } from '../utils/formatDate'
 import { formatTime } from '../utils/formatTime'
 import {
-  accounts,
+  account,
   acquirerData,
   creditCardMetadata,
   creditData,
-  merchants,
+  merchant,
   paymentData,
-  paymentParticipants,
-  spendingGoals,
-  transactions,
+  paymentParticipant,
+  spendingGoal,
+  transaction,
 } from './db/schema'
 
 export interface BootstrapData {
@@ -38,6 +38,24 @@ export interface BootstrapData {
 
 type Db = ReturnType<typeof drizzle>
 
+/** Raw row returned by the transaction JOIN query — one row per payer/receiver pair */
+type RawTransactionRow = {
+  transaction: typeof transaction.$inferSelect
+  account: { type: string } | null
+  paymentData: typeof paymentData.$inferSelect | null
+  payer: typeof paymentParticipant.$inferSelect | null
+  receiver: typeof paymentParticipant.$inferSelect | null
+  creditCardMetadata: typeof creditCardMetadata.$inferSelect | null
+  acquirerData: typeof acquirerData.$inferSelect | null
+  merchant: typeof merchant.$inferSelect | null
+}
+
+/** Grouped transaction row with all payers/receivers collected */
+type TransactionRow = Omit<RawTransactionRow, 'payer' | 'receiver'> & {
+  payers: (typeof paymentParticipant.$inferSelect)[]
+  receivers: (typeof paymentParticipant.$inferSelect)[]
+}
+
 export function createBootstrapHandler(db: Db) {
   return {
     async GET(request: Request) {
@@ -56,18 +74,16 @@ export function createBootstrapHandler(db: Db) {
 }
 
 async function getBootstrapData(db: Db, since?: number): Promise<BootstrapData> {
-  const now = Date.now()
-  const nowDate = new Date(now)
-  const from = new Date(nowDate.getFullYear(), nowDate.getMonth() - 6, 1).getTime()
-  const to = now
+  const now = new Date()
+  const from = new Date(now.getFullYear(), now.getMonth() - 6, 1).getTime()
   const isDelta = since !== undefined
 
   // Load data based on whether this is a full load or delta
   const [accountsData, transactionsData, goalsData, cursorValue] = await Promise.all([
     loadAccounts(db),
-    isDelta ? loadTransactionsDelta(db, from, to, since) : loadTransactionsInRange(db, from, to),
-    loadSpendingGoalsDelta(db, since),
-    getMaxUpdatedAt(db, from, to),
+    isDelta ? loadTransactionsDelta(db, from, since) : loadTransactionsInRange(db, from),
+    loadSpendingGoals(db, since),
+    getMaxUpdatedAt(db, from),
   ])
 
   return {
@@ -83,68 +99,45 @@ async function getBootstrapData(db: Db, since?: number): Promise<BootstrapData> 
  * Get the max updatedAt timestamp for transactions in the window.
  * This is used as the cursor for delta sync.
  */
-async function getMaxUpdatedAt(db: Db, from: number, to: number): Promise<number> {
+async function getMaxUpdatedAt(db: Db, from: number): Promise<number> {
   const result = await db
-    .select({ maxUpdatedAt: max(transactions.updatedAt) })
-    .from(transactions)
-    .where(and(gte(transactions.date, from), lte(transactions.date, to)))
+    .select({ maxUpdatedAt: max(transaction.updatedAt) })
+    .from(transaction)
+    .where(gte(transaction.date, from))
 
   return result[0]?.maxUpdatedAt ?? 0
 }
 
-async function loadSpendingGoalsDelta(
+async function loadSpendingGoals(
   db: Db,
   since?: number
 ): Promise<BootstrapData['spendingGoals']> {
-  if (since === undefined) {
-    const rows = await db
-      .select({
-        categoryId: spendingGoals.categoryId,
-        goal: spendingGoals.goal,
-        tolerance: spendingGoals.tolerance,
-      })
-      .from(spendingGoals)
-
-    const data: BootstrapData['spendingGoals'] = {}
-    rows.forEach((row) => {
-      data[row.categoryId as CategoryId] = {
-        goal: row.goal ?? null,
-        tolerance: row.tolerance ?? null,
-      }
-    })
-
-    return data
-  }
-
   const rows = await db
     .select({
-      categoryId: spendingGoals.categoryId,
-      goal: spendingGoals.goal,
-      tolerance: spendingGoals.tolerance,
+      categoryId: spendingGoal.categoryId,
+      goal: spendingGoal.goal,
+      tolerance: spendingGoal.tolerance,
     })
-    .from(spendingGoals)
-    .where(gt(spendingGoals.updatedAt, since))
+    .from(spendingGoal)
+    .where(since !== undefined ? gt(spendingGoal.updatedAt, since) : undefined)
 
-  const data: BootstrapData['spendingGoals'] = {}
-  rows.forEach((row) => {
-    data[row.categoryId as CategoryId] = {
-      goal: row.goal ?? null,
-      tolerance: row.tolerance ?? null,
-    }
-  })
-
-  return data
+  return Object.fromEntries(
+    rows.map((row) => [
+      row.categoryId as CategoryId,
+      { goal: row.goal ?? null, tolerance: row.tolerance ?? null },
+    ])
+  )
 }
 
 async function loadAccounts(db: Db): Promise<Account[]> {
   const result = await db
     .select({
-      account: accounts,
+      account: account,
       creditData: creditData,
     })
-    .from(accounts)
-    .leftJoin(creditData, eq(accounts.id, creditData.accountId))
-    .orderBy(accounts.type, accounts.itemId)
+    .from(account)
+    .leftJoin(creditData, eq(account.id, creditData.accountId))
+    .orderBy(account.type, account.itemId)
 
   return result.map((row) => {
     const accountData = row.account
@@ -180,137 +173,82 @@ async function loadAccounts(db: Db): Promise<Account[]> {
  * Load all transactions within the date range with a single efficient query.
  * This avoids the N+1 problem of loading transactions per-account.
  */
-async function loadTransactionsInRange(db: Db, from: number, to: number): Promise<Transaction[]> {
-  const payer = aliasedTable(paymentParticipants, 'payer')
-  const receiver = aliasedTable(paymentParticipants, 'receiver')
+async function loadTransactionsInRange(db: Db, from: number): Promise<Transaction[]> {
+  const payer = aliasedTable(paymentParticipant, 'payer')
+  const receiver = aliasedTable(paymentParticipant, 'receiver')
 
-  const result = await db
+  const rows = await db
     .select({
-      transaction: transactions,
-      account: { type: accounts.type },
-      paymentData: paymentData,
-      payer: payer,
-      receiver: receiver,
-      creditCardMetadata: creditCardMetadata,
-      acquirerData: acquirerData,
-      merchant: merchants,
+      transaction,
+      account: { type: account.type },
+      paymentData,
+      payer,
+      receiver,
+      creditCardMetadata,
+      acquirerData,
+      merchant,
     })
-    .from(transactions)
-    .leftJoin(accounts, eq(transactions.accountId, accounts.id))
-    .leftJoin(paymentData, eq(transactions.id, paymentData.transactionId))
+    .from(transaction)
+    .leftJoin(account, eq(transaction.accountId, account.id))
+    .leftJoin(paymentData, eq(transaction.id, paymentData.transactionId))
     .leftJoin(payer, eq(paymentData.id, payer.payerPaymentDataId))
     .leftJoin(receiver, eq(paymentData.id, receiver.receiverPaymentDataId))
-    .leftJoin(creditCardMetadata, eq(transactions.id, creditCardMetadata.transactionId))
-    .leftJoin(acquirerData, eq(transactions.id, acquirerData.transactionId))
-    .leftJoin(merchants, eq(transactions.id, merchants.transactionId))
-    .where(and(gte(transactions.date, from), lte(transactions.date, to)))
-    .orderBy(desc(transactions.date))
+    .leftJoin(creditCardMetadata, eq(transaction.id, creditCardMetadata.transactionId))
+    .leftJoin(acquirerData, eq(transaction.id, acquirerData.transactionId))
+    .leftJoin(merchant, eq(transaction.id, merchant.transactionId))
+    .where(gte(transaction.date, from))
+    .orderBy(desc(transaction.date))
 
-  // Group results by transaction ID since joins can create duplicates
-  const transactionMap = new Map<
-    string,
-    {
-      transaction: typeof transactions.$inferSelect
-      account: { type: string } | null
-      paymentData: typeof paymentData.$inferSelect | null
-      creditCardMetadata: typeof creditCardMetadata.$inferSelect | null
-      acquirerData: typeof acquirerData.$inferSelect | null
-      merchant: typeof merchants.$inferSelect | null
-      payers: (typeof paymentParticipants.$inferSelect)[]
-      receivers: (typeof paymentParticipants.$inferSelect)[]
-    }
-  >()
-
-  for (const row of result) {
-    const transactionId = row.transaction.id
-
-    if (!transactionMap.has(transactionId)) {
-      transactionMap.set(transactionId, {
-        transaction: row.transaction,
-        account: row.account,
-        paymentData: row.paymentData,
-        creditCardMetadata: row.creditCardMetadata,
-        acquirerData: row.acquirerData,
-        merchant: row.merchant,
-        payers: [],
-        receivers: [],
-      })
-    }
-
-    const tx = transactionMap.get(transactionId)!
-
-    if (row.payer && row.paymentData) {
-      tx.payers.push(row.payer)
-    }
-    if (row.receiver && row.paymentData) {
-      tx.receivers.push(row.receiver)
-    }
-  }
-
-  return Array.from(transactionMap.values()).map(mapTransactionToEntity)
+  return groupTransactionRows(rows).map(mapTransactionToEntity)
 }
 
 /**
  * Load transactions that have been updated since the given timestamp (delta sync).
- * Only returns transactions within the window that have updatedAt > since.
+ * Only returns transactions from `from` onwards that have updatedAt > since.
  */
 async function loadTransactionsDelta(
   db: Db,
   from: number,
-  to: number,
   since: number
 ): Promise<Transaction[]> {
-  const payer = aliasedTable(paymentParticipants, 'payer')
-  const receiver = aliasedTable(paymentParticipants, 'receiver')
+  const payer = aliasedTable(paymentParticipant, 'payer')
+  const receiver = aliasedTable(paymentParticipant, 'receiver')
 
-  const result = await db
+  const rows = await db
     .select({
-      transaction: transactions,
-      account: { type: accounts.type },
+      transaction: transaction,
+      account: { type: account.type },
       paymentData: paymentData,
       payer: payer,
       receiver: receiver,
       creditCardMetadata: creditCardMetadata,
       acquirerData: acquirerData,
-      merchant: merchants,
+      merchant: merchant,
     })
-    .from(transactions)
-    .leftJoin(accounts, eq(transactions.accountId, accounts.id))
-    .leftJoin(paymentData, eq(transactions.id, paymentData.transactionId))
+    .from(transaction)
+    .leftJoin(account, eq(transaction.accountId, account.id))
+    .leftJoin(paymentData, eq(transaction.id, paymentData.transactionId))
     .leftJoin(payer, eq(paymentData.id, payer.payerPaymentDataId))
     .leftJoin(receiver, eq(paymentData.id, receiver.receiverPaymentDataId))
-    .leftJoin(creditCardMetadata, eq(transactions.id, creditCardMetadata.transactionId))
-    .leftJoin(acquirerData, eq(transactions.id, acquirerData.transactionId))
-    .leftJoin(merchants, eq(transactions.id, merchants.transactionId))
-    .where(
-      and(
-        gte(transactions.date, from),
-        lte(transactions.date, to),
-        gt(transactions.updatedAt, since)
-      )
-    )
-    .orderBy(desc(transactions.date))
+    .leftJoin(creditCardMetadata, eq(transaction.id, creditCardMetadata.transactionId))
+    .leftJoin(acquirerData, eq(transaction.id, acquirerData.transactionId))
+    .leftJoin(merchant, eq(transaction.id, merchant.transactionId))
+    .where(and(gte(transaction.date, from), gt(transaction.updatedAt, since)))
+    .orderBy(desc(transaction.date))
 
-  // Group results by transaction ID since joins can create duplicates
-  const transactionMap = new Map<
-    string,
-    {
-      transaction: typeof transactions.$inferSelect
-      account: { type: string } | null
-      paymentData: typeof paymentData.$inferSelect | null
-      creditCardMetadata: typeof creditCardMetadata.$inferSelect | null
-      acquirerData: typeof acquirerData.$inferSelect | null
-      merchant: typeof merchants.$inferSelect | null
-      payers: (typeof paymentParticipants.$inferSelect)[]
-      receivers: (typeof paymentParticipants.$inferSelect)[]
-    }
-  >()
+  return groupTransactionRows(rows).map(mapTransactionToEntity)
+}
 
-  for (const row of result) {
-    const transactionId = row.transaction.id
+/**
+ * Joins produce multiple rows per transaction when there are multiple payers/receivers.
+ * This groups them back into a single TransactionRow per transaction ID.
+ */
+function groupTransactionRows(rows: RawTransactionRow[]): TransactionRow[] {
+  const byId = new Map<string, TransactionRow>()
 
-    if (!transactionMap.has(transactionId)) {
-      transactionMap.set(transactionId, {
+  for (const row of rows) {
+    if (!byId.has(row.transaction.id)) {
+      byId.set(row.transaction.id, {
         transaction: row.transaction,
         account: row.account,
         paymentData: row.paymentData,
@@ -322,38 +260,26 @@ async function loadTransactionsDelta(
       })
     }
 
-    const tx = transactionMap.get(transactionId)!
-
-    if (row.payer && row.paymentData) {
-      tx.payers.push(row.payer)
-    }
-    if (row.receiver && row.paymentData) {
-      tx.receivers.push(row.receiver)
-    }
+    const tx = byId.get(row.transaction.id)!
+    if (row.payer && row.paymentData) tx.payers.push(row.payer)
+    if (row.receiver && row.paymentData) tx.receivers.push(row.receiver)
   }
 
-  return Array.from(transactionMap.values()).map(mapTransactionToEntity)
+  return Array.from(byId.values())
 }
 
-function mapTransactionToEntity(row: {
-  transaction: typeof transactions.$inferSelect
-  account: { type: string } | null
-  paymentData: typeof paymentData.$inferSelect | null
-  creditCardMetadata: typeof creditCardMetadata.$inferSelect | null
-  acquirerData: typeof acquirerData.$inferSelect | null
-  merchant: typeof merchants.$inferSelect | null
-  payers: (typeof paymentParticipants.$inferSelect)[]
-  receivers: (typeof paymentParticipants.$inferSelect)[]
-}): Transaction {
+function mapTransactionToEntity(row: TransactionRow): Transaction {
   const transactionData = row.transaction
   const accountType = row.account?.type
 
   const metadata = row.creditCardMetadata?.data
     ? JSON.parse(row.creditCardMetadata.data)
     : undefined
+  const purchaseDate = metadata?.purchaseDate ? new Date(metadata.purchaseDate) : undefined
 
   const normalizedAmount =
     accountType === 'BANK' ? transactionData.amount : transactionData.amount * -1
+  const date = new Date(transactionData.date)
 
   return {
     id: transactionData.id,
@@ -363,10 +289,10 @@ function mapTransactionToEntity(row: {
     currencyCode: transactionData.currencyCode,
     amount: normalizedAmount,
     amountFormatted: formatCurrency(normalizedAmount),
-    date: new Date(transactionData.date),
-    dateFormatted: formatDate(new Date(transactionData.date)),
-    timeFormatted: formatTime(new Date(transactionData.date)),
-    futurePayment: new Date(transactionData.date) > new Date(),
+    date,
+    dateFormatted: formatDate(date),
+    timeFormatted: formatTime(date),
+    futurePayment: date > new Date(),
     category: (transactionData.category ?? undefined) as Transaction['category'],
     categoryId: (transactionData.categoryId ?? undefined) as Transaction['categoryId'],
     balance: transactionData.balance ?? undefined,
@@ -411,12 +337,8 @@ function mapTransactionToEntity(row: {
           transactionId: row.creditCardMetadata.transactionId,
           cardNumber: metadata?.cardNumber ?? undefined,
           purchaseDate: metadata?.purchaseDate ?? undefined,
-          purchaseDateFormatted: metadata?.purchaseDate
-            ? formatDate(new Date(metadata.purchaseDate))
-            : undefined,
-          purchaseTimeFormatted: metadata?.purchaseDate
-            ? formatTime(new Date(metadata.purchaseDate))
-            : undefined,
+          purchaseDateFormatted: purchaseDate ? formatDate(purchaseDate) : undefined,
+          purchaseTimeFormatted: purchaseDate ? formatTime(purchaseDate) : undefined,
           totalInstallments: metadata?.totalInstallments ?? undefined,
           installmentNumber: metadata?.installmentNumber ?? undefined,
         }

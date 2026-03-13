@@ -1,12 +1,12 @@
 import { eq, max } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/bun-sqlite'
 import {
-  acquirerData,
-  creditCardMetadata,
-  merchants,
-  paymentData,
-  paymentParticipants,
-  transactions,
+    acquirerData,
+    creditCardMetadata,
+    merchant,
+    paymentData,
+    paymentParticipant,
+    transaction as transactionTable,
 } from '../db/schema'
 import { PluggyClient } from './PluggyClient'
 import { PluggyDataMapper, type PluggyAccount, type PluggyTransaction } from './PluggyDataMapper'
@@ -56,9 +56,9 @@ export class TransactionSyncService {
 
   private async getLatestUpdatedAt(accountId: string): Promise<number> {
     const result = await this.db
-      .select({ maxUpdatedAt: max(transactions.updatedAt) })
-      .from(transactions)
-      .where(eq(transactions.accountId, accountId))
+      .select({ maxUpdatedAt: max(transactionTable.updatedAt) })
+      .from(transactionTable)
+      .where(eq(transactionTable.accountId, accountId))
 
     return result[0]?.maxUpdatedAt ?? 0
   }
@@ -67,8 +67,8 @@ export class TransactionSyncService {
     await this.db.transaction(async (tx) => {
       const existingTransactionResult = await tx
         .select()
-        .from(transactions)
-        .where(eq(transactions.id, transaction.id))
+        .from(transactionTable)
+        .where(eq(transactionTable.id, transaction.id))
         .limit(1)
 
       if (existingTransactionResult.length > 0) {
@@ -82,7 +82,7 @@ export class TransactionSyncService {
         status: rawTransactionData.status || 'POSTED',
       }
 
-      await tx.insert(transactions).values(transactionData)
+      await tx.insert(transactionTable).values(transactionData)
 
       if (transaction.creditCardMetadata) {
         await tx.insert(creditCardMetadata).values({
@@ -109,7 +109,7 @@ export class TransactionSyncService {
         }
 
         if (transaction.paymentData.payer) {
-          await tx.insert(paymentParticipants).values({
+          await tx.insert(paymentParticipant).values({
             accountNumber: transaction.paymentData.payer.accountNumber || null,
             branchNumber: transaction.paymentData.payer.branchNumber || null,
             documentType: transaction.paymentData.payer.documentNumber?.type || null,
@@ -122,7 +122,7 @@ export class TransactionSyncService {
         }
 
         if (transaction.paymentData.receiver) {
-          await tx.insert(paymentParticipants).values({
+          await tx.insert(paymentParticipant).values({
             accountNumber: transaction.paymentData.receiver.accountNumber || null,
             branchNumber: transaction.paymentData.receiver.branchNumber || null,
             documentType: transaction.paymentData.receiver.documentNumber?.type || null,
@@ -143,7 +143,7 @@ export class TransactionSyncService {
       }
 
       if (transaction.merchant) {
-        await tx.insert(merchants).values({
+        await tx.insert(merchant).values({
           transactionId: transaction.id,
           cnae: transaction.merchant.cnae || null,
           cnpj: transaction.merchant.cnpj || null,
