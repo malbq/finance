@@ -280,6 +280,14 @@ export const spendingGoal = sqliteTable('SpendingGoal', {
   updatedAt: integer('updatedAt', { mode: 'number' }).notNull(),
 })
 
+export const categoryExclusion = sqliteTable('CategoryExclusion', {
+  categoryId: text('categoryId')
+    .primaryKey()
+    .references(() => category.id),
+  excludedFromTx: integer('excludedFromTx', { mode: 'boolean' }).notNull().default(false),
+  excludedFromSpending: integer('excludedFromSpending', { mode: 'boolean' }).notNull().default(false),
+})
+
 // Types
 export type Account = typeof account.$inferSelect
 export type NewAccount = typeof account.$inferInsert
@@ -319,3 +327,6 @@ export type NewCategory = typeof category.$inferInsert
 
 export type SpendingGoal = typeof spendingGoal.$inferSelect
 export type NewSpendingGoal = typeof spendingGoal.$inferInsert
+
+export type CategoryExclusion = typeof categoryExclusion.$inferSelect
+export type NewCategoryExclusion = typeof categoryExclusion.$inferInsert

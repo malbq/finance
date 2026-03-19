@@ -15,6 +15,7 @@ const tablesOnlySchema = {
   investmentTransactions: schema.investmentTransaction,
   categories: schema.category,
   spendingGoals: schema.spendingGoal,
+  categoryExclusions: schema.categoryExclusion,
 }
 
 export const relations = defineRelations(tablesOnlySchema, (r) => ({
@@ -135,6 +136,12 @@ export const relations = defineRelations(tablesOnlySchema, (r) => ({
   spendingGoals: {
     category: r.one.categories({
       from: r.spendingGoals.categoryId,
+      to: r.categories.id,
+    }),
+  },
+  categoryExclusions: {
+    category: r.one.categories({
+      from: r.categoryExclusions.categoryId,
       to: r.categories.id,
     }),
   },
