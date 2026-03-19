@@ -498,6 +498,7 @@ export const excludedCategories = [
   '200200000',
   '200300000',
   '200400000',
+  '07020001',
 ]
 
 export const sortedCategories = Object.entries(CATEGORY_MAP)

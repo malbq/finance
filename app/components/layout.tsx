@@ -1,7 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { CATEGORY_MAP, type CategoryId } from '../../domain/Categories'
 import { downloadCsv, toCsv } from '../../utils/downloadCsv'
-import { excludedCategories, useDashboardData } from '../hooks/useDashboardData'
+import { useDashboardData } from '../hooks/useDashboardData'
 import { useSyncMutation } from '../hooks/useSyncMutation'
 import { localStore } from '../lib/localStore'
 import { Toast, toast } from './toast'
@@ -72,19 +72,14 @@ export function Layout({ children }: LayoutProps) {
       downloadCsv(`finance-dashboard-spending-${timestamp}.csv`, csv)
       toast.success('Dashboard data exported')
     } else if (currentPath === '/transactions') {
-      // Transactions export: all transactions filtered by excludedCategories
       const allTransactions = localStore.getTransactions()
 
-      const filteredTransactions = allTransactions.filter(
-        (tx) => !tx.categoryId || !excludedCategories.has(tx.categoryId)
-      )
-
-      if (filteredTransactions.length === 0) {
+      if (allTransactions.length === 0) {
         toast.error('No transactions to export')
         return
       }
 
-      const rows = filteredTransactions.map((tx) => ({
+      const rows = allTransactions.map((tx) => ({
         id: tx.id,
         date: tx.dateFormatted,
         description: tx.description,
@@ -100,7 +95,7 @@ export function Layout({ children }: LayoutProps) {
 
       const csv = toCsv(rows)
       downloadCsv(`finance-transactions-${timestamp}.csv`, csv)
-      toast.success(`Exported ${filteredTransactions.length} transactions`)
+      toast.success(`Exported ${allTransactions.length} transactions`)
     } else {
       toast.error('Export not available for this view')
     }
