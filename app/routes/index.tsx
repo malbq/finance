@@ -1,26 +1,26 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { BalanceEvolutionChart } from '../components/BalanceEvolutionChart'
-import { SpendingByCategoryChart } from '../components/SpendingByCategoryChart'
-import { SpendingByCategoryTable } from '../components/SpendingByCategoryTable'
-import { useDashboardData } from '../hooks/useDashboardData'
+import { createFileRoute } from "@tanstack/react-router";
+import { BalanceEvolutionChart } from "../components/BalanceEvolutionChart";
+import { SpendingByCategoryChart } from "../components/SpendingByCategoryChart";
+import { SpendingByCategoryTable } from "../components/SpendingByCategoryTable";
+import { useDashboardData } from "../hooks/useDashboardData";
 
-export const Route = createFileRoute('/')({
-  component: Dashboard
-})
+export const Route = createFileRoute("/")({
+  component: Dashboard,
+});
 
 function Dashboard() {
-  const { data, isLoading, error } = useDashboardData()
+  const { data, isLoading, error } = useDashboardData();
 
   if (isLoading) {
-    return <div className='text-zinc-300'>Loading...</div>
+    return <div className="text-zinc-300">Loading...</div>;
   }
 
   if (error) {
-    return <div className='text-red-400'>Error loading dashboard data</div>
+    return <div className="text-red-400">Error loading dashboard data</div>;
   }
 
   if (!data) {
-    return null
+    return null;
   }
 
   const {
@@ -29,13 +29,13 @@ function Dashboard() {
     investmentBalance,
     balanceEvolution = [],
     movingAverages,
-    spendingByCategory = []
-  } = data
+    spendingByCategory = [],
+  } = data;
 
   return (
-    <div className='p-8 grid grid-cols-1 lg:grid-cols-2 gap-12 h-full overflow-x-auto gutter-stable'>
+    <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-12 h-full overflow-x-auto gutter-stable">
       <BalanceEvolutionChart
-        className='lg:col-span-2'
+        className="lg:col-span-2"
         data={balanceEvolution}
         totalBalance={totalBalanceFormatted}
         bankBalance={bankBalance}
@@ -45,5 +45,5 @@ function Dashboard() {
       <SpendingByCategoryTable data={spendingByCategory} />
       <SpendingByCategoryChart data={spendingByCategory} />
     </div>
-  )
+  );
 }

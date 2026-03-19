@@ -1,73 +1,73 @@
-import { drizzle } from 'drizzle-orm/bun-sqlite'
-import { AccountSyncService } from './AccountSyncService'
-import { CategorySyncService } from './CategorySyncService'
-import { PluggyApiError, PluggyClient } from './PluggyClient'
-import { TransactionSyncService } from './TransactionSyncService'
+import { drizzle } from "drizzle-orm/bun-sqlite";
+import { AccountSyncService } from "./AccountSyncService";
+import { CategorySyncService } from "./CategorySyncService";
+import { PluggyApiError, PluggyClient } from "./PluggyClient";
+import { TransactionSyncService } from "./TransactionSyncService";
 
 interface SyncResult {
-  success: boolean
-  message: string
+  success: boolean;
+  message: string;
   details: {
-    accountsCount: number
-    categoriesSynced: boolean
-    transactionsSynced: boolean
-  }
-  errors: string[]
+    accountsCount: number;
+    categoriesSynced: boolean;
+    transactionsSynced: boolean;
+  };
+  errors: string[];
 }
 
 export class SyncOrchestrator {
   constructor(private db: ReturnType<typeof drizzle>) {}
 
   async executeFull(): Promise<SyncResult> {
-    const errors: string[] = []
-    let accountsCount = 0
-    let categoriesSynced = false
-    let transactionsSynced = false
+    const errors: string[] = [];
+    let accountsCount = 0;
+    let categoriesSynced = false;
+    let transactionsSynced = false;
 
     try {
-      console.log('Starting comprehensive data synchronization...')
+      console.log("Starting comprehensive data synchronization...");
 
-      const apiKey = await PluggyClient.authenticate()
-      console.log('Authentication successful')
+      const apiKey = await PluggyClient.authenticate();
+      console.log("Authentication successful");
 
-      const accountSyncService = new AccountSyncService(this.db, apiKey)
-      const transactionSyncService = new TransactionSyncService(this.db, apiKey)
-      const categorySyncService = new CategorySyncService(this.db, apiKey)
+      const accountSyncService = new AccountSyncService(this.db, apiKey);
+      const transactionSyncService = new TransactionSyncService(this.db, apiKey);
+      const categorySyncService = new CategorySyncService(this.db, apiKey);
 
-      console.log('Syncing accounts...')
-      const accounts = await accountSyncService.syncAccounts()
-      accountsCount = accounts.length
-      console.log(`Synced ${accountsCount} accounts`)
+      console.log("Syncing accounts...");
+      const accounts = await accountSyncService.syncAccounts();
+      accountsCount = accounts.length;
+      console.log(`Synced ${accountsCount} accounts`);
 
       await Promise.allSettled([
         this.syncWithErrorHandling(
           () => transactionSyncService.syncTransactions(accounts),
-          'Transactions synced',
-          'Failed to sync transactions',
-          errors
+          "Transactions synced",
+          "Failed to sync transactions",
+          errors,
         ).then(() => {
-          transactionsSynced = true
+          transactionsSynced = true;
         }),
 
         this.syncWithErrorHandling(
           () => categorySyncService.syncCategories(),
-          'Categories synced',
-          'Failed to sync categories',
-          errors
+          "Categories synced",
+          "Failed to sync categories",
+          errors,
         ).then(() => {
-          categoriesSynced = true
+          categoriesSynced = true;
         }),
-      ])
+      ]);
 
-      const success = errors.length === 0
+      const success = errors.length === 0;
       console.log(
-        success ? 'Data synchronized successfully!' : 'Data synchronized with some errors'
-      )
+        success ? "Data synchronized successfully!" : "Data synchronized with some errors",
+      );
 
       return {
         success,
         message: success
-          ? 'Data synchronized successfully!'
+          ? "Data synchronized successfully!"
           : `Data synchronized with ${errors.length} error(s)`,
         details: {
           accountsCount,
@@ -75,32 +75,32 @@ export class SyncOrchestrator {
           transactionsSynced,
         },
         errors,
-      }
+      };
     } catch (error) {
-      console.error('Critical sync error:', error)
+      console.error("Critical sync error:", error);
 
-      const errorMessage = this.getErrorMessage(error)
-      errors.push(errorMessage)
+      const errorMessage = this.getErrorMessage(error);
+      errors.push(errorMessage);
 
       return {
         success: false,
-        message: 'Synchronization failed',
+        message: "Synchronization failed",
         details: {
           accountsCount,
           categoriesSynced,
           transactionsSynced,
         },
         errors,
-      }
+      };
     }
   }
 
   async executeAccounts(): Promise<SyncResult> {
     try {
-      const apiKey = await PluggyClient.authenticate()
-      const accountSyncService = new AccountSyncService(this.db, apiKey)
+      const apiKey = await PluggyClient.authenticate();
+      const accountSyncService = new AccountSyncService(this.db, apiKey);
 
-      const accounts = await accountSyncService.syncAccounts()
+      const accounts = await accountSyncService.syncAccounts();
 
       return {
         success: true,
@@ -111,30 +111,30 @@ export class SyncOrchestrator {
           transactionsSynced: false,
         },
         errors: [],
-      }
+      };
     } catch (error) {
-      const errorMessage = this.getErrorMessage(error)
+      const errorMessage = this.getErrorMessage(error);
       return {
         success: false,
-        message: 'Failed to sync accounts',
+        message: "Failed to sync accounts",
         details: {
           accountsCount: 0,
           categoriesSynced: false,
           transactionsSynced: false,
         },
         errors: [errorMessage],
-      }
+      };
     }
   }
 
   async executeTransactions(): Promise<SyncResult> {
     try {
-      const apiKey = await PluggyClient.authenticate()
-      const accountSyncService = new AccountSyncService(this.db, apiKey)
-      const transactionSyncService = new TransactionSyncService(this.db, apiKey)
+      const apiKey = await PluggyClient.authenticate();
+      const accountSyncService = new AccountSyncService(this.db, apiKey);
+      const transactionSyncService = new TransactionSyncService(this.db, apiKey);
 
-      const accounts = await accountSyncService.syncAccounts()
-      await transactionSyncService.syncTransactions(accounts)
+      const accounts = await accountSyncService.syncAccounts();
+      await transactionSyncService.syncTransactions(accounts);
 
       return {
         success: true,
@@ -145,19 +145,19 @@ export class SyncOrchestrator {
           transactionsSynced: true,
         },
         errors: [],
-      }
+      };
     } catch (error) {
-      const errorMessage = this.getErrorMessage(error)
+      const errorMessage = this.getErrorMessage(error);
       return {
         success: false,
-        message: 'Failed to sync transactions',
+        message: "Failed to sync transactions",
         details: {
           accountsCount: 0,
           categoriesSynced: false,
           transactionsSynced: false,
         },
         errors: [errorMessage],
-      }
+      };
     }
   }
 
@@ -165,27 +165,27 @@ export class SyncOrchestrator {
     operation: () => Promise<void>,
     successMessage: string,
     errorMessage: string,
-    errors: string[]
+    errors: string[],
   ): Promise<void> {
     try {
-      await operation()
-      console.log(successMessage)
+      await operation();
+      console.log(successMessage);
     } catch (error) {
-      const msg = `${errorMessage}: ${this.getErrorMessage(error)}`
-      console.error(msg)
-      errors.push(msg)
+      const msg = `${errorMessage}: ${this.getErrorMessage(error)}`;
+      console.error(msg);
+      errors.push(msg);
     }
   }
 
   private getErrorMessage(error: unknown): string {
     if (error instanceof PluggyApiError) {
-      return `Pluggy API Error: ${error.message}${error.endpoint ? ` (${error.endpoint})` : ''}`
+      return `Pluggy API Error: ${error.message}${error.endpoint ? ` (${error.endpoint})` : ""}`;
     }
 
     if (error instanceof Error) {
-      return error.message
+      return error.message;
     }
 
-    return 'Unknown error occurred'
+    return "Unknown error occurred";
   }
 }

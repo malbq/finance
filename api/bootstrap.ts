@@ -1,14 +1,16 @@
-import { aliasedTable, and, desc, eq, gt, gte, max } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/bun-sqlite'
-import type { Account } from '../domain/Account'
-import type { CategoryId } from '../domain/Categories'
-import type { Transaction } from '../domain/Transaction'
-import { formatCurrency } from '../utils/formatCurrency'
-import { formatDate } from '../utils/formatDate'
-import { formatTime } from '../utils/formatTime'
+import { aliasedTable, and, desc, eq, gt, gte, max } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/bun-sqlite";
+import type { Account } from "../domain/Account";
+import type { CategoryId } from "../domain/Categories";
+import type { Transaction } from "../domain/Transaction";
+import { formatCurrency } from "../utils/formatCurrency";
+import { formatDate } from "../utils/formatDate";
+import { formatTime } from "../utils/formatTime";
 import {
   account,
   acquirerData,
+  category,
+  categoryExclusion,
   creditCardMetadata,
   creditData,
   merchant,
@@ -16,83 +18,98 @@ import {
   paymentParticipant,
   spendingGoal,
   transaction,
-} from './db/schema'
+} from "./db/schema";
+
+export interface BootstrapCategory {
+  id: string;
+  description: string;
+  descriptionTranslated: string;
+  parentId: string | null;
+  parentDescription: string | null;
+  excludedFromTx: boolean;
+  excludedFromSpending: boolean;
+}
 
 export interface BootstrapData {
-  accounts: Account[]
-  transactions: Transaction[]
+  accounts: Account[];
+  transactions: Transaction[];
+  /** Full category list with exclusion flags -- always sent in full, no delta */
+  categories: BootstrapCategory[];
   spendingGoals: Partial<
     Record<
       CategoryId,
       {
-        goal: number | null
-        tolerance: number | null
+        goal: number | null;
+        tolerance: number | null;
       }
     >
-  >
+  >;
   /** Cursor for delta sync: max Transaction.updatedAt in DB window */
-  cursor: number
+  cursor: number;
   /** True if this is a delta response (since param was provided) */
-  isDelta: boolean
+  isDelta: boolean;
 }
 
-type Db = ReturnType<typeof drizzle>
+type Db = ReturnType<typeof drizzle>;
 
 /** Raw row returned by the transaction JOIN query — one row per payer/receiver pair */
 type RawTransactionRow = {
-  transaction: typeof transaction.$inferSelect
-  account: { type: string } | null
-  paymentData: typeof paymentData.$inferSelect | null
-  payer: typeof paymentParticipant.$inferSelect | null
-  receiver: typeof paymentParticipant.$inferSelect | null
-  creditCardMetadata: typeof creditCardMetadata.$inferSelect | null
-  acquirerData: typeof acquirerData.$inferSelect | null
-  merchant: typeof merchant.$inferSelect | null
-}
+  transaction: typeof transaction.$inferSelect;
+  account: { type: string } | null;
+  paymentData: typeof paymentData.$inferSelect | null;
+  payer: typeof paymentParticipant.$inferSelect | null;
+  receiver: typeof paymentParticipant.$inferSelect | null;
+  creditCardMetadata: typeof creditCardMetadata.$inferSelect | null;
+  acquirerData: typeof acquirerData.$inferSelect | null;
+  merchant: typeof merchant.$inferSelect | null;
+};
 
 /** Grouped transaction row with all payers/receivers collected */
-type TransactionRow = Omit<RawTransactionRow, 'payer' | 'receiver'> & {
-  payers: (typeof paymentParticipant.$inferSelect)[]
-  receivers: (typeof paymentParticipant.$inferSelect)[]
-}
+type TransactionRow = Omit<RawTransactionRow, "payer" | "receiver"> & {
+  payers: (typeof paymentParticipant.$inferSelect)[];
+  receivers: (typeof paymentParticipant.$inferSelect)[];
+};
 
 export function createBootstrapHandler(db: Db) {
   return {
     async GET(request: Request) {
-      const url = new URL(request.url)
-      const sinceParam = url.searchParams.get('since')
-      const since = sinceParam ? Number(sinceParam) : undefined
+      const url = new URL(request.url);
+      const sinceParam = url.searchParams.get("since");
+      const since = sinceParam ? Number(sinceParam) : undefined;
 
       return await getBootstrapData(db, since)
         .then((data) => Response.json(data))
         .catch((error) => {
-          console.error('[API] Bootstrap API error:', error)
-          return Response.json({ error: 'Failed to fetch bootstrap data' }, { status: 500 })
-        })
+          console.error("[API] Bootstrap API error:", error);
+          return Response.json({ error: "Failed to fetch bootstrap data" }, { status: 500 });
+        });
     },
-  }
+  };
 }
 
 async function getBootstrapData(db: Db, since?: number): Promise<BootstrapData> {
-  const now = new Date()
-  const from = new Date(now.getFullYear(), now.getMonth() - 6, 1).getTime()
-  const isDelta = since !== undefined
+  const now = new Date();
+  const from = new Date(now.getFullYear(), now.getMonth() - 6, 1).getTime();
+  const isDelta = since !== undefined;
 
   // Load data based on whether this is a full load or delta
-  const [accountsData, transactionsData, goalsData, cursorValue] = await Promise.all([
-    loadAccounts(db),
-    isDelta ? loadTransactionsDelta(db, from, since) : loadTransactionsInRange(db, from),
-    loadSpendingGoals(db, since),
-    getMaxUpdatedAt(db, from),
-  ])
+  const [accountsData, transactionsData, categoriesData, goalsData, cursorValue] =
+    await Promise.all([
+      loadAccounts(db),
+      isDelta ? loadTransactionsDelta(db, from, since) : loadTransactionsInRange(db, from),
+      loadCategories(db),
+      loadSpendingGoals(db, since),
+      getMaxUpdatedAt(db, from),
+    ]);
 
   return {
     accounts: accountsData,
     transactions: transactionsData,
+    categories: categoriesData,
     spendingGoals: goalsData,
     cursor: cursorValue,
     isDelta,
-  }
+  };
 }
 
 /**
@@ -103,15 +120,12 @@ async function getMaxUpdatedAt(db: Db, from: number): Promise<number> {
   const result = await db
     .select({ maxUpdatedAt: max(transaction.updatedAt) })
     .from(transaction)
-    .where(gte(transaction.date, from))
+    .where(gte(transaction.date, from));
 
-  return result[0]?.maxUpdatedAt ?? 0
+  return result[0]?.maxUpdatedAt ?? 0;
 }
 
-async function loadSpendingGoals(
-  db: Db,
-  since?: number
-): Promise<BootstrapData['spendingGoals']> {
+async function loadSpendingGoals(db: Db, since?: number): Promise<BootstrapData["spendingGoals"]> {
   const rows = await db
     .select({
       categoryId: spendingGoal.categoryId,
@@ -119,14 +133,40 @@ async function loadSpendingGoals(
       tolerance: spendingGoal.tolerance,
     })
     .from(spendingGoal)
-    .where(since !== undefined ? gt(spendingGoal.updatedAt, since) : undefined)
+    .where(since !== undefined ? gt(spendingGoal.updatedAt, since) : undefined);
 
   return Object.fromEntries(
     rows.map((row) => [
       row.categoryId as CategoryId,
       { goal: row.goal ?? null, tolerance: row.tolerance ?? null },
-    ])
-  )
+    ]),
+  );
+}
+
+/** Load all categories with their exclusion flags. Always sent in full (no delta). */
+async function loadCategories(db: Db): Promise<BootstrapCategory[]> {
+  const rows = await db
+    .select({
+      id: category.id,
+      description: category.description,
+      descriptionTranslated: category.descriptionTranslated,
+      parentId: category.parentId,
+      parentDescription: category.parentDescription,
+      excludedFromTx: categoryExclusion.excludedFromTx,
+      excludedFromSpending: categoryExclusion.excludedFromSpending,
+    })
+    .from(category)
+    .leftJoin(categoryExclusion, eq(category.id, categoryExclusion.categoryId));
+
+  return rows.map((row) => ({
+    id: row.id,
+    description: row.description,
+    descriptionTranslated: row.descriptionTranslated,
+    parentId: row.parentId,
+    parentDescription: row.parentDescription,
+    excludedFromTx: row.excludedFromTx ?? false,
+    excludedFromSpending: row.excludedFromSpending ?? false,
+  }));
 }
 
 async function loadAccounts(db: Db): Promise<Account[]> {
@@ -137,11 +177,11 @@ async function loadAccounts(db: Db): Promise<Account[]> {
     })
     .from(account)
     .leftJoin(creditData, eq(account.id, creditData.accountId))
-    .orderBy(account.type, account.itemId)
+    .orderBy(account.type, account.itemId);
 
   return result.map((row) => {
-    const accountData = row.account
-    const credit = row.creditData
+    const accountData = row.account;
+    const credit = row.creditData;
 
     const account: Account = {
       id: accountData.id,
@@ -151,9 +191,9 @@ async function loadAccounts(db: Db): Promise<Account[]> {
       balance: accountData.balance,
       balanceFormatted: formatCurrency(accountData.balance),
       currencyCode: accountData.currencyCode,
-    }
+    };
 
-    if (accountData.type === 'CREDIT' && credit) {
+    if (accountData.type === "CREDIT" && credit) {
       account.creditData = {
         level: credit.level,
         brand: credit.brand,
@@ -162,11 +202,11 @@ async function loadAccounts(db: Db): Promise<Account[]> {
         creditLimitFormatted: formatCurrency(credit.creditLimit),
         availableCreditLimit: credit.availableCreditLimit,
         availableCreditLimitFormatted: formatCurrency(credit.availableCreditLimit),
-      }
+      };
     }
 
-    return account
-  })
+    return account;
+  });
 }
 
 /**
@@ -174,8 +214,8 @@ async function loadAccounts(db: Db): Promise<Account[]> {
  * This avoids the N+1 problem of loading transactions per-account.
  */
 async function loadTransactionsInRange(db: Db, from: number): Promise<Transaction[]> {
-  const payer = aliasedTable(paymentParticipant, 'payer')
-  const receiver = aliasedTable(paymentParticipant, 'receiver')
+  const payer = aliasedTable(paymentParticipant, "payer");
+  const receiver = aliasedTable(paymentParticipant, "receiver");
 
   const rows = await db
     .select({
@@ -197,22 +237,18 @@ async function loadTransactionsInRange(db: Db, from: number): Promise<Transactio
     .leftJoin(acquirerData, eq(transaction.id, acquirerData.transactionId))
     .leftJoin(merchant, eq(transaction.id, merchant.transactionId))
     .where(gte(transaction.date, from))
-    .orderBy(desc(transaction.date))
+    .orderBy(desc(transaction.date));
 
-  return groupTransactionRows(rows).map(mapTransactionToEntity)
+  return groupTransactionRows(rows).map(mapTransactionToEntity);
 }
 
 /**
  * Load transactions that have been updated since the given timestamp (delta sync).
  * Only returns transactions from `from` onwards that have updatedAt > since.
  */
-async function loadTransactionsDelta(
-  db: Db,
-  from: number,
-  since: number
-): Promise<Transaction[]> {
-  const payer = aliasedTable(paymentParticipant, 'payer')
-  const receiver = aliasedTable(paymentParticipant, 'receiver')
+async function loadTransactionsDelta(db: Db, from: number, since: number): Promise<Transaction[]> {
+  const payer = aliasedTable(paymentParticipant, "payer");
+  const receiver = aliasedTable(paymentParticipant, "receiver");
 
   const rows = await db
     .select({
@@ -234,9 +270,9 @@ async function loadTransactionsDelta(
     .leftJoin(acquirerData, eq(transaction.id, acquirerData.transactionId))
     .leftJoin(merchant, eq(transaction.id, merchant.transactionId))
     .where(and(gte(transaction.date, from), gt(transaction.updatedAt, since)))
-    .orderBy(desc(transaction.date))
+    .orderBy(desc(transaction.date));
 
-  return groupTransactionRows(rows).map(mapTransactionToEntity)
+  return groupTransactionRows(rows).map(mapTransactionToEntity);
 }
 
 /**
@@ -244,7 +280,7 @@ async function loadTransactionsDelta(
  * This groups them back into a single TransactionRow per transaction ID.
  */
 function groupTransactionRows(rows: RawTransactionRow[]): TransactionRow[] {
-  const byId = new Map<string, TransactionRow>()
+  const byId = new Map<string, TransactionRow>();
 
   for (const row of rows) {
     if (!byId.has(row.transaction.id)) {
@@ -257,29 +293,29 @@ function groupTransactionRows(rows: RawTransactionRow[]): TransactionRow[] {
         merchant: row.merchant,
         payers: [],
         receivers: [],
-      })
+      });
     }
 
-    const tx = byId.get(row.transaction.id)!
-    if (row.payer && row.paymentData) tx.payers.push(row.payer)
-    if (row.receiver && row.paymentData) tx.receivers.push(row.receiver)
+    const tx = byId.get(row.transaction.id)!;
+    if (row.payer && row.paymentData) tx.payers.push(row.payer);
+    if (row.receiver && row.paymentData) tx.receivers.push(row.receiver);
   }
 
-  return Array.from(byId.values())
+  return Array.from(byId.values());
 }
 
 function mapTransactionToEntity(row: TransactionRow): Transaction {
-  const transactionData = row.transaction
-  const accountType = row.account?.type
+  const transactionData = row.transaction;
+  const accountType = row.account?.type;
 
   const metadata = row.creditCardMetadata?.data
     ? JSON.parse(row.creditCardMetadata.data)
-    : undefined
-  const purchaseDate = metadata?.purchaseDate ? new Date(metadata.purchaseDate) : undefined
+    : undefined;
+  const purchaseDate = metadata?.purchaseDate ? new Date(metadata.purchaseDate) : undefined;
 
   const normalizedAmount =
-    accountType === 'BANK' ? transactionData.amount : transactionData.amount * -1
-  const date = new Date(transactionData.date)
+    accountType === "BANK" ? transactionData.amount : transactionData.amount * -1;
+  const date = new Date(transactionData.date);
 
   return {
     id: transactionData.id,
@@ -293,8 +329,8 @@ function mapTransactionToEntity(row: TransactionRow): Transaction {
     dateFormatted: formatDate(date),
     timeFormatted: formatTime(date),
     futurePayment: date > new Date(),
-    category: (transactionData.category ?? undefined) as Transaction['category'],
-    categoryId: (transactionData.categoryId ?? undefined) as Transaction['categoryId'],
+    category: (transactionData.category ?? undefined) as Transaction["category"],
+    categoryId: (transactionData.categoryId ?? undefined) as Transaction["categoryId"],
     balance: transactionData.balance ?? undefined,
     status: transactionData.status,
     type: transactionData.type,
@@ -354,5 +390,5 @@ function mapTransactionToEntity(row: TransactionRow): Transaction {
           businessName: row.merchant.businessName ?? undefined,
         }
       : undefined,
-  }
+  };
 }

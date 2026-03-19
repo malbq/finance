@@ -11,4 +11,4 @@ export type Serialized<T> = T extends Date
     ? Serialized<U>[]
     : T extends object
       ? { [K in keyof T]: Serialized<T[K]> }
-      : T
+      : T;

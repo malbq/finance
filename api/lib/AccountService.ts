@@ -1,8 +1,8 @@
-import { eq } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/bun-sqlite'
-import type { Account } from '../../domain/Account'
-import { formatCurrency } from '../../utils/formatCurrency'
-import { account, creditData } from '../db/schema'
+import { eq } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/bun-sqlite";
+import type { Account } from "../../domain/Account";
+import { formatCurrency } from "../../utils/formatCurrency";
+import { account, creditData } from "../db/schema";
 
 export class AccountService {
   constructor(private db: ReturnType<typeof drizzle>) {}
@@ -15,17 +15,17 @@ export class AccountService {
       })
       .from(account)
       .leftJoin(creditData, eq(account.id, creditData.accountId))
-      .orderBy(account.type, account.itemId)
+      .orderBy(account.type, account.itemId);
 
-    return result.map(this.mapToEntity)
+    return result.map(this.mapToEntity);
   }
 
   private mapToEntity = (result: {
-    account: typeof account.$inferSelect
-    creditData: typeof creditData.$inferSelect | null
+    account: typeof account.$inferSelect;
+    creditData: typeof creditData.$inferSelect | null;
   }): Account => {
-    const accountData = result.account
-    const creditData = result.creditData
+    const accountData = result.account;
+    const creditData = result.creditData;
 
     const account: Account = {
       id: accountData.id,
@@ -35,9 +35,9 @@ export class AccountService {
       balance: accountData.balance,
       balanceFormatted: formatCurrency(accountData.balance),
       currencyCode: accountData.currencyCode,
-    }
+    };
 
-    if (accountData.type === 'CREDIT' && creditData) {
+    if (accountData.type === "CREDIT" && creditData) {
       account.creditData = {
         level: creditData.level,
         brand: creditData.brand,
@@ -46,9 +46,9 @@ export class AccountService {
         creditLimitFormatted: formatCurrency(creditData.creditLimit),
         availableCreditLimit: creditData.availableCreditLimit,
         availableCreditLimitFormatted: formatCurrency(creditData.availableCreditLimit),
-      }
+      };
     }
 
-    return account
-  }
+    return account;
+  };
 }

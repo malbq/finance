@@ -1,27 +1,27 @@
-import assert from 'node:assert/strict'
-import { createBootstrapHandler } from './api/bootstrap'
-import { createDatabase } from './api/db/drizzle'
-import { createSpendingGoalsHandler } from './api/spending-goals'
-import { createSyncHandler } from './api/sync'
-import { createTransactionsHandler } from './api/transactions'
-import indexHtml from './app/index.html'
+import assert from "node:assert/strict";
+import { createBootstrapHandler } from "./api/bootstrap";
+import { createDatabase } from "./api/db/drizzle";
+import { createSpendingGoalsHandler } from "./api/spending-goals";
+import { createSyncHandler } from "./api/sync";
+import { createTransactionsHandler } from "./api/transactions";
+import indexHtml from "./app/index.html";
 
-const db = createDatabase()
+const db = createDatabase();
 
-assert.ok(process.env.PORT, 'PORT environment variable is not set')
+assert.ok(process.env.PORT, "PORT environment variable is not set");
 
 Bun.serve({
   port: parseInt(process.env.PORT, 10),
-  development: process.env.NODE_ENV !== 'production' && {
+  development: process.env.NODE_ENV !== "production" && {
     hmr: true,
-    console: true
+    console: true,
   },
   routes: {
-    '/api/bootstrap': createBootstrapHandler(db),
-    '/api/spending-goals': createSpendingGoalsHandler(db),
-    '/api/transactions': createTransactionsHandler(db),
-    '/api/sync': createSyncHandler(db),
-    '/favicon.ico': new Response(await Bun.file('public/favicon.ico').bytes()),
-    '/*': indexHtml
-  }
-})
+    "/api/bootstrap": createBootstrapHandler(db),
+    "/api/spending-goals": createSpendingGoalsHandler(db),
+    "/api/transactions": createTransactionsHandler(db),
+    "/api/sync": createSyncHandler(db),
+    "/favicon.ico": new Response(await Bun.file("public/favicon.ico").bytes()),
+    "/*": indexHtml,
+  },
+});

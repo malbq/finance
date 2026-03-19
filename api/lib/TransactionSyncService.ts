@@ -1,55 +1,58 @@
-import { eq, max } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/bun-sqlite'
+import { eq, max } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/bun-sqlite";
 import {
-    acquirerData,
-    creditCardMetadata,
-    merchant,
-    paymentData,
-    paymentParticipant,
-    transaction as transactionTable,
-} from '../db/schema'
-import { PluggyClient } from './PluggyClient'
-import { PluggyDataMapper, type PluggyAccount, type PluggyTransaction } from './PluggyDataMapper'
+  acquirerData,
+  creditCardMetadata,
+  merchant,
+  paymentData,
+  paymentParticipant,
+  transaction as transactionTable,
+} from "../db/schema";
+import { PluggyClient } from "./PluggyClient";
+import { PluggyDataMapper, type PluggyAccount, type PluggyTransaction } from "./PluggyDataMapper";
 
 export class TransactionSyncService {
-  constructor(private db: ReturnType<typeof drizzle>, private apiKey: string) {}
+  constructor(
+    private db: ReturnType<typeof drizzle>,
+    private apiKey: string,
+  ) {}
 
   async syncTransactions(accounts: PluggyAccount[]): Promise<void> {
     for (const account of accounts) {
       try {
-        await this.syncAccountTransactions(account)
+        await this.syncAccountTransactions(account);
       } catch (error) {
-        console.error(`Failed to sync transactions for account ${account.id}:`, error)
-        throw error
+        console.error(`Failed to sync transactions for account ${account.id}:`, error);
+        throw error;
       }
     }
   }
 
   private async syncAccountTransactions(account: PluggyAccount): Promise<void> {
-    const latestUpdatedAt = await this.getLatestUpdatedAt(account.id)
+    const latestUpdatedAt = await this.getLatestUpdatedAt(account.id);
     const params: Record<string, string> = {
       accountId: account.id,
-      pageSize: '500',
-    }
+      pageSize: "500",
+    };
 
-    params.from = '2025-06-20'
+    params.from = "2025-06-20";
 
     const response = await PluggyClient.fetchData<PluggyTransaction>(
       this.apiKey,
-      '/transactions',
-      params
-    )
+      "/transactions",
+      params,
+    );
 
     for (const transaction of response.results) {
-      const incomingUpdatedAt = new Date(transaction.updatedAt).getTime()
+      const incomingUpdatedAt = new Date(transaction.updatedAt).getTime();
       if (Number.isFinite(incomingUpdatedAt) && incomingUpdatedAt <= latestUpdatedAt) {
-        continue
+        continue;
       }
       try {
-        await this.syncSingleTransaction(transaction)
+        await this.syncSingleTransaction(transaction);
       } catch (error) {
-        console.error(`Failed to sync transaction ${transaction.id}:`, error)
-        throw error
+        console.error(`Failed to sync transaction ${transaction.id}:`, error);
+        throw error;
       }
     }
   }
@@ -58,9 +61,9 @@ export class TransactionSyncService {
     const result = await this.db
       .select({ maxUpdatedAt: max(transactionTable.updatedAt) })
       .from(transactionTable)
-      .where(eq(transactionTable.accountId, accountId))
+      .where(eq(transactionTable.accountId, accountId));
 
-    return result[0]?.maxUpdatedAt ?? 0
+    return result[0]?.maxUpdatedAt ?? 0;
   }
 
   private async syncSingleTransaction(transaction: PluggyTransaction): Promise<void> {
@@ -69,26 +72,26 @@ export class TransactionSyncService {
         .select()
         .from(transactionTable)
         .where(eq(transactionTable.id, transaction.id))
-        .limit(1)
+        .limit(1);
 
       if (existingTransactionResult.length > 0) {
-        return
+        return;
       }
 
-      const rawTransactionData = PluggyDataMapper.mapTransactionToDatabase(transaction)
+      const rawTransactionData = PluggyDataMapper.mapTransactionToDatabase(transaction);
       const transactionData = {
         ...rawTransactionData,
-        type: rawTransactionData.type || 'DEBIT',
-        status: rawTransactionData.status || 'POSTED',
-      }
+        type: rawTransactionData.type || "DEBIT",
+        status: rawTransactionData.status || "POSTED",
+      };
 
-      await tx.insert(transactionTable).values(transactionData)
+      await tx.insert(transactionTable).values(transactionData);
 
       if (transaction.creditCardMetadata) {
         await tx.insert(creditCardMetadata).values({
           transactionId: transaction.id,
           data: JSON.stringify(transaction.creditCardMetadata),
-        })
+        });
       }
 
       if (transaction.paymentData) {
@@ -102,10 +105,10 @@ export class TransactionSyncService {
             referenceNumber: transaction.paymentData.referenceNumber || null,
             boletoMetadata: transaction.paymentData.boletoMetadata || null,
           })
-          .returning()
+          .returning();
 
         if (!paymentDataResult) {
-          throw new Error('Failed to create payment data')
+          throw new Error("Failed to create payment data");
         }
 
         if (transaction.paymentData.payer) {
@@ -118,7 +121,7 @@ export class TransactionSyncService {
             routingNumber: transaction.paymentData.payer.routingNumber || null,
             routingNumberISPB: transaction.paymentData.payer.routingNumberISPB || null,
             payerPaymentDataId: paymentDataResult.id,
-          })
+          });
         }
 
         if (transaction.paymentData.receiver) {
@@ -131,7 +134,7 @@ export class TransactionSyncService {
             routingNumber: transaction.paymentData.receiver.routingNumber || null,
             routingNumberISPB: transaction.paymentData.receiver.routingNumberISPB || null,
             receiverPaymentDataId: paymentDataResult.id,
-          })
+          });
         }
       }
 
@@ -139,7 +142,7 @@ export class TransactionSyncService {
         await tx.insert(acquirerData).values({
           transactionId: transaction.id,
           data: transaction.acquirerData.data || null,
-        })
+        });
       }
 
       if (transaction.merchant) {
@@ -150,8 +153,8 @@ export class TransactionSyncService {
           name: transaction.merchant.name || null,
           category: transaction.merchant.category || null,
           businessName: transaction.merchant.businessName || null,
-        })
+        });
       }
-    })
+    });
   }
 }

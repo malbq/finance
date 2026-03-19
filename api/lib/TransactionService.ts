@@ -1,10 +1,10 @@
-import { aliasedTable, desc, eq } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/bun-sqlite'
-import type { CategoryId, CategoryName } from '../../domain/Categories'
-import type { Transaction } from '../../domain/Transaction'
-import { formatCurrency } from '../../utils/formatCurrency'
-import { formatDate } from '../../utils/formatDate'
-import { formatTime } from '../../utils/formatTime'
+import { aliasedTable, desc, eq } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/bun-sqlite";
+import type { CategoryId, CategoryName } from "../../domain/Categories";
+import type { Transaction } from "../../domain/Transaction";
+import { formatCurrency } from "../../utils/formatCurrency";
+import { formatDate } from "../../utils/formatDate";
+import { formatTime } from "../../utils/formatTime";
 import {
   account,
   acquirerData,
@@ -13,14 +13,14 @@ import {
   paymentData,
   paymentParticipant,
   transaction,
-} from '../db/schema'
+} from "../db/schema";
 
 export class TransactionService {
   constructor(private db: ReturnType<typeof drizzle>) {}
 
   async findByAccountId(accountId: string): Promise<Transaction[]> {
-    const payer = aliasedTable(paymentParticipant, 'payer')
-    const receiver = aliasedTable(paymentParticipant, 'receiver')
+    const payer = aliasedTable(paymentParticipant, "payer");
+    const receiver = aliasedTable(paymentParticipant, "receiver");
 
     const result = await this.db
       .select({
@@ -42,61 +42,61 @@ export class TransactionService {
       .leftJoin(acquirerData, eq(transaction.id, acquirerData.transactionId))
       .leftJoin(merchant, eq(transaction.id, merchant.transactionId))
       .where(eq(transaction.accountId, accountId))
-      .orderBy(desc(transaction.date))
+      .orderBy(desc(transaction.date));
 
     // Group results by transaction ID since joins can create duplicates
-    const transactionMap = new Map<string, any>()
+    const transactionMap = new Map<string, any>();
 
     for (const row of result) {
-      const transactionId = row.transaction.id
+      const transactionId = row.transaction.id;
 
       if (!transactionMap.has(transactionId)) {
         transactionMap.set(transactionId, {
           ...row,
           payers: [],
           receivers: [],
-        })
+        });
       }
 
-      const transaction = transactionMap.get(transactionId)!
+      const transaction = transactionMap.get(transactionId)!;
 
       // Handle payer/receiver relationships (this is simplified - in practice you might need more complex logic)
       if (row.payer && row.paymentData) {
-        transaction.payers.push(row.payer)
+        transaction.payers.push(row.payer);
       }
       if (row.receiver && row.paymentData) {
-        transaction.receivers.push(row.receiver)
+        transaction.receivers.push(row.receiver);
       }
     }
 
-    return Array.from(transactionMap.values()).map(this.mapToEntity)
+    return Array.from(transactionMap.values()).map(this.mapToEntity);
   }
 
   async updateCategory(id: string, categoryId: string): Promise<void> {
-    await this.db.update(transaction).set({ categoryId }).where(eq(transaction.id, id))
+    await this.db.update(transaction).set({ categoryId }).where(eq(transaction.id, id));
   }
 
   private mapToEntity = (row: {
-    transaction: typeof transaction.$inferSelect
-    account: { type: string } | null
-    paymentData: typeof paymentData.$inferSelect | null
-    payer: typeof paymentParticipant.$inferSelect | null
-    receiver: typeof paymentParticipant.$inferSelect | null
-    creditCardMetadata: typeof creditCardMetadata.$inferSelect | null
-    acquirerData: typeof acquirerData.$inferSelect | null
-    merchant: typeof merchant.$inferSelect | null
-    payers?: (typeof paymentParticipant.$inferSelect)[]
-    receivers?: (typeof paymentParticipant.$inferSelect)[]
+    transaction: typeof transaction.$inferSelect;
+    account: { type: string } | null;
+    paymentData: typeof paymentData.$inferSelect | null;
+    payer: typeof paymentParticipant.$inferSelect | null;
+    receiver: typeof paymentParticipant.$inferSelect | null;
+    creditCardMetadata: typeof creditCardMetadata.$inferSelect | null;
+    acquirerData: typeof acquirerData.$inferSelect | null;
+    merchant: typeof merchant.$inferSelect | null;
+    payers?: (typeof paymentParticipant.$inferSelect)[];
+    receivers?: (typeof paymentParticipant.$inferSelect)[];
   }): Transaction => {
-    const transactionData = row.transaction
-    const accountType = row.account?.type
+    const transactionData = row.transaction;
+    const accountType = row.account?.type;
 
     const metadata = row.creditCardMetadata?.data
       ? JSON.parse(row.creditCardMetadata.data)
-      : undefined
+      : undefined;
 
     const normalizedAmount =
-      accountType === 'BANK' ? transactionData.amount : transactionData.amount * -1
+      accountType === "BANK" ? transactionData.amount : transactionData.amount * -1;
 
     const transaction: Transaction = {
       id: transactionData.id,
@@ -174,8 +174,8 @@ export class TransactionService {
             businessName: row.merchant.businessName ?? undefined,
           }
         : undefined,
-    }
+    };
 
-    return transaction
-  }
+    return transaction;
+  };
 }

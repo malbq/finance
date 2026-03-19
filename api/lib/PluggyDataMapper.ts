@@ -1,318 +1,302 @@
 export interface PluggyAccount {
-  id: string
-  itemId: string
-  type: 'BANK' | 'CREDIT'
-  subtype?: 'CHECKING_ACCOUNT' | 'CREDIT_CARD' | 'SAVINGS_ACCOUNT'
-  number?: string
-  name: string
-  balance: number
-  currencyCode: string
-  marketingName?: string
-  taxNumber?: string
-  owner?: string
-  createdAt: string
-  updatedAt: string
+  id: string;
+  itemId: string;
+  type: "BANK" | "CREDIT";
+  subtype?: "CHECKING_ACCOUNT" | "CREDIT_CARD" | "SAVINGS_ACCOUNT";
+  number?: string;
+  name: string;
+  balance: number;
+  currencyCode: string;
+  marketingName?: string;
+  taxNumber?: string;
+  owner?: string;
+  createdAt: string;
+  updatedAt: string;
   bankData?: {
-    transferNumber?: string
-    closingBalance?: number
-    automaticallyInvestedBalance?: number
-    overdraftContractedLimit?: number
-    overdraftUsedLimit?: number
-    unarrangedOverdraftAmount?: number
-  }
+    transferNumber?: string;
+    closingBalance?: number;
+    automaticallyInvestedBalance?: number;
+    overdraftContractedLimit?: number;
+    overdraftUsedLimit?: number;
+    unarrangedOverdraftAmount?: number;
+  };
   creditData?: {
-    level?: string
-    brand?: string
-    balanceCloseDate?: string
-    balanceDueDate?: string
-    availableCreditLimit?: number
-    balanceForeignCurrency?: number
-    minimumPayment?: number
-    creditLimit?: number
-    isLimitFlexible?: boolean
-    holderType?: string
-    status?: string
-  }
+    level?: string;
+    brand?: string;
+    balanceCloseDate?: string;
+    balanceDueDate?: string;
+    availableCreditLimit?: number;
+    balanceForeignCurrency?: number;
+    minimumPayment?: number;
+    creditLimit?: number;
+    isLimitFlexible?: boolean;
+    holderType?: string;
+    status?: string;
+  };
 }
 
 export interface PluggyTransaction {
-  id: string
-  accountId: string
-  description: string
-  descriptionRaw?: string
-  currencyCode: string
-  amount: number
-  amountInAccountCurrency?: number
-  date: string
-  category?: string
-  categoryId?: string
-  balance?: number
-  providerCode?: string
-  status?: 'POSTED' | 'PENDING'
-  type?: 'CREDIT' | 'DEBIT'
-  operationType?: string
-  providerId?: string
-  createdAt: string
-  updatedAt: string
+  id: string;
+  accountId: string;
+  description: string;
+  descriptionRaw?: string;
+  currencyCode: string;
+  amount: number;
+  amountInAccountCurrency?: number;
+  date: string;
+  category?: string;
+  categoryId?: string;
+  balance?: number;
+  providerCode?: string;
+  status?: "POSTED" | "PENDING";
+  type?: "CREDIT" | "DEBIT";
+  operationType?: string;
+  providerId?: string;
+  createdAt: string;
+  updatedAt: string;
   paymentData?: {
     payer?: {
-      name?: string
-      branchNumber?: string
-      accountNumber?: string
-      routingNumber?: string
-      routingNumberISPB?: string
+      name?: string;
+      branchNumber?: string;
+      accountNumber?: string;
+      routingNumber?: string;
+      routingNumberISPB?: string;
       documentNumber?: {
-        type?: string
-        value?: string
-      }
-    }
+        type?: string;
+        value?: string;
+      };
+    };
     receiver?: {
-      name?: string
-      branchNumber?: string
-      accountNumber?: string
-      routingNumber?: string
-      routingNumberISPB?: string
+      name?: string;
+      branchNumber?: string;
+      accountNumber?: string;
+      routingNumber?: string;
+      routingNumberISPB?: string;
       documentNumber?: {
-        type?: string
-        value?: string
-      }
-    }
-    paymentMethod?: string
-    reason?: string
-    receiverReferenceId?: string
-    referenceNumber?: string
-    boletoMetadata?: string
-  }
+        type?: string;
+        value?: string;
+      };
+    };
+    paymentMethod?: string;
+    reason?: string;
+    receiverReferenceId?: string;
+    referenceNumber?: string;
+    boletoMetadata?: string;
+  };
   creditCardMetadata?: {
-    installmentNumber?: number
-    totalInstallments?: number
-    totalAmount?: number
-    payeeMCC?: string
-    purchaseDate?: string
-    cardNumber?: string
-    billId?: string
-  }
+    installmentNumber?: number;
+    totalInstallments?: number;
+    totalAmount?: number;
+    payeeMCC?: string;
+    purchaseDate?: string;
+    cardNumber?: string;
+    billId?: string;
+  };
   acquirerData?: {
-    data?: string
-  }
+    data?: string;
+  };
   merchant?: {
-    cnae?: string
-    cnpj?: string
-    name?: string
-    category?: string
-    businessName?: string
-  }
+    cnae?: string;
+    cnpj?: string;
+    name?: string;
+    category?: string;
+    businessName?: string;
+  };
 }
 
 interface PluggyInvestment {
-  id: string
-  itemId: string
-  type: string
-  subtype?: string
-  number?: string
-  balance: number
-  name: string
-  lastMonthRate?: number
-  lastTwelveMonthsRate?: number
-  annualRate?: number
-  currencyCode: string
-  code?: string
-  isin?: string
-  value?: number
-  quantity?: number
-  amount?: number
-  taxes?: number
-  taxes2?: number
-  date: string
-  owner?: string
-  amountProfit?: number
-  amountWithdrawal?: number
-  amountOriginal?: number
-  dueDate?: string
-  issuer?: string
-  issuerCNPJ?: string
-  issueDate?: string
-  rate?: number
-  rateType?: string
-  fixedAnnualRate?: number
-  status?: 'ACTIVE' | 'PENDING' | 'TOTAL_WITHDRAWAL'
-  institution?: string
-  metadata?: string
-  createdAt: string
-  updatedAt: string
+  id: string;
+  itemId: string;
+  type: string;
+  subtype?: string;
+  number?: string;
+  balance: number;
+  name: string;
+  lastMonthRate?: number;
+  lastTwelveMonthsRate?: number;
+  annualRate?: number;
+  currencyCode: string;
+  code?: string;
+  isin?: string;
+  value?: number;
+  quantity?: number;
+  amount?: number;
+  taxes?: number;
+  taxes2?: number;
+  date: string;
+  owner?: string;
+  amountProfit?: number;
+  amountWithdrawal?: number;
+  amountOriginal?: number;
+  dueDate?: string;
+  issuer?: string;
+  issuerCNPJ?: string;
+  issueDate?: string;
+  rate?: number;
+  rateType?: string;
+  fixedAnnualRate?: number;
+  status?: "ACTIVE" | "PENDING" | "TOTAL_WITHDRAWAL";
+  institution?: string;
+  metadata?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface PluggyInvestmentTransaction {
-  id: string
-  investmentId: string
-  type: 'BUY' | 'SELL' | 'TAX' | 'TRANSFER' | 'INTEREST' | 'AMORTIZATION'
-  movementType?: 'CREDIT' | 'DEBIT'
-  quantity?: number
-  value?: number
-  amount?: number
-  netAmount?: number
-  description?: string
-  agreedRate?: number
-  date: string
-  tradeDate?: string
-  brokerageNumber?: string
-  expenses?: string
+  id: string;
+  investmentId: string;
+  type: "BUY" | "SELL" | "TAX" | "TRANSFER" | "INTEREST" | "AMORTIZATION";
+  movementType?: "CREDIT" | "DEBIT";
+  quantity?: number;
+  value?: number;
+  amount?: number;
+  netAmount?: number;
+  description?: string;
+  agreedRate?: number;
+  date: string;
+  tradeDate?: string;
+  brokerageNumber?: string;
+  expenses?: string;
 }
 
 export interface PluggyCategory {
-  id: string
-  description: string
-  descriptionTranslated: string
-  parentId?: string
-  parentDescription?: string
+  id: string;
+  description: string;
+  descriptionTranslated: string;
+  parentId?: string;
+  parentDescription?: string;
 }
 
 export const PluggyDataMapper = {
   mapInvestmentType(
-    type: string
-  ):
-    | 'COE'
-    | 'EQUITY'
-    | 'ETF'
-    | 'FIXED_INCOME'
-    | 'MUTUAL_FUND'
-    | 'SECURITY'
-    | 'OTHER' {
+    type: string,
+  ): "COE" | "EQUITY" | "ETF" | "FIXED_INCOME" | "MUTUAL_FUND" | "SECURITY" | "OTHER" {
     const typeMap: Record<
       string,
-      | 'COE'
-      | 'EQUITY'
-      | 'ETF'
-      | 'FIXED_INCOME'
-      | 'MUTUAL_FUND'
-      | 'SECURITY'
-      | 'OTHER'
+      "COE" | "EQUITY" | "ETF" | "FIXED_INCOME" | "MUTUAL_FUND" | "SECURITY" | "OTHER"
     > = {
-      COE: 'COE',
-      EQUITY: 'EQUITY',
-      ETF: 'ETF',
-      FIXED_INCOME: 'FIXED_INCOME',
-      MUTUAL_FUND: 'MUTUAL_FUND',
-      SECURITY: 'SECURITY',
-    }
-    return typeMap[type] || 'OTHER'
+      COE: "COE",
+      EQUITY: "EQUITY",
+      ETF: "ETF",
+      FIXED_INCOME: "FIXED_INCOME",
+      MUTUAL_FUND: "MUTUAL_FUND",
+      SECURITY: "SECURITY",
+    };
+    return typeMap[type] || "OTHER";
   },
 
   mapInvestmentSubtype(
-    subtype?: string
+    subtype?: string,
   ):
-    | 'STRUCTURED_NOTE'
-    | 'STOCK'
-    | 'ETF'
-    | 'REAL_ESTATE_FUND'
-    | 'BDR'
-    | 'DERIVATIVES'
-    | 'OPTION'
-    | 'TREASURY'
-    | 'LCI'
-    | 'LCA'
-    | 'LF'
-    | 'CDB'
-    | 'CRI'
-    | 'CRA'
-    | 'CORPORATE_DEBT'
-    | 'LC'
-    | 'DEBENTURES'
-    | 'INVESTMENT_FUND'
-    | 'MULTIMARKET_FUND'
-    | 'FIXED_INCOME_FUND'
-    | 'STOCK_FUND'
-    | 'ETF_FUND'
-    | 'OFFSHORE_FUND'
-    | 'FIP_FUND'
-    | 'EXCHANGE_FUND'
-    | 'RETIREMENT'
-    | 'OTHER'
+    | "STRUCTURED_NOTE"
+    | "STOCK"
+    | "ETF"
+    | "REAL_ESTATE_FUND"
+    | "BDR"
+    | "DERIVATIVES"
+    | "OPTION"
+    | "TREASURY"
+    | "LCI"
+    | "LCA"
+    | "LF"
+    | "CDB"
+    | "CRI"
+    | "CRA"
+    | "CORPORATE_DEBT"
+    | "LC"
+    | "DEBENTURES"
+    | "INVESTMENT_FUND"
+    | "MULTIMARKET_FUND"
+    | "FIXED_INCOME_FUND"
+    | "STOCK_FUND"
+    | "ETF_FUND"
+    | "OFFSHORE_FUND"
+    | "FIP_FUND"
+    | "EXCHANGE_FUND"
+    | "RETIREMENT"
+    | "OTHER"
     | undefined {
-    if (!subtype) return undefined
+    if (!subtype) return undefined;
 
     const subtypeMap: Record<
       string,
-      | 'STRUCTURED_NOTE'
-      | 'STOCK'
-      | 'ETF'
-      | 'REAL_ESTATE_FUND'
-      | 'BDR'
-      | 'DERIVATIVES'
-      | 'OPTION'
-      | 'TREASURY'
-      | 'LCI'
-      | 'LCA'
-      | 'LF'
-      | 'CDB'
-      | 'CRI'
-      | 'CRA'
-      | 'CORPORATE_DEBT'
-      | 'LC'
-      | 'DEBENTURES'
-      | 'INVESTMENT_FUND'
-      | 'MULTIMARKET_FUND'
-      | 'FIXED_INCOME_FUND'
-      | 'STOCK_FUND'
-      | 'ETF_FUND'
-      | 'OFFSHORE_FUND'
-      | 'FIP_FUND'
-      | 'EXCHANGE_FUND'
-      | 'RETIREMENT'
-      | 'OTHER'
+      | "STRUCTURED_NOTE"
+      | "STOCK"
+      | "ETF"
+      | "REAL_ESTATE_FUND"
+      | "BDR"
+      | "DERIVATIVES"
+      | "OPTION"
+      | "TREASURY"
+      | "LCI"
+      | "LCA"
+      | "LF"
+      | "CDB"
+      | "CRI"
+      | "CRA"
+      | "CORPORATE_DEBT"
+      | "LC"
+      | "DEBENTURES"
+      | "INVESTMENT_FUND"
+      | "MULTIMARKET_FUND"
+      | "FIXED_INCOME_FUND"
+      | "STOCK_FUND"
+      | "ETF_FUND"
+      | "OFFSHORE_FUND"
+      | "FIP_FUND"
+      | "EXCHANGE_FUND"
+      | "RETIREMENT"
+      | "OTHER"
     > = {
-      STRUCTURED_NOTE: 'STRUCTURED_NOTE',
-      STOCK: 'STOCK',
-      ETF: 'ETF',
-      REAL_ESTATE_FUND: 'REAL_ESTATE_FUND',
-      BDR: 'BDR',
-      DERIVATIVES: 'DERIVATIVES',
-      OPTION: 'OPTION',
-      TREASURY: 'TREASURY',
-      LCI: 'LCI',
-      LCA: 'LCA',
-      LF: 'LF',
-      CDB: 'CDB',
-      CRI: 'CRI',
-      CRA: 'CRA',
-      CORPORATE_DEBT: 'CORPORATE_DEBT',
-      LC: 'LC',
-      DEBENTURES: 'DEBENTURES',
-      INVESTMENT_FUND: 'INVESTMENT_FUND',
-      MULTIMARKET_FUND: 'MULTIMARKET_FUND',
-      FIXED_INCOME_FUND: 'FIXED_INCOME_FUND',
-      STOCK_FUND: 'STOCK_FUND',
-      ETF_FUND: 'ETF_FUND',
-      OFFSHORE_FUND: 'OFFSHORE_FUND',
-      FIP_FUND: 'FIP_FUND',
-      EXCHANGE_FUND: 'EXCHANGE_FUND',
-      RETIREMENT: 'RETIREMENT',
-    }
-    return subtypeMap[subtype] || 'OTHER'
+      STRUCTURED_NOTE: "STRUCTURED_NOTE",
+      STOCK: "STOCK",
+      ETF: "ETF",
+      REAL_ESTATE_FUND: "REAL_ESTATE_FUND",
+      BDR: "BDR",
+      DERIVATIVES: "DERIVATIVES",
+      OPTION: "OPTION",
+      TREASURY: "TREASURY",
+      LCI: "LCI",
+      LCA: "LCA",
+      LF: "LF",
+      CDB: "CDB",
+      CRI: "CRI",
+      CRA: "CRA",
+      CORPORATE_DEBT: "CORPORATE_DEBT",
+      LC: "LC",
+      DEBENTURES: "DEBENTURES",
+      INVESTMENT_FUND: "INVESTMENT_FUND",
+      MULTIMARKET_FUND: "MULTIMARKET_FUND",
+      FIXED_INCOME_FUND: "FIXED_INCOME_FUND",
+      STOCK_FUND: "STOCK_FUND",
+      ETF_FUND: "ETF_FUND",
+      OFFSHORE_FUND: "OFFSHORE_FUND",
+      FIP_FUND: "FIP_FUND",
+      EXCHANGE_FUND: "EXCHANGE_FUND",
+      RETIREMENT: "RETIREMENT",
+    };
+    return subtypeMap[subtype] || "OTHER";
   },
 
-  mapInvestmentStatus(
-    status?: string
-  ): 'ACTIVE' | 'PENDING' | 'TOTAL_WITHDRAWAL' | undefined {
-    if (!status) return undefined
+  mapInvestmentStatus(status?: string): "ACTIVE" | "PENDING" | "TOTAL_WITHDRAWAL" | undefined {
+    if (!status) return undefined;
 
-    const statusMap: Record<string, 'ACTIVE' | 'PENDING' | 'TOTAL_WITHDRAWAL'> =
-      {
-        ACTIVE: 'ACTIVE',
-        PENDING: 'PENDING',
-        TOTAL_WITHDRAWAL: 'TOTAL_WITHDRAWAL',
-      }
-    return statusMap[status]
+    const statusMap: Record<string, "ACTIVE" | "PENDING" | "TOTAL_WITHDRAWAL"> = {
+      ACTIVE: "ACTIVE",
+      PENDING: "PENDING",
+      TOTAL_WITHDRAWAL: "TOTAL_WITHDRAWAL",
+    };
+    return statusMap[status];
   },
 
-  mapMovementType(movementType?: string): 'CREDIT' | 'DEBIT' | undefined {
-    if (!movementType) return undefined
+  mapMovementType(movementType?: string): "CREDIT" | "DEBIT" | undefined {
+    if (!movementType) return undefined;
 
-    const movementTypeMap: Record<string, 'CREDIT' | 'DEBIT'> = {
-      CREDIT: 'CREDIT',
-      DEBIT: 'DEBIT',
-    }
-    return movementTypeMap[movementType]
+    const movementTypeMap: Record<string, "CREDIT" | "DEBIT"> = {
+      CREDIT: "CREDIT",
+      DEBIT: "DEBIT",
+    };
+    return movementTypeMap[movementType];
   },
 
   mapAccountToDatabase(account: PluggyAccount) {
@@ -330,29 +314,22 @@ export const PluggyDataMapper = {
       owner: account.owner || null,
       createdAt: new Date(account.createdAt).getTime(),
       updatedAt: new Date(account.updatedAt).getTime(),
-    }
+    };
   },
 
-  mapBankDataToDatabase(
-    accountId: string,
-    bankData: NonNullable<PluggyAccount['bankData']>
-  ) {
+  mapBankDataToDatabase(accountId: string, bankData: NonNullable<PluggyAccount["bankData"]>) {
     return {
       accountId,
       transferNumber: bankData.transferNumber || null,
       closingBalance: bankData.closingBalance || null,
-      automaticallyInvestedBalance:
-        bankData.automaticallyInvestedBalance || null,
+      automaticallyInvestedBalance: bankData.automaticallyInvestedBalance || null,
       overdraftContractedLimit: bankData.overdraftContractedLimit || null,
       overdraftUsedLimit: bankData.overdraftUsedLimit || null,
       unarrangedOverdraftAmount: bankData.unarrangedOverdraftAmount || null,
-    }
+    };
   },
 
-  mapCreditDataToDatabase(
-    accountId: string,
-    creditData: NonNullable<PluggyAccount['creditData']>
-  ) {
+  mapCreditDataToDatabase(accountId: string, creditData: NonNullable<PluggyAccount["creditData"]>) {
     return {
       accountId,
       level: creditData.level || null,
@@ -370,7 +347,7 @@ export const PluggyDataMapper = {
       isLimitFlexible: creditData.isLimitFlexible || null,
       holderType: creditData.holderType || null,
       status: creditData.status || null,
-    }
+    };
   },
 
   mapTransactionToDatabase(transaction: PluggyTransaction) {
@@ -393,7 +370,7 @@ export const PluggyDataMapper = {
       providerId: transaction.providerId || null,
       createdAt: new Date(transaction.createdAt).getTime(),
       updatedAt: new Date(transaction.updatedAt).getTime(),
-    }
+    };
   },
 
   mapInvestmentToDatabase(investment: PluggyInvestment) {
@@ -433,7 +410,7 @@ export const PluggyDataMapper = {
       metadata: investment.metadata || null,
       createdAt: new Date(investment.createdAt).getTime(),
       updatedAt: new Date(investment.updatedAt).getTime(),
-    }
+    };
   },
 
   mapInvestmentTransactionToDatabase(transaction: PluggyInvestmentTransaction) {
@@ -452,7 +429,7 @@ export const PluggyDataMapper = {
       tradeDate: transaction.tradeDate ? new Date(transaction.tradeDate).getTime() : null,
       brokerageNumber: transaction.brokerageNumber || null,
       expenses: transaction.expenses || null,
-    }
+    };
   },
 
   mapCategoryToDatabase(category: PluggyCategory) {
@@ -462,6 +439,6 @@ export const PluggyDataMapper = {
       descriptionTranslated: category.descriptionTranslated,
       parentId: category.parentId || null,
       parentDescription: category.parentDescription || null,
-    }
+    };
   },
-}
+};

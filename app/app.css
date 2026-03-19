@@ -1,7 +1,7 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @theme {
-  --font-sans: 'JetBrainsMono Nerd Font', monospace;
+  --font-sans: "JetBrainsMono Nerd Font", monospace;
 }
 
 html,

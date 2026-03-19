@@ -6,7 +6,9 @@ Types: never use `any` to fix type errors.
 Never edit migrations manually. Use `bun run db:generate` to generate new migrations.
 Never alter database manually. Always use Drizzle's migration system.
 Client is local-first:
-  - Tanstack DB backed by Tanstack Query
-  - Optimistic UI
-  - Debounced persistence
-  - No “saving” indicator.
+
+- Tanstack DB backed by Tanstack Query
+- Optimistic UI
+- Debounced persistence
+- No “saving” indicator.
+  Always assume dev server is running. If you need to (re)start it, ask me first and I'll do it manually.

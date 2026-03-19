@@ -1,5 +1,5 @@
-import { defineRelations } from 'drizzle-orm'
-import * as schema from './schema'
+import { defineRelations } from "drizzle-orm";
+import * as schema from "./schema";
 
 const tablesOnlySchema = {
   accounts: schema.account,
@@ -16,10 +16,9 @@ const tablesOnlySchema = {
   categories: schema.category,
   spendingGoals: schema.spendingGoal,
   categoryExclusions: schema.categoryExclusion,
-}
+};
 
 export const relations = defineRelations(tablesOnlySchema, (r) => ({
-
   accounts: {
     transactions: r.many.transactions({
       from: r.accounts.id,
@@ -64,24 +63,24 @@ export const relations = defineRelations(tablesOnlySchema, (r) => ({
     payer: r.one.paymentParticipants({
       from: r.paymentData.id,
       to: r.paymentParticipants.payerPaymentDataId,
-      alias: 'payer',
+      alias: "payer",
     }),
     receiver: r.one.paymentParticipants({
       from: r.paymentData.id,
       to: r.paymentParticipants.receiverPaymentDataId,
-      alias: 'receiver',
+      alias: "receiver",
     }),
   },
   paymentParticipants: {
     payerPaymentData: r.one.paymentData({
       from: r.paymentParticipants.payerPaymentDataId,
       to: r.paymentData.id,
-      alias: 'payerPaymentData',
+      alias: "payerPaymentData",
     }),
     receiverPaymentData: r.one.paymentData({
       from: r.paymentParticipants.receiverPaymentDataId,
       to: r.paymentData.id,
-      alias: 'receiverPaymentData',
+      alias: "receiverPaymentData",
     }),
   },
   bankData: {
@@ -130,7 +129,7 @@ export const relations = defineRelations(tablesOnlySchema, (r) => ({
     parent: r.one.categories({
       from: r.categories.parentId,
       to: r.categories.id,
-      alias: 'parent',
+      alias: "parent",
     }),
   },
   spendingGoals: {
@@ -145,4 +144,4 @@ export const relations = defineRelations(tablesOnlySchema, (r) => ({
       to: r.categories.id,
     }),
   },
-}))
+}));
